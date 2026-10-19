@@ -912,3 +912,13 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
   .serviceDemo button{transition:none!important}
   .sd-toast{animation:none!important}
 }
+
+
+.sd-confirm-backdrop{position:fixed;inset:0;z-index:1300;display:grid;place-items:center;padding:18px;background:rgba(14,18,24,.48);backdrop-filter:blur(5px)}
+.sd-confirm-dialog{width:min(100%,440px);padding:22px;border:1px solid #d8dce2;border-radius:20px;background:#fff;color:#17191b;box-shadow:0 24px 80px rgba(0,0,0,.24);animation:sd-toast-in .18s ease-out both}
+.sd-confirm-dialog h2{margin:12px 0 8px;font-size:1.65rem;line-height:1.05;letter-spacing:-.03em;text-transform:none;font-family:inherit}
+.sd-confirm-dialog p{margin:0;color:#4b5563;font-size:.92rem;line-height:1.55}
+.sd-confirm-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}
+.sd-confirm-actions .sd-button{min-width:100px}
+@media(max-width:420px){.sd-confirm-dialog{padding:18px}.sd-confirm-actions{display:grid;grid-template-columns:1fr 1fr}.sd-confirm-actions .sd-button{width:100%;padding:11px 9px;font-size:.74rem}}
+@media(prefers-reduced-motion:reduce){.sd-confirm-dialog{animation:none!important}}
