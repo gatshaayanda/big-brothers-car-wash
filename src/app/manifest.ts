@@ -43,7 +43,7 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: "Admin",
         description: "Open the local prototype operations panel",
         url: "/#admin",
-        icons: [{ src: "/iteration13-icon-192.svg", sizes: "192x192", type: "image/svg+xml" }]
+        icons: [{ src: "/iteration13-icon-192.png", sizes: "192x192", type: "image/png" }]
       }
     ]
   };
