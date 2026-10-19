@@ -66,7 +66,9 @@ export default function ServiceGuide({ view, services, requestCount, onChooseSer
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
-    const timer = window.setTimeout(() => inputRef.current?.focus(), 40);
+    // Move focus to the dialog's close control for keyboard accessibility, never to
+    // the composer; the mobile keyboard stays closed until the visitor taps the field.
+    const focusTimer = window.setTimeout(() => panelRef.current?.querySelector<HTMLElement>('button:not([disabled])')?.focus(), 0);
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") { setOpen(false); launcherRef.current?.focus(); return; }
       if (event.key !== "Tab") return;
@@ -77,7 +79,7 @@ export default function ServiceGuide({ view, services, requestCount, onChooseSer
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
     window.addEventListener("keydown", handleKey);
-    return () => { window.clearTimeout(timer); window.removeEventListener("keydown", handleKey); if (previous?.isConnected) previous.focus(); else launcherRef.current?.focus(); };
+    return () => { window.clearTimeout(focusTimer); window.removeEventListener("keydown", handleKey); if (previous?.isConnected) previous.focus(); else launcherRef.current?.focus(); };
   }, [open]);
 
   function say(text: string) {
@@ -160,7 +162,8 @@ export default function ServiceGuide({ view, services, requestCount, onChooseSer
       {view !== "admin" && <div className="sd-guide-services"><span className="sd-guide-section-label">SERVICE SHORTCUTS</span>{activeServices.map(service => <button key={service.id} type="button" onClick={() => chooseService(service)} aria-pressed={lastChoice === service.id}><span className="sd-guide-service-thumb" aria-hidden="true"><img src={service.media} alt="" loading="lazy" onError={event => { event.currentTarget.style.visibility = "hidden"; }}/></span><span className="sd-guide-service-copy"><strong>{service.name}</strong><small>{service.description}</small></span><b>P{service.price.toLocaleString("en-BW")}</b></button>)}</div>}
       {lastChoice && view !== "admin" && <button type="button" className="sd-guide-continue" onClick={continueWithService}>Request this service <ArrowRight size={16}/></button>}
       <div className="sd-guide-thread" aria-live="polite" aria-relevant="additions text">{messages.slice(-4).map(message => <p key={message.id} className={`sd-guide-message is-${message.from}`}>{message.text}</p>)}</div>
-      <form className="sd-guide-composer" onSubmit={sendText}><input ref={inputRef} value={input} onChange={event => setInput(event.target.value)} aria-label="Ask the service guide" placeholder={view === "admin" ? "Ask about admin tools…" : "Ask about a service…"} maxLength={300}/><button type="submit" disabled={!input.trim()} aria-label="Send message"><Send size={17}/></button></form>
+      <form className="sd-guide-composer" onSubmit={sendText}><input ref={inputRef} value={input} onChange={event => setInput(event.target.value)} aria-label="Ask the service guide" aria-describedby="sd-guide-type-hint" placeholder="Tap here to type a question…" maxLength={300}/><button type="submit" disabled={!input.trim()} aria-label="Send message"><Send size={17}/></button></form>
+      <p id="sd-guide-type-hint" className="sd-guide-type-hint">Tap the message box above to type. Your keyboard opens only when you choose to type.</p>
       <p className="sd-guide-footnote"><Check size={12}/> Scripted guidance · Local demo only · No data sent</p>
     </section>}
     <button ref={launcherRef} type="button" className={`sd-guide-launcher${open ? " is-open" : ""}`} aria-expanded={open} aria-haspopup="dialog" aria-label={open ? "Close service guide" : "Open service guide"} onClick={() => { setTeaser(false); setOpen(value => !value); if (!messages.length) say("Hi! I’m the Service Studio guide. I can point you to the right action, but I’m not a live person or an AI assistant."); }}>

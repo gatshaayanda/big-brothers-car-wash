@@ -1029,3 +1029,13 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
   .sd-guide-services>button{grid-template-columns:50px minmax(0,1fr) auto;gap:7px}
 }
 
+
+
+/* Keep the fixed guide launcher clear of the footer's Admin demo action. */
+@media(max-width:640px){
+  .sd-footer{padding-bottom:92px}
+}
+
+/* Typing is opt-in: make the composer instruction visible without stealing focus. */
+.sd-guide-type-hint{margin:3px 14px 0;color:#667085;font-size:.72rem;line-height:1.35;text-align:center}
+@media(max-width:600px){.sd-guide-type-hint{margin:3px 12px 0;font-size:.7rem}}
