@@ -19,7 +19,7 @@ for (const file of walk(root)) {
   const rel = path.relative(root, file).replaceAll(path.sep, "/");
   if (ignoredFiles.has(rel) || !textExtensions.has(path.extname(file).toLowerCase())) continue;
   const content = fs.readFileSync(file, "utf8");
-  if (/boemo-joos-food-deals|namane-tyres\\.vercel\\.app|yusuf-clothing-line\\.vercel\\.app/i.test(content)) failures.push(rel + ": inherited project URL remains");
+  if (/boemo-joos-food-deals|namane-tyres\.vercel\.app|yusuf-clothing-line\.vercel\.app/i.test(content)) failures.push(rel + ": inherited project URL remains");
 }
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "public/manifest.webmanifest"), "utf8"));
 if (manifest.name !== "Iteration 13 | PWA Prototype") failures.push("manifest: wrong application name");
@@ -30,7 +30,7 @@ if (!fs.existsSync(path.join(root, "public/iteration13-icon.svg"))) failures.pus
 const layout = fs.readFileSync(path.join(root, "src/app/layout.tsx"), "utf8");
 for (const expected of ["Iteration 13 | PWA Prototype", "applicationName:\"Iteration 13\"", "appleWebApp:{capable:true,title:\"Iteration 13\"}"]) if (!layout.includes(expected)) failures.push("layout: missing " + expected);
 const sw = fs.readFileSync(path.join(root, "public/sw.js"), "utf8");
-if (!/iteration13-shell-v\\d+/.test(sw)) failures.push("service worker: missing isolated cache namespace");
+if (!/iteration13-shell-v\d+/.test(sw)) failures.push("service worker: missing isolated cache namespace");
 if (!sw.includes("/iteration13-icon.svg")) failures.push("service worker: prototype icon missing from app shell");
 if (failures.length) {
   console.error("IDENTITY VERIFICATION FAILED");
