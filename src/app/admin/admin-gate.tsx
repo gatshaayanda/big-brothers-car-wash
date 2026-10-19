@@ -57,7 +57,7 @@ export default function AdminGate({children}:{children:React.ReactNode}){
     setError("This account is not enabled for Iteration 13 Operations.");
     await signOut(auth);
    }else{setAuthorized(true);setOffline(false);setAccessWord("")}
-  }catch(err){setError(err instanceof Error?err.message:"We could not sign you in. Check the access word and try again.")}
+  }catch(err){setError(friendlyAuthError(err))}
   finally{setBusy(false)}
  }
 
