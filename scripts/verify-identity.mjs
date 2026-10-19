@@ -37,7 +37,7 @@ for (const iconPath of ["/iteration13-icon-192.png", "/iteration13-icon-512.png"
 if (!fs.existsSync(path.join(root, "public/iteration13-icon.svg"))) failures.push("prototype icon file missing");
 if (!fs.existsSync(path.join(root, "public/iteration13-icon-180.png"))) failures.push("Apple install icon file missing");
 const layout = fs.readFileSync(path.join(root, "src/app/layout.tsx"), "utf8");
-for (const expected of ["Iteration 13 | PWA Prototype", "applicationName:\"Iteration 13\""]) if (!layout.includes(expected)) failures.push("layout: missing " + expected);
+for (const expected of ["Iteration 13 | Service Studio", "applicationName:\"Iteration 13\""]) if (!layout.includes(expected)) failures.push("layout: missing " + expected);
 // Validate Apple install metadata semantically; whitespace and additional metadata fields are harmless.
 if (!/appleWebApp\s*:\s*\{[^}]*\bcapable\s*:\s*true\b[^}]*\btitle\s*:\s*["']Iteration 13["']/s.test(layout)) failures.push('layout: missing appleWebApp capable=true and title="Iteration 13"');
 const sw = fs.readFileSync(path.join(root, "public/sw.js"), "utf8");
