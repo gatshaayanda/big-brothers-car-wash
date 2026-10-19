@@ -11,14 +11,16 @@ type Props = {
   type: "image" | "video";
   online: boolean;
   onChange: (url: string, type: "image" | "video") => void;
+  onUploadingChange: (uploading: boolean) => void;
 };
 
-export default function ServiceMediaPicker({ value, type, online, onChange }: Props) {
+export default function ServiceMediaPicker({ value, type, online, onChange, onUploadingChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
   const [urlDraft, setUrlDraft] = useState(type === "video" ? value : "");
   const { startUpload, isUploading } = useUploadThing("fileUploader", {
     onClientUploadComplete: (files) => {
+      onUploadingChange(false);
       const file = files?.[0];
       const url = file?.ufsUrl || file?.url;
       if (!url) {
@@ -32,6 +34,7 @@ export default function ServiceMediaPicker({ value, type, online, onChange }: Pr
       if (inputRef.current) inputRef.current.value = "";
     },
     onUploadError: (error) => {
+      onUploadingChange(false);
       setMessage(error.message || "Upload failed. Your current media has been kept.");
     },
   });
@@ -51,10 +54,12 @@ export default function ServiceMediaPicker({ value, type, online, onChange }: Pr
       event.target.value = "";
       return;
     }
+    onUploadingChange(true);
     setMessage("Uploading… keep this page open until the upload finishes.");
     try {
       await startUpload(Array.from(files));
     } catch {
+      onUploadingChange(false);
       setMessage("Upload failed. Check your connection and try again. Your current media has been kept.");
     }
   }
@@ -82,7 +87,7 @@ export default function ServiceMediaPicker({ value, type, online, onChange }: Pr
       {type === "image" ? (
         <div className="sd-media-upload">
           <label className="sd-media-file-label" htmlFor="service-media-file">Upload an image from this device or camera</label>
-          <input ref={inputRef} id="service-media-file" type="file" accept="image/*" capture="environment" onChange={uploadSelected} disabled={!online || isUploading} />
+          <input ref={inputRef} id="service-media-file" type="file" accept="image/*" capture="environment" onChange={uploadSelected} disabled={isUploading} />
           <small>Images upload to UploadThing. Internet is required to finish uploading; choosing a file alone does not publish it.</small>
           {!online && <p className="sd-media-offline">Offline: image upload is paused. Reconnect before uploading.</p>}
           <label className="sd-media-url-label" htmlFor="service-image-url">Or use an existing image URL</label>
