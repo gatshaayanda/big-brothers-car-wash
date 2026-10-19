@@ -54,14 +54,14 @@ export default function AdminGate({children}:{children:React.ReactNode}){
     const stop=onSnapshot(doc(db,"admins",credential.user.uid),snapshot=>{stop();resolve({exists:snapshot.exists(),data:()=>snapshot.data()??{}})},()=>{stop();resolve(null)});
    });
    if(!adminSnapshot||!adminSnapshot.exists||!hasAdminRole(adminSnapshot.data())){
-    setError("This account is not enabled for The Plug Operations.");
+    setError("This account is not enabled for Iteration 13 Operations.");
     await signOut(auth);
    }else{setAuthorized(true);setOffline(false);setAccessWord("")}
   }catch(err){setError(err instanceof Error?err.message:"We could not sign you in. Check the access word and try again.")}
   finally{setBusy(false)}
  }
 
- if(checking)return <main className="adminPage"><div className="adminShell"><div className="emptyState"><div>🔐</div><h1>Opening The Plug Admin</h1><p>Checking access…</p></div></div></main>;
- if(user&&authorized)return <div className="adminAuthorized">{offline&&<div className="adminAccountBar"><span>The Plug Admin · Offline mode · cached admin access</span><span>Changes will sync when connection returns.</span></div>}<div className="adminAccountBar"><span>The Plug Admin · {user.email??"authorized staff"}</span><button className="button buttonLight" type="button" onClick={()=>void signOut(auth)}>Sign out</button></div>{children}</div>;
- return <main className="adminPage"><div className="adminShell"><section className="adminPanel" style={{maxWidth:520,margin:"80px auto"}}><span className="kicker">The Plug · Operations</span><h1>Operations sign in</h1><p>Enter your Operations access word to manage sourcing requests, catalogue and customer conversations.</p><form className="adminForm" onSubmit={signIn}><label>Access word<input type="password" value={accessWord} onChange={e=>setAccessWord(e.target.value)} autoComplete="current-password" required autoFocus/></label><button className="button buttonPrimary" type="submit" disabled={busy}>{busy?"Checking access…":"Enter Operations"}</button></form>{error&&<p role="alert" className="notice">{error}</p>}</section></div></main>
+ if(checking)return <main className="adminPage"><div className="adminShell"><div className="emptyState"><div>🔐</div><h1>Opening Iteration 13 Admin</h1><p>Checking access…</p></div></div></main>;
+ if(user&&authorized)return <div className="adminAuthorized">{offline&&<div className="adminAccountBar"><span>Iteration 13 Admin · Offline mode · cached admin access</span><span>Changes will sync when connection returns.</span></div>}<div className="adminAccountBar"><span>Iteration 13 Admin · {user.email??"authorized staff"}</span><button className="button buttonLight" type="button" onClick={()=>void signOut(auth)}>Sign out</button></div>{children}</div>;
+ return <main className="adminPage"><div className="adminShell"><section className="adminPanel" style={{maxWidth:520,margin:"80px auto"}}><span className="kicker">Iteration 13 · Operations</span><h1>Operations sign in</h1><p>Enter your Operations access word to manage sourcing requests, catalogue and customer conversations.</p><form className="adminForm" onSubmit={signIn}><label>Access word<input type="password" value={accessWord} onChange={e=>setAccessWord(e.target.value)} autoComplete="current-password" required autoFocus/></label><button className="button buttonPrimary" type="submit" disabled={busy}>{busy?"Checking access…":"Enter Operations"}</button></form>{error&&<p role="alert" className="notice">{error}</p>}</section></div></main>
 }
