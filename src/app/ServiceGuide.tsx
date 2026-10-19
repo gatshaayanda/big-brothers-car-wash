@@ -77,7 +77,7 @@ export default function ServiceGuide({ view, services, requestCount, onChooseSer
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
     window.addEventListener("keydown", handleKey);
-    return () => { window.clearTimeout(timer); window.removeEventListener("keydown", handleKey); if (previous?.isConnected) previous.focus(); };
+    return () => { window.clearTimeout(timer); window.removeEventListener("keydown", handleKey); if (previous?.isConnected) previous.focus(); else launcherRef.current?.focus(); };
   }, [open]);
 
   function say(text: string) {
