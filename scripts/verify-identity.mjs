@@ -25,7 +25,15 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, "public/manifest.web
 if (manifest.name !== "Iteration 13 | PWA Prototype") failures.push("manifest: wrong application name");
 if (manifest.short_name !== "Iteration 13") failures.push("manifest: wrong short name");
 if (manifest.theme_color !== "#155eef") failures.push("manifest: wrong theme color");
-if (!manifest.icons?.some(icon => icon.src === "/iteration13-icon.svg")) failures.push("manifest: prototype icon missing");
+if (!manifest.icons?.some(icon => icon.src === "/iteration13-icon.svg" || icon.src === "/iteration13-icon-192.svg")) failures.push("manifest: prototype icon missing");
+for (const iconPath of ["/iteration13-icon.svg", "/iteration13-icon-192.svg", "/iteration13-icon-512.svg"]) {
+  if (!manifest.icons?.some(icon => icon.src === iconPath)) failures.push("manifest: icon missing " + iconPath);
+  if (!fs.existsSync(path.join(root, "public", iconPath.slice(1)))) failures.push("manifest icon asset missing " + iconPath);
+}
+const appManifest = fs.readFileSync(path.join(root, "src/app/manifest.ts"), "utf8");
+if (!appManifest.includes('name: "Iteration 13 | Service Studio"')) failures.push("app manifest: wrong application name");
+if (appManifest.includes("The Plug") || appManifest.includes("plug-icon")) failures.push("app manifest: inherited The Plug identity remains");
+for (const iconPath of ["/iteration13-icon-192.svg", "/iteration13-icon-512.svg"]) if (!appManifest.includes(iconPath)) failures.push("app manifest: missing " + iconPath);
 if (!fs.existsSync(path.join(root, "public/iteration13-icon.svg"))) failures.push("prototype icon file missing");
 const layout = fs.readFileSync(path.join(root, "src/app/layout.tsx"), "utf8");
 for (const expected of ["Iteration 13 | PWA Prototype", "applicationName:\"Iteration 13\""]) if (!layout.includes(expected)) failures.push("layout: missing " + expected);
