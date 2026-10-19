@@ -66,8 +66,9 @@ export default function ServiceGuide({ view, services, requestCount, onChooseSer
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
-    // Opening the guide must not focus the composer or summon the mobile keyboard.
-    // The visitor can tap the message field when they are ready to type.
+    // Move focus to the dialog's close control for keyboard accessibility, never to
+    // the composer; the mobile keyboard stays closed until the visitor taps the field.
+    const focusTimer = window.setTimeout(() => panelRef.current?.querySelector<HTMLElement>('button:not([disabled])')?.focus(), 0);
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") { setOpen(false); launcherRef.current?.focus(); return; }
       if (event.key !== "Tab") return;
@@ -78,7 +79,7 @@ export default function ServiceGuide({ view, services, requestCount, onChooseSer
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
     window.addEventListener("keydown", handleKey);
-    return () => { window.removeEventListener("keydown", handleKey); if (previous?.isConnected) previous.focus(); else launcherRef.current?.focus(); };
+    return () => { window.clearTimeout(focusTimer); window.removeEventListener("keydown", handleKey); if (previous?.isConnected) previous.focus(); else launcherRef.current?.focus(); };
   }, [open]);
 
   function say(text: string) {
