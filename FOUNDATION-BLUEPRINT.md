@@ -2,6 +2,8 @@
 
 **Entry point for every implementation chat:** [START-HERE.md](./START-HERE.md). Follow its required reading order and verification steps. Then read [AGENTS.md](./AGENTS.md) for protected rules and [README.md](./README.md) for the customer/admin walkthrough. Read [CLONING.md](./CLONING.md) whenever cloning, resetting identity or adapting this foundation. Chat history is not a replacement for these files.
 
+Read [GOLDEN-BASELINE.md](./GOLDEN-BASELINE.md) for the approved recovery point and the complete new-project adaptation contract. Iteration 13 is now the default cloning foundation for new customer-first PWA projects in this portfolio unless the product owner explicitly chooses another source.
+
 This file is the fast technical handoff for a new ChatGPT/Codex conversation. GitHub main is the source of truth; inspect the actual latest commit rather than trusting an old chat summary.
 ## What this repository is
 
