@@ -2,7 +2,7 @@
 
 ## Fast handoff for future implementation chats
 - Read `FOUNDATION-BLUEPRINT.md` for the repository map, data boundaries, protected invariants, clone/reset checklist and verification steps.
-- Read `CHAT-WIDGET-RESEARCH.md` before adding a chat helper. The widget is not implemented in this prototype; that file separates the Sparkle Legacy reference from research-backed recommendations.
+- Read `CHAT-WIDGET-RESEARCH.md` before adding a chat helper. The current deterministic adaptation lives in `src/app/ServiceGuide.tsx`; that file separates the Sparkle Legacy reference from research-backed recommendations.
 - README is the customer/admin demo walkthrough. Do not assume an earlier conversation summary is newer than the repository.
 
 ## Purpose
@@ -43,3 +43,10 @@ Installation currently works and must not be casually rewritten. Before touching
 
 ## Verification and reporting
 Run `npm run verify:identity`, `npm run lint`, and `npm run build` when the available environment permits. Report the exact commit/branch, checks actually run, deployment status separately, and concise QA steps. A successful GitHub push does not prove a successful Vercel deployment.
+
+
+## Service Guide integration contract
+- \`src/app/ServiceGuide.tsx\` is a scripted navigation assistant for this prototype, not AI or live support. Read \`CHAT-WIDGET-RESEARCH.md\` and the “Deterministic Service Guide” section in \`FOUNDATION-BLUEPRINT.md\` before adapting it.
+- Keep its customer/admin actions wired to the existing page state and real handlers. Do not duplicate forms/data, invent completed actions, or make the guide required for the primary journey.
+- Preserve conservative dismissible teaser behavior, mobile safe areas/dynamic viewport, keyboard/Escape support, reduced-motion styles, session-only history and truthful local/offline wording.
+- In a new project, replace demo labels and actions with project-specific workflows, verify authorization for admin actions, and only add network/AI/human handoff integrations when explicitly designed and genuinely implemented.
