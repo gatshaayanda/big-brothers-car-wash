@@ -1039,3 +1039,27 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
 /* Typing is opt-in: make the composer instruction visible without stealing focus. */
 .sd-guide-type-hint{margin:3px 14px 0;color:#667085;font-size:.72rem;line-height:1.35;text-align:center}
 @media(max-width:600px){.sd-guide-type-hint{margin:3px 12px 0;font-size:.7rem}}
+
+
+/* Admin service media picker: explicit media choice, upload state and preview. */
+.sd-media-picker{display:grid;gap:11px;min-width:0;margin:0;padding:15px;border:1px solid #d9dee7;border-radius:14px;background:#f8fafc;color:#172033}
+.sd-media-picker legend{padding:0 5px;font-size:.92rem;font-weight:900}
+.sd-media-help{margin:0;color:#596579;font-size:.82rem;line-height:1.45}
+.sd-media-mode{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.sd-media-mode button,.sd-media-url-row button{min-height:42px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#263247;font-weight:850;cursor:pointer}
+.sd-media-mode button.is-selected{border-color:#1d4ed8;background:#eaf1ff;color:#1d4ed8;box-shadow:inset 0 0 0 1px #1d4ed8}
+.sd-media-upload{display:grid;gap:8px}
+.sd-media-upload label{font-size:.82rem;font-weight:850}
+.sd-media-upload input[type="file"]{width:100%;min-width:0;padding:10px;border:1px dashed #9aa8bb;border-radius:10px;background:#fff;color:#344054;font-size:.78rem}
+.sd-media-upload input[type="url"]{width:100%;min-width:0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#172033}
+.sd-media-upload small{color:#667085;font-size:.75rem;line-height:1.45}
+.sd-media-url-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+.sd-media-url-row button{padding:0 12px}
+.sd-media-status,.sd-media-offline{margin:0;padding:10px 11px;border-radius:9px;background:#eef4ff;color:#244b92;font-size:.8rem;line-height:1.45;overflow-wrap:anywhere}
+.sd-media-offline{background:#fff4df;color:#854d0e}
+.sd-media-preview{display:grid;gap:8px;padding-top:10px;border-top:1px solid #dce2eb}
+.sd-media-preview>span{font-size:.67rem;font-weight:950;letter-spacing:.09em;color:#596579}
+.sd-media-preview img,.sd-media-preview video{display:block;width:100%;max-height:230px;object-fit:contain;border-radius:10px;background:#e7ebf0}
+.sd-media-preview button{justify-self:start;min-height:36px;padding:7px 11px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#9b1c1c;font-size:.78rem;font-weight:850}
+.sd-media-picker button:disabled,.sd-media-picker input:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:560px){.sd-media-picker{padding:12px}.sd-media-url-row{grid-template-columns:1fr}.sd-media-url-row button{width:100%}}
