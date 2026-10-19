@@ -59,7 +59,7 @@ Preserve relevant capabilities and fit them to the product:
 - Customer request/order history, status explanations and obvious next actions.
 - A request-specific conversation where customer messages and staff/admin replies are visible to the correct sides.
 - Attachment sharing with explicit file-type, size, connection and progress/error feedback.
-- Project-appropriate gamified progress or a small theme-specific interaction; do not keep the garden/game theme when it does not fit.
+- Optional project-appropriate progress aids or small interactions only when research and the actual product context justify them. Do not default to gamification or carry the spa garden/game theme into unrelated products. If no contextual extra is useful, omit it rather than forcing a novelty widget.
 - A lightweight journal, saved preferences, offers, reminders or other account extras only when they make sense for the project.
 - Offline access to cached app shell and honestly supported local drafts/state, with clear separation from server synchronization.
 
