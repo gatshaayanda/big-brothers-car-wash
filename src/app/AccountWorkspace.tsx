@@ -15,6 +15,7 @@ type Props = {
   email: string;
   setEmail: (email: string) => void;
   online: boolean;
+  announcement: string;
   onBrowse: () => void;
   onUpdateOrder: (orderId: string, update: (order: WorkspaceOrder) => WorkspaceOrder, notice: string) => void;
 };
@@ -25,7 +26,7 @@ const prettyDate = (value: string) => {
   catch { return value; }
 };
 
-export default function AccountWorkspace({ orders, email, setEmail, online, onBrowse, onUpdateOrder }: Props) {
+export default function AccountWorkspace({ orders, email, setEmail, online, announcement, onBrowse, onUpdateOrder }: Props) {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [uploadingOrder, setUploadingOrder] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -34,15 +35,19 @@ export default function AccountWorkspace({ orders, email, setEmail, online, onBr
   const [journal, setJournal] = useState("");
   const [savedJournal, setSavedJournal] = useState("");
   const [extrasReady, setExtrasReady] = useState(false);
+  const [projectTips, setProjectTips] = useState(true);
+  const [studioNotes, setStudioNotes] = useState(true);
   const [openThread, setOpenThread] = useState<string | null>(null);
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem("iteration13:account-extras:v1");
       if (saved) {
-        const parsed = JSON.parse(saved) as { gardenSeeds?: number; savedJournal?: string };
+        const parsed = JSON.parse(saved) as { gardenSeeds?: number; savedJournal?: string; projectTips?: boolean; studioNotes?: boolean };
         setGardenSeeds(Number.isFinite(parsed.gardenSeeds) ? Math.max(0, Number(parsed.gardenSeeds)) : 0);
         setJournal(typeof parsed.savedJournal === "string" ? parsed.savedJournal.slice(0, 500) : "");
         setSavedJournal(typeof parsed.savedJournal === "string" ? parsed.savedJournal.slice(0, 500) : "");
+        setProjectTips(parsed.projectTips !== false);
+        setStudioNotes(parsed.studioNotes !== false);
       }
     } catch { /* Account extras are optional when browser storage is blocked. */ }
     setExtrasReady(true);
@@ -50,9 +55,9 @@ export default function AccountWorkspace({ orders, email, setEmail, online, onBr
 
   useEffect(() => {
     if (!extrasReady) return;
-    try { window.localStorage.setItem("iteration13:account-extras:v1", JSON.stringify({ gardenSeeds, savedJournal })); }
+    try { window.localStorage.setItem("iteration13:account-extras:v1", JSON.stringify({ gardenSeeds, savedJournal, projectTips, studioNotes })); }
     catch { /* Order history and messages remain usable if optional extras cannot be saved. */ }
-  }, [extrasReady, gardenSeeds, savedJournal]);
+  }, [extrasReady, gardenSeeds, savedJournal, projectTips, studioNotes]);
 
   const { startUpload, isUploading } = useUploadThing("fileUploader", {
     onUploadProgress: progress => setUploadProgress(Math.max(0, Math.min(100, Math.round(progress)))),
@@ -132,7 +137,15 @@ export default function AccountWorkspace({ orders, email, setEmail, online, onBr
         <section className="sd-account-extra"><span className="sd-kicker">01 / PROJECT GARDEN</span><h2>Grow your next idea.</h2><p>A tiny, playful studio garden grows as you work through project steps. It is a creative progress marker, not a productivity score.</p><div className="sd-garden-scene" aria-label={seeds + " project seeds tended"}><span>{seeds > 0 ? "🌱" : "🪴"}</span><div><strong>{seeds} seeds planted</strong><small>{filteredOrders.length} project(s) · {totalMessages} message(s)</small></div>{seeds >= 5 ? <span>🌿</span> : <span>✳</span>}</div><button className="sd-button sd-primary" onClick={() => setGardenSeeds(value => value + 1)}>Plant a seed +1</button><p className="sd-account-note">Your garden is a small theme-specific demo interaction. Garden progress and saved notes stay on this browser; request and message counts come from this browser's saved records.</p></section>
         <section className="sd-account-extra"><span className="sd-kicker">02 / PROJECT JOURNAL</span><h2>Keep a thought.</h2><p>Save a short intention, question or idea while you plan. This journal stays in this browser and is not a secure private vault.</p><label className="sd-journal-label" htmlFor="studio-journal">A note for your next step<textarea id="studio-journal" rows={4} maxLength={500} value={journal} onChange={event => setJournal(event.target.value)} placeholder="What should we remember for this project?" /></label><div className="sd-journal-actions"><span>{journal.length}/500 characters</span><button className="sd-small-button" onClick={() => setSavedJournal(journal.trim())}>Save note</button></div>{savedJournal && <p className="sd-saved-note"><strong>Saved note</strong>{savedJournal}</p>}</section>
       </div>
-      <section className="sd-account-extra sd-account-guide"><span className="sd-kicker">03 / YOUR NEXT STEP</span><h2>Make progress, not guesswork.</h2><div className="sd-next-steps"><article><b>01</b><strong>Review your brief</strong><p>Make sure your requested date and project details are clear.</p></article><article><b>02</b><strong>Share a reference</strong><p>Use the conversation to attach an image, PDF or short video while online.</p></article><article><b>03</b><strong>Keep the thread handy</strong><p>Check your messages and status again when you return to this browser.</p></article></div></section>
+      <div className="sd-account-extras sd-account-followup">
+        <section className="sd-account-extra"><span className="sd-kicker">03 / STUDIO NOTES</span><h2>{announcement.trim() ? "Published studio note." : "A little help between steps."}</h2>{announcement.trim() && studioNotes ? <div className="sd-published-note"><span>LIVE IN THIS DEMO</span><p>{announcement}</p></div> : <p>{studioNotes ? "There is no published studio note right now. New offers or project updates will appear here when the demo admin publishes an announcement." : "Studio notes are switched off in your local preferences."}</p>}<div className="sd-studio-feed">{(projectTips ? [
+          { title: "Bring one clear reference", body: "A screenshot, sketch or example helps turn a broad idea into a useful first draft." },
+          { title: "Keep the first version focused", body: "Choose the one customer action or project outcome that matters most before adding extras." },
+          { title: "Confirm the timeline together", body: "Your requested date is a preference until scope and delivery are reviewed." }
+        ] : []).map((item, index) => <article key={item.title}><span>NOTE / 0{index + 1}</span><strong>{item.title}</strong><p>{item.body}</p></article>)}</div></section>
+        <section className="sd-account-extra"><span className="sd-kicker">04 / YOUR PREFERENCES</span><h2>Keep it relevant.</h2><p>Choose what appears in this account view. These local preferences do not send emails or system notifications.</p><label className="sd-preference-toggle"><input type="checkbox" checked={projectTips} onChange={event => setProjectTips(event.target.checked)} /><span><strong>Project tips & next steps</strong><small>Show general notes that can help with planning.</small></span></label><label className="sd-preference-toggle"><input type="checkbox" checked={studioNotes} onChange={event => setStudioNotes(event.target.checked)} /><span><strong>Published studio notes</strong><small>Show the current demo announcement or offer.</small></span></label><p className="sd-account-note">Preferences are saved in this browser. Real push notifications, email updates and account sync are not configured in this prototype.</p></section>
+      </div>
+      <section className="sd-account-extra sd-account-guide"><span className="sd-kicker">05 / YOUR NEXT STEP</span><h2>Make progress, not guesswork.</h2><div className="sd-next-steps"><article><b>01</b><strong>Review your brief</strong><p>Make sure your requested date and project details are clear.</p></article><article><b>02</b><strong>Share a reference</strong><p>Use the conversation to attach an image, PDF or short video while online.</p></article><article><b>03</b><strong>Keep the thread handy</strong><p>Check your messages and status again when you return to this browser.</p></article></div></section>
       <p className="sd-local-warning">Offline ready for local browsing and text messages after the app shell is cached. Requests, messages and status updates remain on this browser only. Attachments need internet and upload to UploadThing; they are not queued for offline upload.</p>
     </div>
   </section>;
