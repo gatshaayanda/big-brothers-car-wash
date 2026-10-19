@@ -118,8 +118,8 @@ export default function Home() {
   const statusCounts = useMemo(() => data.orders.reduce<Record<string, number>>((acc, order) => { acc[order.status] = (acc[order.status] || 0) + 1; return acc; }, {}), [data.orders]);
 
   function beginOrder(service: Service) {
-    setSelected(service.id); setNotice(`${service.name} selected. Add your details and requested date below.`); setDueDate(""); setBrief("");
-    document.getElementById("service-order")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setSelected(service.id); setView("shop"); setNotice(`${service.name} selected. Add your details and requested date below.`); setDueDate(""); setBrief("");
+    window.setTimeout(() => document.getElementById("service-order")?.scrollIntoView({ behavior: "smooth", block: "start" }), 90);
   }
 
   function openAdminGuide(target?: "services" | "announcement" | "requests") {
