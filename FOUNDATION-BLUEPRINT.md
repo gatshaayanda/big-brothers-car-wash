@@ -82,3 +82,12 @@ The current Iteration 13 service demo does not include a chat widget. The Sparkl
 - Keep the guide optional. The primary CTA and customer journey must remain understandable with the widget closed, disabled or unavailable.
 - Do not copy prices, routes, WhatsApp endpoints, insurance language or Sparkle Legacy's local keys into another project. Never present scripted routing as AI. For external handoff, use only verified project-owned destinations and state clearly when connectivity is required.
 - Before promoting this to the universal foundation, QA both customer and admin flows on a phone, keyboard-only, reduced motion, after dismissing the teaser, in offline mode, and with session storage blocked. Verify that each shortcut reaches the real action and does not merely close the panel or show a toast.
+
+
+## Customer account workspace
+
+The reusable account workspace lives in `src/app/AccountWorkspace.tsx`; the prototype admin's per-request conversation UI is in `src/app/page.tsx`. It is intended as a starting point for customer history, status clarity, customer/admin messages, attachment sharing and optional project-specific extras—not as a fixed design to clone unchanged.
+
+Adapt its vocabulary, theme/game, journal, requests, offers, preferences and next steps to the target product. Keep customer and staff views connected to the same request record. The Iteration 13 demo uses browser-localStorage, so messaging and status changes are visible only in the same browser profile; there is no real inbox, email delivery or cross-device sync. The UploadThing route accepts images (4 MB), PDFs (4 MB) and videos (16 MB) and requires a network connection. Offline text/local-state behavior must never be described as a completed remote send or queued upload.
+
+A production project must implement authenticated storage, customer record ownership, staff/admin authorization, upload privacy and any real message/notification delivery. Reuse the UI pattern only after verifying the target project's real data model and security boundary.

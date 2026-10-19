@@ -72,3 +72,19 @@ After changing icons, inspect both `public/manifest.webmanifest` and `src/app/ma
 The floating **Need a hand?** guide is optional and scripted. Customers can choose a service, continue into the existing request form or open My account. In Admin demo, it links directly to service management, announcements, incoming requests and the storefront. It does not send chat messages to a server or use an AI model. Its small invitation can be dismissed for the current tab session.
 
 Before cloning/adapting the guide, read [CHAT-WIDGET-RESEARCH.md](./CHAT-WIDGET-RESEARCH.md) and [FOUNDATION-BLUEPRINT.md](./FOUNDATION-BLUEPRINT.md). Keep the main customer journey obvious when the guide is closed.
+
+
+## Customer account workspace
+
+**My account** now demonstrates more than an empty request list:
+- Filter and review request history, requested timeline, starting price and current status.
+- Open a conversation attached to a specific request, send a message and share an image, video or PDF attachment while online.
+- See admin/studio replies in the same thread in the Admin demo on this same browser.
+- Use a small Studio Garden interaction and save a project note for later in this browser.
+- Continue reading saved local state and sending text messages offline after the app shell has been cached. File uploads require internet and are not queued.
+
+**Important limitation:** this remains a local prototype. Requests, messages, replies, statuses, garden progress and notes use this browser's storage. They are not sent to a real admin, emailed, or synchronized to another device. UploadThing files are uploaded remotely while online (images up to 4 MB, PDFs up to 4 MB, videos up to 16 MB), but their message metadata is saved in this browser's local thread. Do not use real customer data.
+
+### Reusing the account in another project
+
+Read the customer account adaptation contract in `AGENTS.md` and the account section in `CLONING.md`. Keep the useful capabilities, but replace the theme/game, wording, account extras, status language, file policy and actions with those that fit the actual project. Inspect its authentication, persistence, admin workflow and security rules. A production account requires verified per-customer data access and staff authorization; the demo's localStorage thread is not a real support inbox.

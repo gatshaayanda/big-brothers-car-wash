@@ -48,3 +48,22 @@ Do not replace install code just to change an icon. Update icon assets and their
 
 ## 6. Keep scope honest
 Iteration 13's service-order page is a local demo. Its localStorage requests, admin edits and analytics are not a shared backend. For a real project, decide its data model and authorization boundary from that project's brief; never present the demo admin as secure real-world administration.
+
+
+## Adapt the customer account to the target project
+
+Treat the account as a reusable capability set, not fixed Iteration 13 branding. Inspect `src/app/AccountWorkspace.tsx`, the customer order/request data shape, admin request workflow, UploadThing/file endpoints, local persistence and current authentication before editing.
+
+Preserve relevant capabilities and fit them to the product:
+- Customer request/order history, status explanations and obvious next actions.
+- A request-specific conversation where customer messages and staff/admin replies are visible to the correct sides.
+- Attachment sharing with explicit file-type, size, connection and progress/error feedback.
+- Project-appropriate gamified progress or a small theme-specific interaction; do not keep the garden/game theme when it does not fit.
+- A lightweight journal, saved preferences, offers, reminders or other account extras only when they make sense for the project.
+- Offline access to cached app shell and honestly supported local drafts/state, with clear separation from server synchronization.
+
+For the Iteration 13 prototype, the customer and admin share localStorage on one browser profile. Messages and status updates work in that local demo thread but are not sent to a real admin, email address or other device. Text/local changes can be tested offline after the app shell is cached. UploadThing attachments require internet; the current endpoint accepts images up to 4 MB, PDFs up to 4 MB and videos up to 16 MB. Offline attachments are not queued.
+
+For production adaptations, implement the target project's authenticated persistence and record ownership checks; authorize admin replies on the server/security-rule boundary; choose whether uploads are private/public and apply matching access controls; and implement actual notification delivery only if configured. Do not label localStorage as a customer account, secure journal, remote communication, or cloud backup. Keep account creation proportionate and preserve anonymous identity when linking credentials if that is part of the existing app.
+
+Before QA handoff, verify: empty account, matching/non-matching email, multiple requests, status changes, customer message → admin reply → customer sees reply, upload success/failure and size limits, offline text/state persistence, offline upload messaging, mobile/keyboard usability, and that the account's game/copy/assets match the target project rather than inherited demo content.
