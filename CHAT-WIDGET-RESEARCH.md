@@ -43,7 +43,7 @@ Source: https://www.nngroup.com/articles/chat-ux/
 
 ### 3. Design mobile first
 
-- On a phone, open a near-full-screen panel that respects dynamic viewport height and safe areas; do not let a 33–39rem fixed panel overflow short screens or cover the order form.
+- On a phone, use a contextual bottom sheet (about 72dvh maximum) that leaves the storefront visibly present above it, respects dynamic viewport/safe areas, and sits above the launcher. Avoid turning a helper into a replacement page.
 - Keep a clear header, visible close/minimize action, readable message bubbles, quick-reply chips and a pinned composer above the keyboard.
 - Keep the floating launcher away from primary actions and the install CTA. Let users dismiss a teaser; remember that choice.
 - Avoid forcing a typing interaction when a 1-tap service choice is enough.
@@ -76,7 +76,7 @@ A polished, compact “studio guide” rather than a generic support bubble:
 - Small, calm launcher with an optional one-time teaser card near it (not an unsolicited modal).
 - Teaser text: “Not sure which service fits? I can help you choose.” Buttons: “Help me choose” and “Not now”.
 - The teaser appears only after the user has had time to browse, once per session at most, and stays dismissed when closed. Prefer not to show it on form entry/account flows.
-- Opening panel uses a short greeting and 3–5 specific quick actions, with selected service context and a clear path back to the actual order form.
+- Opening panel uses a short greeting and specific quick actions, with selected service context and a clear path back to the actual order form. Prefer visual service previews to transcript-heavy, text-only lists.
 - Use subtle enter/exit motion, immediate button feedback and accessible success/error toasts; suppress nonessential animation for reduced-motion users.
 
 Do not ship the teaser until it has a genuinely good mobile layout and a reliable dismissal policy. The core service journey must remain obvious without chat.
@@ -89,7 +89,7 @@ The prototype now has \`src/app/ServiceGuide.tsx\`, a genericized and locally de
 - Customer guide: choose an available service and see its real demo price/description, then continue into the existing order form; open My account; or return to browsing.
 - Admin guide: jump to service CRUD, announcement editing, incoming requests, or customer storefront.
 - Optional teaser appears after a delay once per tab session unless dismissed. Opening the guide is always user-controlled; the teaser is not a modal and is never required.
-- The mobile panel is full-screen with safe areas and dynamic viewport height; desktop uses a compact floating panel. It supports Escape, focus handling, visible focus, reduced motion and session-scoped conversation history.
+- The mobile panel is a compact, rounded contextual bottom sheet that leaves the homepage visible; desktop uses a floating panel. Service choices reuse catalogue media, prices and descriptions as visual cards. Typography is sized for comfortable reading; the guide supports Escape, focus handling, visible focus, reduced motion and session-scoped history.
 - The typed composer performs deterministic keyword matching and returns an honest fallback. It is not connected to an AI service or human support, and does not transmit the entered message.
 - Chat shortcuts call the existing customer/admin state handlers; they do not introduce a second order model or Firebase integration.
 
