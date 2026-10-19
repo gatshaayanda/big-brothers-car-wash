@@ -1307,3 +1307,71 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
 .sd-account-stats article span{font-size:.72rem;letter-spacing:.045em}
 .sd-account-stats article strong{font-size:clamp(1.65rem,3vw,2rem);line-height:1.05}
 .sd-account-stats article small{font-size:.76rem}
+
+/* Typography refinement: crisp, native system fonts with calmer tracking.
+   Keep browser-native font rasterisation; do not force non-standard smoothing. */
+.serviceDemo {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-kerning: normal;
+  text-rendering: auto;
+}
+.serviceDemo h1,
+.serviceDemo h2,
+.serviceDemo h3,
+.serviceDemo strong,
+.serviceDemo button,
+.serviceDemo label,
+.serviceDemo input,
+.serviceDemo select,
+.serviceDemo textarea {
+  font-synthesis: none;
+}
+.sd-hero h1,
+.sd-account-head h1,
+.sd-admin-head h1 {
+  letter-spacing: -0.045em;
+  line-height: 0.94;
+  font-weight: 850;
+}
+.sd-section-head h2,
+.sd-order-copy h2 {
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  font-weight: 800;
+}
+.sd-service-title h3,
+.sd-order-card-main h2,
+.sd-panel-head h2,
+.sd-empty h2,
+.sd-account-extra h2 {
+  letter-spacing: -0.025em;
+}
+.sd-hero-copy>p,
+.sd-section-head>p,
+.sd-order-copy>p,
+.sd-account-head>p,
+.sd-admin-head p,
+.sd-service-info>p,
+.sd-order-card-main p,
+.sd-account-extra>p {
+  text-rendering: auto;
+  line-height: 1.65;
+}
+@media (min-width: 641px) {
+  .sd-wrap {
+    width: min(1160px, calc(100% - 48px));
+  }
+  .sd-hero h1,
+  .sd-account-head h1,
+  .sd-admin-head h1 {
+    max-width: 12ch;
+  }
+}
+@media (max-width: 640px) {
+  .sd-hero h1,
+  .sd-account-head h1,
+  .sd-admin-head h1 {
+    letter-spacing: -0.04em;
+    line-height: 0.96;
+  }
+}
