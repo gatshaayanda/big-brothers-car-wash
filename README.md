@@ -1,36 +1,61 @@
-# Iteration 13 — PWA Pattern Lab
+# Iteration 13 — Service Studio prototype
 
-A mobile-first, installable progressive web app prototype built from the proven The Plug foundation. The product-facing shell demonstrates clear customer actions, responsive layout, install behavior, offline boundaries and an iPhone Safari installation explainer.
+A reusable, mobile-first PWA foundation candidate. The homepage demonstrates a complete service-order journey using browser-local demo data. Firebase configuration, rules and data were intentionally left unchanged.
 
-## Prototype journeys
-- **Home:** editorial, mobile-first pattern overview with customer, operations, installation and offline entry points.
-- **Customer:** `/request` and `/account` preserve the foundation customer request/account workflows.
-- **Operations:** `/admin` preserves the existing protected staff workflow; access still depends on its existing server/auth controls.
-- **Installation:** branded install action uses the retained browser prompt when available, with platform-specific guidance when the browser does not provide one. `/iphone-install` explains Safari Share → Add to Home Screen and links to the supplied walkthrough.
-- **Offline:** `/offline` explains that cached content may be stale and private writes are not confirmed while disconnected.
+## Customer demo
 
-## Development
+1. Open the homepage and browse the four example services:
+   - Website — P100
+   - App — P200
+   - Monthly support — P50
+   - Phaser games — P500
+2. Select **Request this service**, enter a name and email, choose a requested timeline date (today or later), and optionally describe the project.
+3. Submit the request. It should take you to **My account**, where the request, requested date, starting price and status are shown.
+4. Return to Services to submit another request or filter account requests by the same email.
+
+The date is a requested timeline, not a confirmed delivery promise. No payment is taken.
+
+## Local admin demo
+
+Use **Admin demo** at the bottom of the page. From the admin view you can:
+
+- Add, edit, hide/show and delete services.
+- Change prices, descriptions, image/video URLs and media type.
+- Publish or clear a storefront announcement.
+- Review incoming requests and change their status.
+- See summary counts for requests, statuses, services, customer emails and demo visits.
+- Reset the local sample data for another walkthrough.
+
+This is a prototype control surface, not a secure admin boundary. Do not enter real customer data.
+
+## Persistence and offline QA
+
+- Orders, service edits, announcements and statuses are stored in this browser's `localStorage`; customer and admin views share the same local data on the same browser profile.
+- Data is not shared with other devices, sent to a business, or synchronized to Firebase.
+- Visit the homepage while online first so the service worker can cache the app shell. Then switch the device/browser offline and reload the homepage. Confirm the app shell opens, submit a sample request, and use the bottom **Admin demo** entry to change its status. Return to **My account** and confirm the status is reflected.
+- External preview images/videos may need a connection; if an asset is unavailable, the service card should fall back to its local visual placeholder. Offline success means local demo state persists on this device, not that external media is downloaded.
+- If local storage is blocked or full, the app should show a notice; do not interpret a local save notice as server synchronization.
+
+## Installation — protected behavior
+
+The existing installation mechanics are intentionally preserved:
+
+- The browser's retained `beforeinstallprompt` event is invoked from the user's explicit branded install action when available.
+- When a native prompt is unavailable, platform-specific guidance is shown instead of a dead button or fake native prompt.
+- Embedded browsers receive a blocking open-in-browser handoff.
+- `/iphone-install` explains Safari Share → Add to Home Screen and includes the walkthrough link.
+- Service-worker caches use an Iteration 13 namespace and provide an update/refresh action.
+
+The duplicate header install CTA has been removed; the persistent branded install action remains the single install entry point. Do not alter install mechanics when changing icon artwork.
+
+## Development and verification
 
 ```sh
 npm install
-npm run dev
 npx tsc --noEmit
-npm run lint
 npm run verify:identity
+npm run lint
 npm run build
 ```
 
-## Boundaries
-- Firebase configuration, Firestore rules, Storage rules, and data model were intentionally left unchanged for this prototype pass.
-- The app does not claim offline private writes have synchronized. Verify the exact workflows against the dedicated Iteration 13 Firebase environment before relying on persistence.
-- iOS installation must be tested on a physical iPhone/iPad in Safari. Chromium `beforeinstallprompt` is not an iOS install API.
-- A successful GitHub push does not confirm a Vercel deployment.
-
-## QA checkpoint
-1. Open the homepage at desktop width and at 320–390 px; confirm no horizontal overflow and all four pattern links work.
-2. Use Install app in Chrome/Edge where the native prompt is available; dismiss it and confirm platform guidance is shown when no prompt is available.
-3. On iPhone Safari, follow `/iphone-install`: Share → Add to Home Screen → Add; open the installed icon.
-4. Test an embedded browser; confirm the blocking open-in-browser handoff is usable.
-5. Visit a public page while online, then go offline and revisit; check that cached public shell behavior is honest and private routes do not expose cached private content.
-6. Use customer request and staff operations journeys with configured credentials; verify saved actions only show success after the server confirms them.
-7. Reconnect, refresh after an update becomes ready, and confirm the new shell is served.
+After changing icons, inspect both `public/manifest.webmanifest` and `src/app/manifest.ts`, verify all referenced assets and the manifest actually served by the built app, and test Chrome/Android plus physical iPhone Safari. Firebase configuration and rules are outside this prototype's scope.
