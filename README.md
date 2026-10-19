@@ -1,5 +1,7 @@
 # Iteration 13 — Service Studio prototype
 
+**Fast handoff for future chats:** read [`AGENTS.md`](./AGENTS.md), then [`FOUNDATION-BLUEPRINT.md`](./FOUNDATION-BLUEPRINT.md). The Sparkle Legacy chat-widget reference and evidence-led proposal live in [`CHAT-WIDGET-RESEARCH.md`](./CHAT-WIDGET-RESEARCH.md). These files explain what to preserve, where to edit, what is demo-only, and what needs deliberate project-specific replacement.
+
 A reusable, mobile-first PWA foundation candidate. The homepage demonstrates a complete service-order journey using browser-local demo data. Firebase configuration, rules and data were intentionally left unchanged.
 
 ## Customer demo
@@ -47,6 +49,10 @@ The existing installation mechanics are intentionally preserved:
 - Service-worker caches use an Iteration 13 namespace and provide an update/refresh action.
 
 The duplicate header install CTA has been removed; the persistent branded install action remains the single install entry point. Do not alter install mechanics when changing icon artwork.
+
+## Interaction feedback
+
+Action buttons provide visible press/focus feedback. Successful local changes and validation/storage failures use a dismissible, screen-reader-announced toast. A success message is shown only after the browser accepts the localStorage write; it does not imply server synchronization.
 
 ## Development and verification
 
