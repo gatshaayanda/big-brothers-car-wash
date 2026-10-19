@@ -1,9 +1,11 @@
 # Cloning Iteration 13 safely
 
-**Before cloning or adapting:** read [START-HERE.md](./START-HERE.md), [AGENTS.md](./AGENTS.md), [FOUNDATION-BLUEPRINT.md](./FOUNDATION-BLUEPRINT.md) and [README.md](./README.md). Start-HERE is the mandatory handoff so a new chat does not have to rediscover which files govern which steps. For a new Admin Hub app, follow the canonical global rule: start from gatshaayanda/the-plug unless the product owner explicitly overrides it.
+**Before cloning or adapting:** read [START-HERE.md](./START-HERE.md), [AGENTS.md](./AGENTS.md), [GOLDEN-BASELINE.md](./GOLDEN-BASELINE.md), [FOUNDATION-BLUEPRINT.md](./FOUNDATION-BLUEPRINT.md) and [README.md](./README.md). Start-HERE is the mandatory handoff so a new chat does not have to rediscover which files govern which steps. Iteration 13 is now the default cloning source for new customer-first PWA projects in this portfolio, including new Admin Hub apps, unless the product owner explicitly chooses another foundation. For an existing project, inspect and improve its current repository instead of recloning it.
 
 Use this guide when creating a new project from Iteration 13. For an existing project, inspect and improve the existing repository instead of recloning it.
 ## 1. Establish the source and target
+
+Before starting, record the current approved baseline from [GOLDEN-BASELINE.md](./GOLDEN-BASELINE.md). Never develop directly on the golden reference branch. Create the working project from the approved source commit and keep the baseline recoverable.
 1. Confirm the canonical source is `gatshaayanda/iteration13`, record the source commit and inspect its current `AGENTS.md`, package scripts, route tree, and recent implementation.
 2. Confirm the new repository name, product brief, intended Firebase project (if any), domain, brand, and media. Do not invent unknown business details.
 3. Clone only after reading this file and the current source implementation. Never reuse another business's Firebase project, secrets, private data, service-worker configuration or deployment target.
