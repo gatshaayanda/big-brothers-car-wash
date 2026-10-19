@@ -1361,11 +1361,6 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
   .sd-wrap {
     width: min(1160px, calc(100% - 48px));
   }
-  .sd-hero h1,
-  .sd-account-head h1,
-  .sd-admin-head h1 {
-    max-width: 12ch;
-  }
 }
 @media (max-width: 640px) {
   .sd-hero h1,
