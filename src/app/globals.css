@@ -1189,3 +1189,111 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
 .sd-account-guide .sd-next-steps{margin-top:7px}
 .sd-account-guide .sd-next-steps article{height:100%;background:#101010}
 @media(max-width:680px){.sd-account-extras{grid-template-columns:minmax(0,1fr);gap:12px}.sd-account-extra{min-height:0}.sd-account-guide .sd-next-steps{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Readability fix: account extras use a high-contrast paper surface and explicit text blocks. */
+.sd-account-extra{
+  background:#f7f5f0;
+  border-color:#d8d2c7;
+  color:#1c2430;
+}
+.sd-account-extra>.sd-kicker{color:#4b5563}
+.sd-account-extra h2{color:#151b25}
+.sd-account-extra>p{color:#46505e}
+.sd-account-extra>p.sd-account-note{color:#596474}
+.sd-project-checklist{
+  gap:9px;
+  margin-top:7px;
+  padding-top:12px;
+  border-top:1px solid #ded9cf;
+}
+.sd-project-check{
+  align-items:flex-start;
+  gap:12px;
+  padding:13px 12px;
+  border:1px solid #dcd6cb;
+  border-radius:11px;
+  background:#fff;
+}
+.sd-project-check input{
+  display:block;
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
+  margin:2px 0 0;
+}
+.sd-project-check .sd-project-check-copy{
+  display:block;
+  flex:1 1 auto;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.sd-project-check .sd-project-check-title{
+  display:block;
+  margin:0 0 6px;
+  color:#182230;
+  font-size:.92rem;
+  font-weight:850;
+  line-height:1.4;
+}
+.sd-project-check .sd-project-check-description{
+  display:block;
+  color:#4b5563;
+  font-size:.84rem;
+  font-weight:500;
+  line-height:1.6;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.sd-account-extra .sd-journal-label{color:#263244}
+.sd-account-extra .sd-journal-label textarea{
+  background:#fff;
+  color:#182230;
+  border-color:#c9c3b8;
+  font-size:16px;
+  line-height:1.55;
+}
+.sd-account-extra .sd-journal-actions>span{color:#596474}
+.sd-account-extra .sd-saved-note{
+  background:#fff;
+  color:#263244;
+  border:1px solid #dcd6cb;
+  border-left:4px solid var(--plug-blue);
+  border-radius:9px;
+  line-height:1.55;
+}
+.sd-account-extra .sd-studio-feed article,
+.sd-account-extra .sd-next-steps article{
+  background:#fff;
+  border-color:#dcd6cb;
+}
+.sd-account-extra .sd-studio-feed article>span{color:#1d4ed8}
+.sd-account-extra .sd-studio-feed article strong,
+.sd-account-extra .sd-next-steps article strong{color:#182230}
+.sd-account-extra .sd-studio-feed article p,
+.sd-account-extra .sd-next-steps article p{color:#4b5563}
+.sd-account-extra .sd-next-steps b{color:#1d4ed8}
+.sd-account-extra .sd-preference-toggle{
+  border-color:#ded9cf;
+  color:#182230;
+}
+.sd-account-extra .sd-preference-toggle small{color:#4b5563}
+.sd-account-stats article{
+  background:#f7f5f0;
+  border-color:#d8d2c7;
+}
+.sd-account-stats article span{color:#46505e}
+.sd-account-stats article strong{color:#174fc4}
+.sd-account-stats article small{color:#596474}
+.sd-account-extra .sd-published-note{
+  background:#edf8f0;
+  border-color:#b7d9c0;
+  color:#173b24;
+}
+.sd-account-extra .sd-published-note>span{color:#24633a}
+.sd-account-extra .sd-published-note p{color:#173b24}
+@media(max-width:680px){
+  .sd-project-check{padding:13px 11px}
+  .sd-project-check .sd-project-check-title{font-size:.9rem}
+  .sd-project-check .sd-project-check-description{font-size:.83rem;line-height:1.55}
+}
