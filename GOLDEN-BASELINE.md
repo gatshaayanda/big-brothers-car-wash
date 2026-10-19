@@ -4,7 +4,7 @@
 
 This repository's accepted baseline is the customer-first Service Studio PWA at GitHub `main`. Preserve it as the default foundation for new projects unless the product owner explicitly selects another starting point. This is the deliberate project-specific override to the former The Plug-first cloning rule.
 
-**Golden reference commit before this documentation/overlay pass:** `1296f2bdc64a013e7b079467f95167cf02dfc527` (install/guide corner collision fix). The approved baseline includes the earlier account readability fixes and responsive typography refinements already on main.
+**Install/guide collision fix:** `1296f2bdc64a013e7b079467f95167cf02dfc527`. **Golden snapshot commit:** `da03d01b750283980ea5d1aebe39856565e8e134` (the complete approved UI, collision fix, and handoff/cloning documentation as of this checkpoint). The snapshot branch is `golden/iteration13-service-studio`.
 
 The stable recovery branch `golden/iteration13-service-studio` is intended to point to the approved baseline. Do not develop directly on it or move it casually. Any baseline promotion must be reviewed and deliberately recorded by the product owner.
 
