@@ -42,9 +42,11 @@ export default function Home() {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as Partial<DemoData>;
-        setData({ services: Array.isArray(parsed.services) ? parsed.services : seedServices, orders: Array.isArray(parsed.orders) ? parsed.orders : [], announcement: typeof parsed.announcement === "string" ? parsed.announcement : "", views: Number(parsed.views) || 0 });
+        setData({ services: Array.isArray(parsed.services) ? parsed.services : seedServices, orders: Array.isArray(parsed.orders) ? parsed.orders : [], announcement: typeof parsed.announcement === "string" ? parsed.announcement : "", views: (Number(parsed.views) || 0) + 1 });
+        setAnnouncementDraft(typeof parsed.announcement === "string" ? parsed.announcement : "");
       } else setData(current => ({ ...current, views: 1 }));
     } catch { setNotice("Local demo storage is unavailable in this browser. You can explore, but changes may not persist."); }
+    setReady(true);
     setOnline(navigator.onLine);
     const syncOnline = () => setOnline(navigator.onLine);
     window.addEventListener("online", syncOnline);
