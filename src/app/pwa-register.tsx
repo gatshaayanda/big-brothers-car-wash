@@ -297,10 +297,10 @@ export default function PwaRegister({ initialEmbedded = false, initialAndroid = 
   const installCard = installState === "native" ? (
     <div style={installShellStyle} role="presentation">
       <section className="plugInstallModal" role="dialog" aria-modal="false" aria-labelledby="plug-install-title" aria-describedby="plug-install-message">
-        <div className="plugInstallTop"><span className="plugInstallMark">P</span><span className="plugInstallTag">ITERATION 13 · PWA PROTOTYPE</span><button type="button" className="plugInstallClose" aria-label="Close install prompt" onClick={dismissInstall}>×</button></div>
+        <div className="plugInstallTop"><span className="plugInstallMark">13</span><span className="plugInstallTag">ITERATION 13 · SERVICE STUDIO</span><button type="button" className="plugInstallClose" aria-label="Close install prompt" onClick={dismissInstall}>×</button></div>
         <div className="plugInstallKicker">YOUR SOURCING APP</div>
         <h2 id="plug-install-title">Iteration 13.<br/><em>One tap away.</em></h2>
-        <p id="plug-install-message">Install Iteration 13 on your device for a direct home-screen shortcut to your sourcing requests, account and private conversations with the team.</p>
+        <p id="plug-install-message">Install Iteration 13 on your device for quick access to the service menu, your demo requests and the local account view.</p>
         {installHelpOpen ? (
           <div className="plugInstallSteps" role="status" aria-live="polite">
             {installPlatform === "ios" ? (
@@ -323,7 +323,7 @@ export default function PwaRegister({ initialEmbedded = false, initialAndroid = 
           </div>
         ) : (
           <>
-            <div className="plugInstallModalBenefits"><span><b>01</b><strong>Quick access</strong><small>Open Iteration 13 from your home screen.</small></span><span><b>02</b><strong>Your requests</strong><small>Return to your sourcing journey and account.</small></span><span><b>03</b><strong>Private by account</strong><small>Keep your conversations in your member space.</small></span></div>
+            <div className="plugInstallModalBenefits"><span><b>01</b><strong>Quick access</strong><small>Open Iteration 13 from your home screen.</small></span><span><b>02</b><strong>Your requests</strong><small>Return to your demo requests and account view.</small></span><span><b>03</b><strong>Private by account</strong><small>Keep your demo requests on this device.</small></span></div>
             <button type="button" className="plugInstallPrimary" onClick={() => void install()}>Install Iteration 13 →</button>
             <button type="button" className="plugInstallSecondary" onClick={dismissInstall}>Not now</button>
           </>
@@ -346,8 +346,8 @@ export default function PwaRegister({ initialEmbedded = false, initialAndroid = 
   ) : null;
 
   return <>
-    {offline && <div className="offlineBanner" role="status" aria-live="polite"><span aria-hidden="true">⚡</span> Offline · Saved public finds may still be available on this device. Requests and account changes need a connection.</div>}
-    {!offline && reconnecting && <div className="offlineBanner reconnectingBanner" role="status" aria-live="polite"><span aria-hidden="true">↻</span> Reconnected · Iteration 13 is syncing and checking for the latest information.</div>}
+    {offline && <div className="offlineBanner" role="status" aria-live="polite"><span aria-hidden="true">⚡</span> Offline · The service demo saves orders and admin edits locally on this device. Firebase-backed routes need a connection.</div>}
+    {!offline && reconnecting && <div className="offlineBanner reconnectingBanner" role="status" aria-live="polite"><span aria-hidden="true">↻</span> Reconnected · Iteration 13 can reach the network again. Local demo data remains on this device.</div>}
     {!environment().standalone && installState !== "embedded" && (
       <button
         type="button"
