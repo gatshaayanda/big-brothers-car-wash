@@ -28,7 +28,9 @@ if (manifest.theme_color !== "#155eef") failures.push("manifest: wrong theme col
 if (!manifest.icons?.some(icon => icon.src === "/iteration13-icon.svg")) failures.push("manifest: prototype icon missing");
 if (!fs.existsSync(path.join(root, "public/iteration13-icon.svg"))) failures.push("prototype icon file missing");
 const layout = fs.readFileSync(path.join(root, "src/app/layout.tsx"), "utf8");
-for (const expected of ["Iteration 13 | PWA Prototype", "applicationName:\"Iteration 13\"", "appleWebApp:{capable:true,title:\"Iteration 13\"}"]) if (!layout.includes(expected)) failures.push("layout: missing " + expected);
+for (const expected of ["Iteration 13 | PWA Prototype", "applicationName:\"Iteration 13\""]) if (!layout.includes(expected)) failures.push("layout: missing " + expected);
+// Validate Apple install metadata semantically; whitespace and additional metadata fields are harmless.
+if (!/appleWebApp\s*:\s*\{[^}]*\bcapable\s*:\s*true\b[^}]*\btitle\s*:\s*["']Iteration 13["']/s.test(layout)) failures.push('layout: missing appleWebApp capable=true and title="Iteration 13"');
 const sw = fs.readFileSync(path.join(root, "public/sw.js"), "utf8");
 if (!/iteration13-shell-v\d+/.test(sw)) failures.push("service worker: missing isolated cache namespace");
 if (!sw.includes("/iteration13-icon.svg")) failures.push("service worker: prototype icon missing from app shell");
