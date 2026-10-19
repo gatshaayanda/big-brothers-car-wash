@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
     name: "Iteration 13 | Service Studio",
-    short_name: "Studio 13",
+    short_name: "Iteration 13",
     description: "A mobile-first service-order demo with customer requests, local admin tools, installation guidance and offline-aware behavior.",
     start_url: "/",
     scope: "/",
@@ -16,8 +16,11 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["business", "productivity"],
     prefer_related_applications: false,
     icons: [
+      { src: "/iteration13-icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/iteration13-icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/iteration13-icon-180.png", sizes: "180x180", type: "image/png", purpose: "any" },
       { src: "/iteration13-icon-192.svg", sizes: "192x192", type: "image/svg+xml", purpose: "any" },
-      { src: "/iteration13-icon-512.svg", sizes: "512x512", type: "image/svg+xml", purpose: "any" },
+      
       { src: "/iteration13-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }
     ],
     shortcuts: [
@@ -26,7 +29,7 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: "Services",
         description: "Explore the service menu and submit a request",
         url: "/",
-        icons: [{ src: "/iteration13-icon-192.svg", sizes: "192x192", type: "image/svg+xml" }]
+        icons: [{ src: "/iteration13-icon-192.png", sizes: "192x192", type: "image/png" }]
       },
       {
         name: "My account",
