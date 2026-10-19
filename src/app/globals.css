@@ -1297,3 +1297,13 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
   .sd-project-check .sd-project-check-title{font-size:.9rem}
   .sd-project-check .sd-project-check-description{font-size:.83rem;line-height:1.55}
 }
+
+
+/* Keep the three account summary metrics clearly separated at every width. */
+.sd-account-stats article{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
+.sd-account-stats article span,
+.sd-account-stats article strong,
+.sd-account-stats article small{display:block;max-width:100%;line-height:1.45;overflow-wrap:anywhere}
+.sd-account-stats article span{font-size:.72rem;letter-spacing:.045em}
+.sd-account-stats article strong{font-size:clamp(1.65rem,3vw,2rem);line-height:1.05}
+.sd-account-stats article small{font-size:.76rem}
