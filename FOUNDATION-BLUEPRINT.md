@@ -1,7 +1,8 @@
 # Iteration 13 — Foundation blueprint
 
-This file is the fast handoff for a new ChatGPT/Codex conversation. Read it with `AGENTS.md` before editing. GitHub `main` is the source of truth; inspect the actual latest commit rather than trusting an old chat summary.
+**Entry point for every implementation chat:** [START-HERE.md](./START-HERE.md). Follow its required reading order and verification steps. Then read [AGENTS.md](./AGENTS.md) for protected rules and [README.md](./README.md) for the customer/admin walkthrough. Read [CLONING.md](./CLONING.md) whenever cloning, resetting identity or adapting this foundation. Chat history is not a replacement for these files.
 
+This file is the fast technical handoff for a new ChatGPT/Codex conversation. GitHub main is the source of truth; inspect the actual latest commit rather than trusting an old chat summary.
 ## What this repository is
 
 Iteration 13 is a **candidate reusable, mobile-first PWA foundation** demonstrated through a local-only service-order studio. It is not yet a production business app, secure admin, cloud-backed CRM, or universal template. Its primary purpose is to prove the customer journey, admin feedback, installation and offline patterns before they are promoted into future apps.
