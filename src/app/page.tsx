@@ -72,9 +72,19 @@ export default function Home() {
 
   useEffect(() => {
     if (!pendingConfirm) return;
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setPendingConfirm(null); };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
+    const keepDialogAccessible = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setPendingConfirm(null); return; }
+      if (event.key !== "Tab") return;
+      const dialog = document.querySelector(".sd-confirm-dialog");
+      const focusable = dialog?.querySelectorAll<HTMLElement>("button:not([disabled]),a[href],input,select,textarea");
+      if (!focusable?.length) { event.preventDefault(); return; }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    window.addEventListener("keydown", keepDialogAccessible);
+    return () => window.removeEventListener("keydown", keepDialogAccessible);
   }, [pendingConfirm]);
 
   useEffect(() => {
