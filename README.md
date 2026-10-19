@@ -1,57 +1,36 @@
-# The Plug
+# Iteration 13 — PWA Pattern Lab
 
-**The Plug — Sneakers & Apparel Sourcing**
+A mobile-first, installable progressive web app prototype built from the proven The Plug foundation. The product-facing shell demonstrates clear customer actions, responsive layout, install behavior, offline boundaries and an iPhone Safari installation explainer.
 
-Mobile-first sourcing and customer operations PWA for sneaker and apparel requests in Botswana.
-
-## Customer flow
-Home → Catalogue → Request a product → Request tracking → Customer account
-
-Customers can browse available products, ask The Plug to source a specific sneaker or apparel item, follow request progress, and message the business.
-
-## Operations
-/admin is protected by Firebase Authentication plus admins/{uid} with role owner/staff.
+## Prototype journeys
+- **Home:** editorial, mobile-first pattern overview with customer, operations, installation and offline entry points.
+- **Customer:** `/request` and `/account` preserve the foundation customer request/account workflows.
+- **Operations:** `/admin` preserves the existing protected staff workflow; access still depends on its existing server/auth controls.
+- **Installation:** branded install action uses the retained browser prompt when available, with platform-specific guidance when the browser does not provide one. `/iphone-install` explains Safari Share → Add to Home Screen and links to the supplied walkthrough.
+- **Offline:** `/offline` explains that cached content may be stale and private writes are not confirmed while disconnected.
 
 ## Development
+
+```sh
 npm install
 npm run dev
-
-Quality gates:
 npx tsc --noEmit
 npm run lint
 npm run verify:identity
 npm run build
+```
 
-See AGENTS.md for the implementation contract.
+## Boundaries
+- Firebase configuration, Firestore rules, Storage rules, and data model were intentionally left unchanged for this prototype pass.
+- The app does not claim offline private writes have synchronized. Verify the exact workflows against the dedicated Iteration 13 Firebase environment before relying on persistence.
+- iOS installation must be tested on a physical iPhone/iPad in Safari. Chromium `beforeinstallprompt` is not an iOS install API.
+- A successful GitHub push does not confirm a Vercel deployment.
 
-## Notifications
-Customer and operations notifications use Firebase Cloud Messaging. Notification permission is requested only from the user's explicit settings action.
-
-## Customer journey analytics
-
-The admin dashboard records server-side journey events for request-flow entry, account confirmation, request submission, sharing and invites, notification choices, and external catalogue/Instagram visits. Admin activity is excluded from customer journey counts. Event access is governed by Firestore rules; review the rules and analytics route together when changing event names or payloads.
-
-## Storefront launch QA
-
-Run this checklist against the exact preview commit before merging or announcing a public launch.
-
-### Customer
-- [ ] Open the home page on mobile and desktop; confirm published, in-date public finds/offers render with their images and prices.
-- [ ] Save a find or offer, open Saved Finds, refresh, and confirm the snapshot remains available.
-- [ ] Remove a saved item and confirm it disappears from Saved Finds; confirm saving it again works.
-- [ ] Start a request from a product card and confirm the product title, listed-price snapshot, and item type carry into the form and submitted private request.
-- [ ] Confirm request copy makes clear that submitting is not payment, a stock reservation, or a confirmed sale.
-- [ ] Confirm a request is visible in the customer tracking flow and the admin queue after submission.
-- [ ] Test source-request entry, navigation, install/PWA behavior, and browser back on a phone-sized viewport.
-
-### Admin
-- [ ] Sign in as an authorized admin; confirm a non-admin account cannot access admin data or write storefront content.
-- [ ] Create a draft find and a draft offer with category, price, image, and display order; confirm drafts do not appear publicly.
-- [ ] Edit the title, price, category, image, audience, status, and active dates; verify each saved value after refresh.
-- [ ] Publish an in-date public item and confirm it appears on the storefront; pause/archive/delete it and verify the expected public behavior.
-- [ ] Confirm image upload, saved image URL, preview, replacement, and removal work with the configured Firebase Storage rules.
-- [ ] Open journey analytics and compare 7/30/90-day and all-time views; verify product interest, bookmarks, and monthly demand signals.
-- [ ] Treat analytics as interaction signals, not unique people, paid orders, confirmed sales, or proof of stock.
-
-### Release boundary
-Saved Finds are stored in the current browser/device and are not synced across devices. Product requests are purchase intent only; Frank confirms availability, final price, and payment directly. Do not describe this release as online payment checkout.
+## QA checkpoint
+1. Open the homepage at desktop width and at 320–390 px; confirm no horizontal overflow and all four pattern links work.
+2. Use Install app in Chrome/Edge where the native prompt is available; dismiss it and confirm platform guidance is shown when no prompt is available.
+3. On iPhone Safari, follow `/iphone-install`: Share → Add to Home Screen → Add; open the installed icon.
+4. Test an embedded browser; confirm the blocking open-in-browser handoff is usable.
+5. Visit a public page while online, then go offline and revisit; check that cached public shell behavior is honest and private routes do not expose cached private content.
+6. Use customer request and staff operations journeys with configured credentials; verify saved actions only show success after the server confirms them.
+7. Reconnect, refresh after an update becomes ready, and confirm the new shell is served.
