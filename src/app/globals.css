@@ -1063,3 +1063,24 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
 .sd-media-preview button{justify-self:start;min-height:36px;padding:7px 11px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#9b1c1c;font-size:.78rem;font-weight:850}
 .sd-media-picker button:disabled,.sd-media-picker input:disabled{opacity:.6;cursor:not-allowed}
 @media(max-width:560px){.sd-media-picker{padding:12px}.sd-media-url-row{grid-template-columns:1fr}.sd-media-url-row button{width:100%}}
+
+
+/* Local admin analytics percentages and upload progress. */
+.sd-stats article small{display:block;margin-top:7px;color:#64748b;font-size:.68rem;line-height:1.35;font-weight:650}
+.sd-admin-performance{grid-column:1/-1}
+.sd-local-pill{display:inline-flex;align-items:center;padding:6px 9px;border:1px solid #d7deea;border-radius:99px;color:#64748b;font-size:.62rem;font-weight:900;letter-spacing:.06em;white-space:nowrap}
+.sd-performance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.sd-performance-grid article{min-width:0;padding:14px;border:1px solid #e1e6ee;border-radius:13px;background:#fff}
+.sd-performance-grid article>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sd-performance-grid article>div:first-child span{color:#536176;font-size:.78rem;font-weight:800}
+.sd-performance-grid article>div:first-child strong{color:#18263a;font-size:1.35rem;font-weight:950;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.sd-performance-track,.sd-media-progress-track{height:7px;overflow:hidden;border-radius:99px;background:#e8edf4}
+.sd-performance-track{margin:12px 0 9px}
+.sd-performance-track span,.sd-media-progress-track span{display:block;height:100%;border-radius:inherit;background:#245bd6;transition:width .2s ease}
+.sd-performance-grid small{color:#6b7280;font-size:.7rem;line-height:1.4}
+.sd-media-progress{display:grid;gap:9px;padding:11px 12px;border:1px solid #c8d7f4;border-radius:11px;background:#f1f6ff;color:#244b92}
+.sd-media-progress-copy{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.82rem}
+.sd-media-progress-copy strong{font-weight:850}
+.sd-media-progress-copy span{font-size:1rem;font-weight:950;font-variant-numeric:tabular-nums}
+.sd-media-progress small{color:#536b92;font-size:.72rem;line-height:1.4}
+@media(max-width:620px){.sd-performance-grid{grid-template-columns:1fr}.sd-local-pill{font-size:.55rem}.sd-admin-performance .sd-panel-head{align-items:flex-start;gap:8px}}
