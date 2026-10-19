@@ -32,6 +32,11 @@ for (const expected of ["Iteration 13 | PWA Prototype", "applicationName:\"Itera
 const sw = fs.readFileSync(path.join(root, "public/sw.js"), "utf8");
 if (!/iteration13-shell-v\d+/.test(sw)) failures.push("service worker: missing isolated cache namespace");
 if (!sw.includes("/iteration13-icon.svg")) failures.push("service worker: prototype icon missing from app shell");
+if (!sw.includes("/iphone-install") || !sw.includes("/iphone-install.svg")) failures.push("service worker: iPhone installation guide is not cached for offline use");
+const installGuidePath = path.join(root, "src/app/iphone-install/page.tsx");
+if (!fs.existsSync(installGuidePath)) failures.push("iPhone installation guide route missing");
+else if (!fs.readFileSync(installGuidePath, "utf8").includes("https://youtu.be/et2_1AcBYlg")) failures.push("iPhone installation guide: walkthrough link missing");
+if (!fs.existsSync(path.join(root, "public/iphone-install.svg"))) failures.push("iPhone installation illustration missing");
 if (failures.length) {
   console.error("IDENTITY VERIFICATION FAILED");
   failures.forEach(failure => console.error(" - " + failure));
