@@ -137,7 +137,24 @@ export default function AccountWorkspace({ orders, email, setEmail, online, anno
       {uploadNotice && <p className="sd-media-status" role="status">{uploadNotice}</p>}
       <div className="sd-account-extras">
         <section className="sd-account-extra"><span className="sd-kicker">01 / PROJECT CHECKLIST</span><h2>Get the brief ready.</h2><p>Use this practical checklist to prepare a clearer request. Tick off steps as you complete them; your checklist is saved in this browser.</p><div className="sd-project-checklist">
-          {[{ id: "brief", title: "Clarify the outcome", body: "Write down what you need the website, app, support or game to achieve." }, { id: "reference", title: "Gather a reference", body: "Save a link, screenshot or example that shows the direction you have in mind." }, { id: "scope", title: "List the essentials", body: "Separate must-haves from ideas that can wait for a later version." }, { id: "timeline", title: "Discuss the timeline", body: "Your requested date is a preference until scope and delivery are agreed." }].map(step => <label className="sd-project-check" key={step.id}><input type="checkbox" checked={projectSteps.includes(step.id)} onChange={event => setProjectSteps(current => event.target.checked ? [...current, step.id] : current.filter(item => item !== step.id))} /><span><strong>{step.title}</strong><small>{step.body}</small></span></label>)}
+          {[
+            { id: "brief", title: "Clarify the outcome", body: "Write down what you need the website, app, support or game to achieve." },
+            { id: "reference", title: "Gather a reference", body: "Save a link, screenshot or example that shows the direction you have in mind." },
+            { id: "scope", title: "List the essentials", body: "Separate must-haves from ideas that can wait for a later version." },
+            { id: "timeline", title: "Discuss the timeline", body: "Your requested date is a preference until scope and delivery are agreed." }
+          ].map(step => (
+            <label className="sd-project-check" key={step.id}>
+              <input
+                type="checkbox"
+                checked={projectSteps.includes(step.id)}
+                onChange={event => setProjectSteps(current => event.target.checked ? [...current, step.id] : current.filter(item => item !== step.id))}
+              />
+              <span className="sd-project-check-copy">
+                <strong className="sd-project-check-title">{step.title}</strong>
+                <small className="sd-project-check-description">{step.body}</small>
+              </span>
+            </label>
+          ))}
         </div><p className="sd-account-note">{projectSteps.length}/4 preparation steps checked. This is a planning aid, not a delivery status or score.</p></section>
         <section className="sd-account-extra"><span className="sd-kicker">02 / PROJECT NOTES</span><h2>Keep the details together.</h2><p>Save a short idea, question or requirement you want to remember before the next conversation. This note stays in this browser and is not a secure private vault.</p><label className="sd-journal-label" htmlFor="studio-journal">Note for your next discussion<textarea id="studio-journal" rows={4} maxLength={500} value={journal} onChange={event => setJournal(event.target.value)} placeholder="A feature idea, reference link, question or detail to confirm…" /></label><div className="sd-journal-actions"><span>{journal.length}/500 characters</span><button className="sd-small-button" onClick={() => setSavedJournal(journal.trim())}>Save note</button></div>{savedJournal && <p className="sd-saved-note"><strong>Saved note</strong>{savedJournal}</p>}</section>
       </div>
