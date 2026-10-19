@@ -1,8 +1,14 @@
-importScripts(
-  "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js",
-  "https://www.gstatic.com/firebasejs/11.9.0/firebase-messaging-compat.js",
-  "/api/firebase/messaging-sw-config"
-);
+// Background push is optional for this prototype. A failed remote import must never
+// prevent the service worker from registering its offline shell and fetch handlers.
+try {
+  importScripts(
+    "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js",
+    "https://www.gstatic.com/firebasejs/11.9.0/firebase-messaging-compat.js",
+    "/api/firebase/messaging-sw-config"
+  );
+} catch (error) {
+  console.warn("Background messaging is unavailable; offline app-shell support remains enabled.", error);
+}
 
 let thePlugMessaging = null;
 try {
@@ -45,7 +51,7 @@ self.addEventListener("notificationclick", (event) => {
   }));
 });
 
-const CACHE_VERSION = "iteration13-shell-v1";
+const CACHE_VERSION = "iteration13-shell-v2";
 const MEDIA_CACHE = "iteration13-media-v1";
 const SHELL_CACHE = CACHE_VERSION;
 const STATIC_LIMIT = 100;
