@@ -298,7 +298,7 @@ export default function PwaRegister({ initialEmbedded = false, initialAndroid = 
     <div style={installShellStyle} role="presentation">
       <section className="plugInstallModal" role="dialog" aria-modal="false" aria-labelledby="plug-install-title" aria-describedby="plug-install-message">
         <div className="plugInstallTop"><span className="plugInstallMark">13</span><span className="plugInstallTag">ITERATION 13 · SERVICE STUDIO</span><button type="button" className="plugInstallClose" aria-label="Close install prompt" onClick={dismissInstall}>×</button></div>
-        <div className="plugInstallKicker">YOUR SOURCING APP</div>
+        <div className="plugInstallKicker">YOUR SERVICE STUDIO APP</div>
         <h2 id="plug-install-title">Iteration 13.<br/><em>One tap away.</em></h2>
         <p id="plug-install-message">Install Iteration 13 on your device for quick access to the service menu, your demo requests and the local account view.</p>
         {installHelpOpen ? (
