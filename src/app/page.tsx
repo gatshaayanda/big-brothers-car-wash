@@ -71,6 +71,13 @@ export default function Home() {
   }, [notice]);
 
   useEffect(() => {
+    if (!pendingConfirm) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setPendingConfirm(null); };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [pendingConfirm]);
+
+  useEffect(() => {
     if (!ready) return;
     if (view === "account") window.history.replaceState({}, "", "/?view=account");
     else if (view === "shop") window.history.replaceState({}, "", "/");
