@@ -23,7 +23,7 @@ export default function SavedFindsPage() {
   }, []);
 
   return <main className="orderPage"><div className="orderWrap">
-    <div className="orderHeader"><Link href="/" className="logo"><span className="logoMark">P</span><span>THE PLUG</span></Link><nav className="accountTopNav"><Link href="/account" className="button buttonLight">My Plug</Link><Link href="/#featured" className="button buttonPrimary">Browse finds</Link></nav></div>
+    <div className="orderHeader"><Link href="/" className="logo"><span className="logoMark">P</span><span>ITERATION 13</span></Link><nav className="accountTopNav"><Link href="/account" className="button buttonLight">My Plug</Link><Link href="/#featured" className="button buttonPrimary">Browse finds</Link></nav></div>
     <section className="orderCard accountHome" style={{ maxWidth: 980, margin: "0 auto" }}>
       <div className="accountHero"><div><span className="kicker">YOUR SAVED EDIT</span><h1>Keep your finds close.</h1><p>Saved items stay here on this browser, even if Frank later removes them from the live storefront.</p></div><span className="accountStatus">{items.length} saved</span></div>
       {items.length === 0 ? <div className="emptyState"><h2>No saved finds yet.</h2><p>Browse the edit and tap Save on anything you want to come back to.</p><Link href="/#featured" className="button buttonPrimary">Explore featured finds ↗</Link></div> :
