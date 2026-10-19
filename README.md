@@ -86,7 +86,7 @@ Before cloning/adapting the guide, read [CHAT-WIDGET-RESEARCH.md](./CHAT-WIDGET-
 - Use a project-preparation checklist and save a project note for later in this browser. Account sections use consistent Service Studio styling; optional extras are chosen for the actual product context rather than copied from another client.
 - Continue reading saved local state and sending text messages offline after the app shell has been cached. File uploads require internet and are not queued.
 
-**Important limitation:** this remains a local prototype. Requests, messages, replies, statuses, garden progress and notes use this browser's storage. They are not sent to a real admin, emailed, or synchronized to another device. UploadThing files are uploaded remotely while online (images up to 4 MB, PDFs up to 4 MB, videos up to 16 MB), but their message metadata is saved in this browser's local thread. Do not use real customer data.
+**Important limitation:** this remains a local prototype. Requests, messages, replies, statuses, project checklist progress and notes use this browser's storage. They are not sent to a real admin, emailed, or synchronized to another device. UploadThing files are uploaded remotely while online (images up to 4 MB, PDFs up to 4 MB, videos up to 16 MB), but their message metadata is saved in this browser's local thread. Do not use real customer data.
 
 ### Reusing the account in another project
 
