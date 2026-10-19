@@ -14,7 +14,7 @@ export default function OfflinePage() {
           <p>The app shell and pages already loaded may remain available on this device. Displayed information may be out of date.</p>
           <p>The service-order demo stores requests, service edits and announcements in this browser, so those demo changes remain on this device while offline. They are not shared with another device or synced to a server. Firebase-backed routes and other server-dependent actions still need a connection.</p>
           <div className="actions centered">
-            <Link className="button buttonPrimary" href="/request">Try customer journey</Link>
+            <Link className="button buttonPrimary" href="/#service-order">Try customer journey</Link>
             <Link className="button buttonLight" href="/">Open home</Link>
           </div>
         </section>
