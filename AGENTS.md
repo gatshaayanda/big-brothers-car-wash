@@ -1,5 +1,10 @@
 # Iteration 13 — Reusable PWA Foundation Contract
 
+## Fast handoff for future implementation chats
+- Read `FOUNDATION-BLUEPRINT.md` for the repository map, data boundaries, protected invariants, clone/reset checklist and verification steps.
+- Read `CHAT-WIDGET-RESEARCH.md` before adding a chat helper. The widget is not implemented in this prototype; that file separates the Sparkle Legacy reference from research-backed recommendations.
+- README is the customer/admin demo walkthrough. Do not assume an earlier conversation summary is newer than the repository.
+
 ## Purpose
 Iteration 13 is the reusable, customer-first PWA prototype and candidate foundation for future projects. It demonstrates responsive customer journeys, browser-local demo workflows, installation, iPhone guidance, offline behavior, and staff/admin patterns. The service catalogue is sample content, not a real business offering.
 
@@ -14,7 +19,7 @@ Iteration 13 is the reusable, customer-first PWA prototype and candidate foundat
 ## Reusable product principles
 - Customer action first. Make the next step obvious, reduce unnecessary navigation, and keep copy concise.
 - Mobile-first, accessible, legible UI; WCAG 2.2 AA contrast is the baseline. Verify keyboard focus, narrow layouts, empty/error/loading states and touch targets.
-- Real workflows over decorative controls. Validate forms, persist state, expose useful feedback, and make admin changes visible to the customer view.
+- Real workflows over decorative controls. Validate forms, persist state, expose useful feedback, and make admin changes visible to the customer view. Use visible press/focus states and accessible, dismissible toasts for meaningful outcomes; never claim a local write succeeded unless localStorage accepted it. Avoid JavaScript alert/confirm for routine UX.
 - Keep account creation proportionate. Let customers explore before requesting credentials unless a real product requirement demands otherwise.
 - Minimize Firebase reads/writes. Do not change Firebase config, rules, collections or production data without explicit instruction.
 - Keep demo data, project-specific requirements and unverified ideas distinct. Local browser storage is not shared persistence, authenticated access, a server database or cloud synchronization.
