@@ -300,7 +300,7 @@ export default function PwaRegister({ initialEmbedded = false, initialAndroid = 
         <div className="plugInstallTop"><span className="plugInstallMark">P</span><span className="plugInstallTag">ITERATION 13 · PWA PROTOTYPE</span><button type="button" className="plugInstallClose" aria-label="Close install prompt" onClick={dismissInstall}>×</button></div>
         <div className="plugInstallKicker">YOUR SOURCING APP</div>
         <h2 id="plug-install-title">Iteration 13.<br/><em>One tap away.</em></h2>
-        <p id="plug-install-message">Install Iteration 13 on your device for a direct home-screen shortcut to your sourcing requests, account and private conversations with Frank.</p>
+        <p id="plug-install-message">Install Iteration 13 on your device for a direct home-screen shortcut to your sourcing requests, account and private conversations with the team.</p>
         {installHelpOpen ? (
           <div className="plugInstallSteps" role="status" aria-live="polite">
             {installPlatform === "ios" ? (
