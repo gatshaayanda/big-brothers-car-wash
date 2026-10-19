@@ -35,6 +35,7 @@ if (!appManifest.includes('name: "Iteration 13 | Service Studio"')) failures.pus
 if (appManifest.includes("The Plug") || appManifest.includes("plug-icon")) failures.push("app manifest: inherited The Plug identity remains");
 for (const iconPath of ["/iteration13-icon-192.png", "/iteration13-icon-512.png"]) if (!appManifest.includes(iconPath)) failures.push("app manifest: missing " + iconPath);
 if (!fs.existsSync(path.join(root, "public/iteration13-icon.svg"))) failures.push("prototype icon file missing");
+if (!fs.existsSync(path.join(root, "public/iteration13-icon-180.png"))) failures.push("Apple install icon file missing");
 const layout = fs.readFileSync(path.join(root, "src/app/layout.tsx"), "utf8");
 for (const expected of ["Iteration 13 | PWA Prototype", "applicationName:\"Iteration 13\""]) if (!layout.includes(expected)) failures.push("layout: missing " + expected);
 // Validate Apple install metadata semantically; whitespace and additional metadata fields are harmless.
