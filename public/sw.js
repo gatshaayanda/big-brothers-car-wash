@@ -50,7 +50,7 @@ const MEDIA_CACHE = "iteration13-media-v1";
 const SHELL_CACHE = CACHE_VERSION;
 const STATIC_LIMIT = 100;
 const PUBLIC_PAGE_LIMIT = 12;
-const APP_SHELL = ["/", "/request", "/offline", "/iteration13-icon.svg", "/manifest.webmanifest"];
+const APP_SHELL = ["/", "/request", "/offline", "/iphone-install", "/iphone-install.svg", "/iteration13-icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
