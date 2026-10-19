@@ -1,4 +1,4 @@
-name: The Plug quality
+name: Iteration 13 prototype quality
 on:
   push:
     branches: [main]
@@ -24,5 +24,7 @@ jobs:
         run: npx tsc --noEmit
       - name: Lint
         run: npm run lint
+      - name: Identity and PWA isolation
+        run: npm run verify:identity
       - name: Production build
         run: npm run build
