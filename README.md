@@ -1,9 +1,10 @@
 # Iteration 13 — Service Studio prototype
 
-**Fast handoff for future chats:** read [`AGENTS.md`](./AGENTS.md), then [`FOUNDATION-BLUEPRINT.md`](./FOUNDATION-BLUEPRINT.md). The Sparkle Legacy chat-widget reference and evidence-led proposal live in [`CHAT-WIDGET-RESEARCH.md`](./CHAT-WIDGET-RESEARCH.md). These files explain what to preserve, where to edit, what is demo-only, and what needs deliberate project-specific replacement.
+**Start every new implementation chat at [START-HERE.md](./START-HERE.md).** It mandates the reading order, implementation/verification workflow, account-adaptation contract and deployment handoff. Then use [AGENTS.md](./AGENTS.md) for rules, [FOUNDATION-BLUEPRINT.md](./FOUNDATION-BLUEPRINT.md) for architecture and invariants, and [CLONING.md](./CLONING.md) for cloning/adaptation. Do not make the product owner repeat these instructions.
+
+The Sparkle Legacy chat-widget reference and evidence-led proposal live in [CHAT-WIDGET-RESEARCH.md](./CHAT-WIDGET-RESEARCH.md). These files explain what to preserve, where to edit, what is demo-only, and what needs deliberate project-specific replacement.
 
 A reusable, mobile-first PWA foundation candidate. The homepage demonstrates a complete service-order journey using browser-local demo data. Firebase configuration, rules and data were intentionally left unchanged.
-
 ## Customer demo
 
 1. Open the homepage and browse the four example services:
