@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 export const metadata = { title: "Install on iPhone", description: "Add the Iteration 13 prototype to your iPhone home screen from Safari." };
