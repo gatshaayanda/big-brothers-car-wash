@@ -1370,3 +1370,37 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
     line-height: 0.96;
   }
 }
+
+/* Install CTA and Service Guide must never compete for the same corner.
+   Keep the install action clear on desktop and lift the guide above the full-width
+   install bar on narrow screens. */
+@media (min-width: 641px) {
+  .sd-guide-launcher {
+    left: 18px;
+    right: auto;
+    bottom: 18px;
+  }
+  .sd-guide-panel {
+    left: 18px;
+    right: auto;
+    bottom: 82px;
+  }
+  .sd-guide-teaser {
+    left: 18px;
+    right: auto;
+    bottom: 84px;
+  }
+}
+@media (max-width: 640px) {
+  .sd-guide-launcher {
+    left: 13px;
+    right: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 82px);
+  }
+  .sd-guide-teaser {
+    left: 12px;
+    right: 12px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
+    width: auto;
+  }
+}
