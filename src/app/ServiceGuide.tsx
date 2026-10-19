@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDownLeft, ArrowRight, Check, ChevronDown, MessageCircle, Send, Sparkles, X } from "lucide-react";
 
-type GuideService = { id: string; name: string; price: number; description: string; active: boolean };
+type GuideService = { id: string; name: string; price: number; description: string; media: string; mediaType: "image" | "video"; active: boolean };
 type View = "shop" | "account" | "admin";
 type Message = { id: string; from: "guide" | "you"; text: string };
 
