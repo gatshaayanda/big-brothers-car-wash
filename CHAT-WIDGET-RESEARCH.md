@@ -80,3 +80,17 @@ A polished, compact “studio guide” rather than a generic support bubble:
 - Use subtle enter/exit motion, immediate button feedback and accessible success/error toasts; suppress nonessential animation for reduced-motion users.
 
 Do not ship the teaser until it has a genuinely good mobile layout and a reliable dismissal policy. The core service journey must remain obvious without chat.
+
+
+## Iteration 13 adaptation now implemented
+
+The prototype now has \`src/app/ServiceGuide.tsx\`, a genericized and locally deterministic adaptation of the useful legacy interaction model. It is mounted on the shared Service Studio page and responds to the current \`shop\`, \`account\` or \`admin\` view.
+
+- Customer guide: choose an available service and see its real demo price/description, then continue into the existing order form; open My account; or return to browsing.
+- Admin guide: jump to service CRUD, announcement editing, incoming requests, or customer storefront.
+- Optional teaser appears after a delay once per tab session unless dismissed. Opening the guide is always user-controlled; the teaser is not a modal and is never required.
+- The mobile panel is full-screen with safe areas and dynamic viewport height; desktop uses a compact floating panel. It supports Escape, focus handling, visible focus, reduced motion and session-scoped conversation history.
+- The typed composer performs deterministic keyword matching and returns an honest fallback. It is not connected to an AI service or human support, and does not transmit the entered message.
+- Chat shortcuts call the existing customer/admin state handlers; they do not introduce a second order model or Firebase integration.
+
+This implementation is a **candidate reusable pattern**. It still needs real browser/mobile and offline QA before promotion. For future apps, preserve the interaction architecture but replace app-specific options and callbacks; do not copy this demo's services or insecure demo-admin assumption.
