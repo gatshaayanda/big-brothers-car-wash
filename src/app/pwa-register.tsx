@@ -84,9 +84,9 @@ export default function PwaRegister({ initialEmbedded = false, initialAndroid = 
       if (!user) return;
       const idToken = await getIdToken(user).catch(() => null);
       if (!idToken) return;
-      const pendingKeys = Object.keys(localStorage).filter(key => key.startsWith("iteration13-pending-order-notification-"));
+      const pendingKeys = Object.keys(localStorage).filter(key => key.startsWith("plug-pending-order-notification-"));
       for (const key of pendingKeys) {
-        const orderId = key.replace("iteration13-pending-order-notification-", "");
+        const orderId = key.replace("plug-pending-order-notification-", "");
         try {
           const response = await fetch("/api/notifications/order-created", {
             method: "POST",
