@@ -1163,3 +1163,29 @@ button.plugProductAction{width:100%;align-items:center;background:transparent;bo
 .sd-preference-toggle span{display:grid;gap:5px}
 .sd-preference-toggle strong{font-size:.84rem}
 .sd-preference-toggle small{font-size:.73rem;font-weight:500;color:#aaa197;line-height:1.4}
+
+
+/* Account workspace: consistent Service Studio styling, not inherited client/theme decoration. */
+.sd-account-extras{align-items:stretch;gap:14px;margin-top:16px}
+.sd-account-extra{display:flex;flex-direction:column;align-items:stretch;gap:0;min-height:100%;padding:clamp(17px,2.3vw,23px);background:#141414;border:1px solid #39352f;border-radius:16px}
+.sd-account-extra>.sd-kicker{display:block;min-height:1em}
+.sd-account-extra h2{margin:12px 0 10px;font-size:clamp(1.45rem,2.5vw,1.9rem);line-height:1.08;letter-spacing:-.025em}
+.sd-account-extra>p{margin:0 0 13px;color:#b5ada3;font-size:.84rem;line-height:1.55}
+.sd-account-extra>p.sd-account-note{margin-top:12px;margin-bottom:0;font-size:.72rem;color:#a49b90}
+.sd-project-checklist{display:grid;gap:0;margin-top:3px;border-top:1px solid #39352f}
+.sd-project-check{display:flex;align-items:flex-start;gap:11px;padding:13px 0;border-bottom:1px solid #39352f;cursor:pointer}
+.sd-project-check input{width:18px;height:18px;flex:0 0 18px;margin:2px 0 0;accent-color:var(--plug-blue)}
+.sd-project-check span{display:grid;gap:5px;min-width:0}
+.sd-project-check strong{font-size:.84rem;line-height:1.35}
+.sd-project-check small{color:#aaa197;font-size:.75rem;line-height:1.5;font-weight:500}
+.sd-account-extra .sd-journal-label{margin-top:3px}
+.sd-account-extra .sd-journal-label textarea{min-height:105px}
+.sd-account-extra .sd-journal-actions{margin-top:10px}
+.sd-account-extra .sd-studio-feed{margin-top:8px}
+.sd-account-extra .sd-studio-feed article{background:#101010}
+.sd-account-extra .sd-preference-toggle:first-of-type{margin-top:3px}
+.sd-account-extra .sd-preference-toggle:last-of-type{border-bottom:0}
+.sd-account-guide{margin-top:14px}
+.sd-account-guide .sd-next-steps{margin-top:7px}
+.sd-account-guide .sd-next-steps article{height:100%;background:#101010}
+@media(max-width:680px){.sd-account-extras{grid-template-columns:minmax(0,1fr);gap:12px}.sd-account-extra{min-height:0}.sd-account-guide .sd-next-steps{grid-template-columns:minmax(0,1fr)}}
