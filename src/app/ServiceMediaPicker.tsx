@@ -76,8 +76,8 @@ export default function ServiceMediaPicker({ value, type, online, onChange }: Pr
       <legend>Service media</legend>
       <p className="sd-media-help">Choose what customers will see. Image and video are handled separately.</p>
       <div className="sd-media-mode" role="group" aria-label="Media type">
-        <button type="button" className={type === "image" ? "is-selected" : ""} onClick={() => { onChange(value, "image"); setMessage(""); }}>Image</button>
-        <button type="button" className={type === "video" ? "is-selected" : ""} onClick={() => { onChange(value, "video"); setUrlDraft(value); setMessage(""); }}>Video</button>
+        <button type="button" className={type === "image" ? "is-selected" : ""} onClick={() => { onChange("", "image"); setUrlDraft(""); setMessage("Media type changed to image. Select or upload an image."); }}>Image</button>
+        <button type="button" className={type === "video" ? "is-selected" : ""} onClick={() => { onChange("", "video"); setUrlDraft(""); setMessage("Media type changed to video. Upload a video or add its URL."); }}>Video</button>
       </div>
       {type === "image" ? (
         <div className="sd-media-upload">
