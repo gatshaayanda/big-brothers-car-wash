@@ -14,11 +14,11 @@ try {
       // Notification payloads are displayed automatically by Firebase. Only render
       // data-only pushes here to avoid showing the same notification twice.
       if (payload.notification) return;
-      const title = payload.data?.title || "The Plug update";
+      const title = payload.data?.title || "Iteration 13 update";
       const options = {
-        body: payload.data?.body || "Open The Plug to check your latest account information.",
-        icon: "/plug-icon.svg",
-        badge: "/plug-icon.svg",
+        body: payload.data?.body || "Open the app to check your latest information.",
+        icon: "/iteration13-icon.svg",
+        badge: "/iteration13-icon.svg",
         data: { link: payload.data?.link || "/account" },
       };
       self.registration.showNotification(title, options);
@@ -45,12 +45,12 @@ self.addEventListener("notificationclick", (event) => {
   }));
 });
 
-const CACHE_VERSION = "theplug-shell-v15";
-const MEDIA_CACHE = "theplug-media-v1";
+const CACHE_VERSION = "iteration13-shell-v1";
+const MEDIA_CACHE = "iteration13-media-v1";
 const SHELL_CACHE = CACHE_VERSION;
 const STATIC_LIMIT = 100;
 const PUBLIC_PAGE_LIMIT = 12;
-const APP_SHELL = ["/", "/request", "/offline", "/plug-icon.svg", "/manifest.webmanifest"];
+const APP_SHELL = ["/", "/request", "/offline", "/iteration13-icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
@@ -91,7 +91,7 @@ self.addEventListener("message", event => {
 self.addEventListener("activate", event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => (key.startsWith("theplug-shell-") && key !== SHELL_CACHE) || (key.startsWith("theplug-media-") && key !== MEDIA_CACHE)).map(key => caches.delete(key)));
+    await Promise.all(keys.filter(key => (key.startsWith("iteration13-shell-") && key !== SHELL_CACHE) || (key.startsWith("iteration13-media-") && key !== MEDIA_CACHE)).map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });
