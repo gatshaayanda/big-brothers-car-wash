@@ -7,6 +7,7 @@ const f = createUploadthing();
 export const ourFileRouter = {
   fileUploader: f({
     image: { maxFileSize: "4MB", maxFileCount: 1 },
+    video: { maxFileSize: "16MB", maxFileCount: 1 },
     pdf: { maxFileSize: "4MB", maxFileCount: 1 },
   }).onUploadComplete(async ({ file }) => {
     console.info("[The Plug] sourcing attachment uploaded", {
