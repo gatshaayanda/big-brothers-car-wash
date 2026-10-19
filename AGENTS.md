@@ -1,6 +1,8 @@
 # Iteration 13 — Reusable PWA Foundation Contract
 
 ## Fast handoff for future implementation chats
+- **Golden baseline:** [GOLDEN-BASELINE.md](./GOLDEN-BASELINE.md) records protected behavior, recovery policy and new-project adaptation steps. Do not casually move or develop on the golden reference branch.
+- **Cloning default:** this repository now supersedes The Plug as the default starting point for new customer-first PWA projects in this portfolio, unless the product owner explicitly chooses another foundation. Existing projects must be inspected and improved in place.
 - **Mandatory first read:** [START-HERE.md](./START-HERE.md). Every new implementation chat must start there and follow its reading order; never ask the product owner which docs to inspect.
 - Then read FOUNDATION-BLUEPRINT.md, README.md, and CLONING.md as directed by START-HERE. These files serve different purposes; do not substitute chat summaries for them.
 - Read CHAT-WIDGET-RESEARCH.md before adding a chat helper. The current deterministic adaptation lives in src/app/ServiceGuide.tsx; that file separates the Sparkle Legacy reference from research-backed recommendations.
