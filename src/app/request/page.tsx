@@ -1,3 +1,7 @@
-import RequestForm from "./request-form";
-export const metadata={title:"Request a product",description:"Send The Plug a sneaker or apparel sourcing request."};
-export default function RequestPage(){return <RequestForm/>}
+import { redirect } from "next/navigation";
+
+export const metadata = { title: "Service request", description: "Start a service request from the Iteration 13 Service Studio." };
+
+export default function RequestPage() {
+  redirect("/#service-order");
+}
