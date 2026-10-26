@@ -1,66 +1,78 @@
-# Iteration 13 — Reusable PWA Foundation Contract
-
-## Fast handoff for future implementation chats
-- **Golden baseline:** [GOLDEN-BASELINE.md](./GOLDEN-BASELINE.md) records protected behavior, recovery policy and new-project adaptation steps. Do not casually move or develop on the golden reference branch.
-- **Cloning default:** this repository now supersedes The Plug as the default starting point for new customer-first PWA projects in this portfolio, unless the product owner explicitly chooses another foundation. Existing projects must be inspected and improved in place.
-- **Mandatory first read:** [START-HERE.md](./START-HERE.md). Every new implementation chat must start there and follow its reading order; never ask the product owner which docs to inspect.
-- Then read FOUNDATION-BLUEPRINT.md, README.md, and CLONING.md as directed by START-HERE. These files serve different purposes; do not substitute chat summaries for them.
-- Read CHAT-WIDGET-RESEARCH.md before adding a chat helper. The current deterministic adaptation lives in src/app/ServiceGuide.tsx; that file separates the Sparkle Legacy reference from research-backed recommendations.
-- Before claiming a fix is complete, run the repository's available checks, inspect their actual output, and verify the exact commit/deployment state. A GitHub edit or merge alone is not a build verification.
-- README is the customer/admin demo walkthrough. Do not assume an earlier conversation summary is newer than the repository.
-## Purpose
-Iteration 13 is the reusable, customer-first PWA prototype and candidate foundation for future projects. It demonstrates responsive customer journeys, browser-local demo workflows, installation, iPhone guidance, offline behavior, and staff/admin patterns. The service catalogue is sample content, not a real business offering.
+# Big Brothers Car Wash — project instructions
 
 ## Source of truth and workflow
-- Product owner / final reviewer: the user. Implementation: ChatGPT.
-- GitHub is the source of truth. Inspect the actual branch, latest commit, working tree, instructions, routes, service worker, install code and tests before changing them.
-- Existing project workflow: START → INSPECT → BUILD → VERIFY → CHECKPOINT. Keep inspection proportional; do not endlessly re-audit a repository whose context is established.
-- Unexpected result: STOP → inspect actual state → identify the first failure → fix → verify.
-- Preserve successful behavior. Prefer focused changes over rewrites. Never claim a test, deployment, device test, offline write or Firebase workflow passed without evidence.
-- When authorized, push changes to `main`. The user handles Vercel deployments unless explicitly delegated.
+- The product owner is the final reviewer; implement working software, not plans alone.
+- GitHub repository state, this file, README, actual code, Firebase rules, environment examples and verified checks are the source of truth. Inspect the current branch, commit, tree, and working tree before changing code.
+- This is an existing car-wash product being adapted from Vula's Car Wash for the same business owner. Preserve working functionality and infrastructure where verified; do not rebuild from a generic foundation or overwrite local work to resolve a Git divergence.
+- Current handoff warning: the initial push to this repository came from the local `main` branch after `git pull --ff-only origin main` failed because local and remote histories diverged. Verify the actual code against `gatshaayanda/vulas-car-wash` `main` before feature work. The intended product source is the latest verified Vula application, including its working racing game, authentication/data workflows, PWA installation and offline support—not the generic Iteration 13 demo. Do not force-push or rewrite history. Resolve the repository/source mismatch safely and transparently.
+- Existing project workflow: INSPECT → UNDERSTAND → IMPLEMENT → VERIFY → CHECKPOINT. On unexpected results: stop, inspect actual state, locate the first failure, fix and reverify.
+- Make focused changes. Run available identity checks, lint, tests and production build where feasible. Report code commits, push status, checks and deployment status separately. The owner handles Vercel deployment unless explicitly delegated.
+- Never claim a Firebase rule, data write, notification, PDF, account link, build, device test or deployment succeeded without evidence.
 
-## Reusable product principles
-- Customer action first. Make the next step obvious, reduce unnecessary navigation, and keep copy concise.
-- Mobile-first, accessible, legible UI; WCAG 2.2 AA contrast is the baseline. Verify keyboard focus, narrow layouts, empty/error/loading states and touch targets.
-- Real workflows over decorative controls. Validate forms, persist state, expose useful feedback, and make admin changes visible to the customer view. Use visible press/focus states and accessible, dismissible toasts for meaningful outcomes; never claim a local write succeeded unless localStorage accepted it. Avoid JavaScript alert/confirm for routine UX.
-- Keep account creation proportionate. Let customers explore before requesting credentials unless a real product requirement demands otherwise.
-- Minimize Firebase reads/writes. Do not change Firebase config, rules, collections or production data without explicit instruction.
-- Keep demo data, project-specific requirements and unverified ideas distinct. Local browser storage is not shared persistence, authenticated access, a server database or cloud synchronization.
+## Business identity and customer-first priorities
+- Product: Big Brothers Car Wash, G-West, Botswana. Use the owner's confirmed brand assets and real supplied photos/videos. Do not invent hours, prices, location details, services, capacity, available slots or contact details; make these editable admin settings or clearly marked configuration until confirmed.
+- Primary action on the customer-facing home page: **Join the walk-in queue**. This is the main intake journey and must be immediately obvious on a phone.
+- Keep the interface mobile-first, accessible, legible and quick to use on the staff member's smartphone handed to a walk-in customer. Use concise copy, appropriate touch targets, keyboard/accessibility support, validation and clear loading, empty, error, offline, success and pending states.
+- Staff operations are secondary to the customer journey and must be behind real authorization. Do not add unnecessary forced sign-in before a walk-in can submit their details.
 
-## Demo behavior
-- The customer service-order demo on `/` uses localStorage intentionally so a reviewer can submit an order without Firebase credentials.
-- Demo services, prices, media URLs, announcements, customer requests and statuses are editable locally. The admin demo is a prototype control surface, not a security boundary and not suitable for real customer data.
-- The requested timeline date is a customer preference, not a confirmed delivery commitment. No payment is taken.
-- Never describe local-only changes as synced to a server or shared with another device.
-- Preserve the PWA pattern lab at `/patterns`, the iPhone installation guide at `/iphone-install`, and the existing offline guide.
+## Walk-in queue: required end-to-end workflow
+- Intake form fields: customer's full name; phone number; vehicle type (e.g. sedan, SUV, bakkie); optional vehicle registration; service (default to the configured general walk-in service); optional notes.
+- Primary submit label: **Join the queue**. Validate required fields and phone number reasonably; explain validation inline. Prevent accidental duplicate submissions and provide a clear reference/status after successful server persistence.
+- Staff can manage queue order and wait-time estimates, update job/queue status, and mark jobs as started and completed. Wait estimates must be based on real staff-entered/configured data or clearly labelled estimates, never fabricated promises.
+- Clearly distinguish a local/offline draft from a server-accepted queue entry. Never tell staff a customer has joined the shared queue until the server confirms persistence. Retry with a stable request ID where supported to avoid duplicates.
+- The staff phone handoff is a privacy-sensitive shared-device flow: do not expose the previous customer's personal details, account, receipt or notifications to the next customer. After submission, provide a clear safe hand-back/finish state; clear transient form state and do not silently authenticate the customer as the staff member.
 
-## Installation — protected behavior
-Installation currently works and must not be casually rewritten. Before touching any PWA identity/icon/install files, inspect their actual implementation and consult current primary documentation (MDN and web.dev; Apple guidance for iOS).
-- Preserve the early `beforeinstallprompt` capture in `src/app/layout.tsx`, the retained one-shot event, the `iteration13-open-install` click event, and the user-initiated call to the native browser prompt in `src/app/pwa-register.tsx`.
-- Do not fake a native prompt, consume the prompt before the user clicks, or replace the working install action with a dead button.
-- Keep the embedded-browser handoff and `/iphone-install` Safari Share → Add to Home Screen guide, including its referenced media assets.
-- Inspect both `public/manifest.webmanifest` and `src/app/manifest.ts` before changing manifest output. Verify which manifest Next.js actually serves; do not assume similarly named files are interchangeable.
-- Change icon artwork separately from install mechanics. Keep valid manifest icon paths, MIME types, purpose and supported sizes. Do not delete or rename an icon until every reference is updated and the built manifest/assets have been checked.
-- Keep service-worker cache namespaces scoped to Iteration 13. Preserve update detection, the visible refresh action, offline fallback and existing privacy boundaries. Do not cache private Firebase responses as public content.
-- After any install-related change, run identity verification and build/lint checks, inspect the served manifest and assets, and state that real Chrome/Android and iPhone/Safari testing remains for the product owner unless it was actually performed.
+## Customer identity, accounts and future bookings
+- The queue is the entry point to a durable customer relationship, not a dead-end form. Let customers join as guests without friction, then offer a clear way to secure/claim their customer account using their phone and a verified sign-in/linking method. Do not equate a typed phone number with verified ownership.
+- Preserve a guest's queue/job history when linking an account where the auth provider supports safe identity linking. Do not create duplicate customer records or lose records during linking; use stable customer IDs and verified ownership checks.
+- Customers should be able to return to their own job history, receipts, notification preferences and future bookings. Enforce customer ownership on the server/Firestore rules; never expose another customer's records through a guessed ID, phone number or URL.
+- Offer future appointments after intake and in the completed-job/receipt journey, without distracting from the primary walk-in action. Customers can request a slot only from admin-configured opening hours and slots that are genuinely available.
+- Admins manage opening hours, service durations/capacity and bookable slots through real CRUD. Prevent double-booking with server-side transactional/authoritative availability checks. A submitted booking is **requested/pending** until the business confirms it; never call it confirmed merely because a form submitted.
+- Do not add payments or imply payment was taken unless a real verified payment integration exists.
 
-## Verification and reporting
-Run `npm run verify:identity`, `npm run lint`, and `npm run build` when the available environment permits. Report the exact commit/branch, checks actually run, deployment status separately, and concise QA steps. A successful GitHub push does not prove a successful Vercel deployment.
+## Completed jobs, PDF receipts and account handoff
+- At the end of the day, staff/admin need a reliable view of completed jobs and a way to review the actual job details.
+- For a completed job, generate or provide a real PDF receipt containing only verified information (business identity, job/receipt reference, date, vehicle/service, agreed charges and recorded payment state where available). Do not invent prices, taxes, payment or completion details. Make the PDF accessible to the customer via a secure, shareable link.
+- Receipt links must be hard to guess, scoped to the intended receipt, revocable/expirable where practical, and must not grant access to the customer's full account. Avoid putting private customer details in URL parameters. A receipt link is a way to view/download that receipt, not proof that the recipient owns the account.
+- The shared receipt page should invite the customer to securely claim/link their account, enable notifications if desired, and book a future wash from real available slots. These are opt-in actions with clear explanations. Do not claim account security, notification subscription or booking completion until each action succeeds.
+- Staff must be able to find completed jobs and resend/re-copy the correct receipt link. Show meaningful errors if PDF generation, persistence or link creation fails; no fake download or fake success.
 
+## Notifications and communication
+- Reuse the existing verified Firebase Cloud Messaging / notification setup if it is present in the corrected Vula source. Inspect its implementation and required environment variables before changing it.
+- Notifications should cover meaningful customer events (queue/job status, completed job/receipt ready, confirmed booking and relevant reminders) and authorized staff events (new queue entry, booking request, customer response) only when supported by the actual workflow.
+- Ask permission in context and only when useful. Provide in-app status/history or a fallback when push is unavailable. Store and authorize tokens safely; allow customers to manage/disable notifications. Do not claim a notification was delivered merely because it was queued.
+- Notification clicks should open the relevant authorized job, receipt or booking; test the destination and session behavior, not only that a push appears.
 
-## Service Guide integration contract
-- \`src/app/ServiceGuide.tsx\` is a scripted navigation assistant for this prototype, not AI or live support. Read \`CHAT-WIDGET-RESEARCH.md\` and the “Deterministic Service Guide” section in \`FOUNDATION-BLUEPRINT.md\` before adapting it.
-- Keep its customer/admin actions wired to the existing page state and real handlers. Do not duplicate forms/data, invent completed actions, or make the guide required for the primary journey.
-- Preserve conservative dismissible teaser behavior, mobile safe areas/dynamic viewport, keyboard/Escape support, reduced-motion styles, session-only history and truthful local/offline wording.
-- In a new project, replace demo labels and actions with project-specific workflows, verify authorization for admin actions, and only add network/AI/human handoff integrations when explicitly designed and genuinely implemented.
+## Account/session UX and product personality
+- Avoid repeated sign-in screens when a valid Firebase session already exists. On auth-state restoration, verify admin authorization using the existing server-side authorization route/rules; a remembered Google login alone must never grant staff privileges. Do not force the Google account chooser on every sign-in without a clear user request.
+- Where the approved project policy requires admin sessions to expire after 24 hours, enforce expiry on protected-route entry and at the deadline, clear authorization state and require re-verification. Do not weaken the staff allowlist, operations-word checks, server verification or role checks to improve convenience.
+- Give customers a warm, contextual greeting using their verified/preferred first name when available; use a neutral fallback otherwise and avoid repeating their name everywhere. Admin greeting may use “Boss” if consistent with the owner's tone, followed by verified operational information. Counts, queue size, wait estimates and job statuses must come from live records, never sample numbers presented as real.
+- A contextual guide/chat helper may reuse the Iteration 13 pattern only after inspecting its actual implementation and adapting it to this app. It should offer actions that navigate to real workflows (join queue, check my job/receipt, book a wash; staff review queue, completed jobs, booking requests). Do not create a duplicate account/data system or pretend a scripted helper is an AI. Never claim a message, booking or action succeeded unless the underlying workflow did.
+- Weather is optional and secondary. Only show real, timestamped weather for a relevant business/site location if it helps plan outdoor work; do not use silent precise-location tracking or fabricated conditions. Do not let weather/chat/greetings displace the queue CTA.
 
+## Firebase, data and security
+- Verify the actual Firebase project/configuration and existing data model before implementation. Since this is the same owner/business as Vula, reuse that database/infrastructure only after confirming the repository configuration and intended project. Keep environment-specific values in environment variables; never commit service-account JSON, staff secrets, production env files or tokens.
+- Do not make Firestore or Storage public to bypass errors. Apply least privilege and server-side/rule-based authorization for queue entries, customers, jobs, receipts, bookings, staff/admin actions and notification tokens.
+- Align Firestore rules, indexes and actual query/write shapes. Do not claim rules/indexes are deployed just because their files are committed. Avoid exposing Admin SDK-only collections to browser clients.
+- Keep UploadThing/Storage choice aligned with the verified current app and owner's requirements; do not migrate media infrastructure without explicit need. Real uploaded media must have validation, permission checks and failure feedback.
+- Distinguish shared server persistence from browser-local demo/offline state. Never use demo/localStorage records for real customer data or describe them as synchronized.
 
-## Customer account workspace adaptation contract
+## Protected PWA installation, offline support and racing game
+- Installation is protected infrastructure. Preserve the approved Africhiko installation behavior: capture the real `beforeinstallprompt` event early, retain it, invoke the native prompt only from the user's branded install-button click when available, use the existing dismissible branded card and responsive placement, and preserve close/reopen behavior. Never substitute a fake prompt, JavaScript alert, duplicate/intrusive banner, forced install or dead button.
+- Do not assume iOS Safari supports `beforeinstallprompt`; give accurate Safari Share → Add to Home Screen guidance. Keep embedded-browser open-in-browser handling, service-worker update/refresh behavior and cache isolation intact.
+- Do not alter protected install files, lifecycle, service-worker registration/caches or installation UX for unrelated branding, account, queue, notification or game changes. Change only project identity/assets and genuinely required project-specific copy unless the owner explicitly authorizes an installation change.
+- Preserve the verified Vula racing game and its controls, physics, assets, offline play, server-owned career/progression rules and existing routes. Do not recreate, remove, redesign or alter gameplay as part of the car-wash intake/account work. Inspect and identify protected files before any change touching them.
+- Verify manifest, icons, metadata, service-worker registration, isolated cache namespaces, updates, refresh and offline fallback when installation/PWA files are intentionally changed. Test browser and installed-app behavior separately where possible; report unperformed physical-device tests honestly.
 
-- The reusable account implementation is `src/app/AccountWorkspace.tsx`, integrated with `src/app/page.tsx`. Preserve and build on its useful account-holder capabilities: request/order history and status, email filtering, project-specific progress/gamification, a lightweight journal, a per-request customer ↔ admin conversation, and image/video/PDF attachments where the target project's upload rules allow them.
-- For every new project and every existing project whose account is being improved, inspect that project's real customer journey, data model, authentication, staff/admin workflow, upload endpoints, offline strategy and privacy/security rules first. Then research the target product and audience online before choosing account extras, interaction metaphors, terminology, hierarchy or visual treatment. Use primary product sources and credible UX research (for example, Baymard's account/dashboard consistency guidance) where relevant; cite/record useful findings in project docs. Replace Iteration 13 labels, sample services, journal prompts, status names and helper copy with the target project's own context. Do not transplant a spa garden, game, prices, treatments, customer messages or business-specific content unchanged. Theme-specific extras are optional: choose something genuinely useful for this product, or omit gamification entirely.
-- The account should help a customer take the next useful step: see their own history, understand status versus confirmation, message the responsible team on a specific request, share relevant files, and return to supported project-specific extras. Keep sign-in proportionate and never reveal another customer's records.
-- In this prototype, request data, conversation messages, statuses, garden progress and journal notes are browser-local. Customer and admin communication is a same-browser demo thread only; it is not email, live chat, a remote inbox, or cross-device sync. File attachments upload to UploadThing only while online (images/PDFs max 4 MB; videos max 16 MB); they are not queued offline. Never claim otherwise.
-- When adapting to a real production app, replace local-only account state with a verified authenticated data path, enforce ownership and staff authorization at the server/security-rule boundary, and connect messages/notifications to a real team inbox only when the backend and delivery path are implemented and tested. Do not weaken security rules or expose all requests to make the UI work.
-- Keep optional account extras and their data collection proportionate. Gamification should be playful and project-specific, never a misleading health, performance or customer-worth score. Journal privacy and retention must be stated truthfully.
-- Verify customer-created messages/files are visible to the authorized staff workflow, staff replies/status changes return to the correct customer view, invalid/oversized files fail clearly, and offline text/local-state behavior is distinct from online upload or remote delivery. Update `README.md` and `CLONING.md` with any project-specific limits.
+## Required QA checkpoint
+Before declaring ready for owner QA, verify:
+1. Walk-in intake on a narrow mobile screen, validation, duplicate-submit prevention, success/error/offline feedback and safe staff-phone handoff.
+2. Staff queue ordering/status updates and accurate estimate semantics.
+3. Customer can securely access only their own job and receipt; receipt PDF/link works and exposes no other data.
+4. Account claim/linking preserves history and rejects unverified ownership.
+5. Admin-configured opening hours/slots, availability checks, double-booking prevention and pending-versus-confirmed states.
+6. Notification opt-in, token handling, meaningful events and click-through destinations where configured.
+7. Existing sign-in/session authorization, racing game and protected installation/offline behavior remain intact.
+8. Identity search, lint/tests/build and actual GitHub commit state; distinguish code checks from deployment and live Firebase configuration.
+
+Keep this document aligned with verified architecture. Update README and related docs when the repository has been corrected to the intended Vula application; do not document imagined paths or claim the workflow is already implemented.
