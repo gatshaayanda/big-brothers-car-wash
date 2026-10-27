@@ -129,7 +129,7 @@ export default function Home() {
       }
       localStorage.setItem(pendingKey, JSON.stringify(remaining));
       setNotice(remaining.length ? { kind: "pending", text: remaining.length + " saved request(s) still have not synced." } : { kind: "success", text: "Saved requests have synced to Big Brothers' system. Bookings still need staff confirmation." });
-      if (!remaining.length && queueDraft) { setQueueReference(queueDraft.id || ""); setQueueHandoff("synced"); }
+      if (queueDraft && !remaining.some(draft => draft.id === queueDraft.id)) { setQueueReference(queueDraft.id || ""); setQueueHandoff("synced"); }
     } catch { setNotice({ kind: "pending", text: "Sync is not complete. Your saved requests remain on this device." }); }
   }
 
