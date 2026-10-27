@@ -12,3 +12,10 @@
 .queue-handoff-card .big-brothers-button{width:100%;margin-top:10px}
 .queue-reference{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #dfe4da;border-radius:10px;background:#f7fbf1;color:#14221e!important}
 .queue-reference strong{overflow-wrap:anywhere;text-align:right}
+
+.receipt-page{min-height:100svh;display:grid;place-items:center;padding:24px;background:#f5f6f1;color:#14221e}
+.receipt-card{width:min(100%,620px);padding:clamp(22px,5vw,40px);border:1px solid #dfe4da;border-radius:22px;background:#fff;box-shadow:0 20px 60px rgba(20,34,30,.12)}
+.receipt-brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}.receipt-brand strong,.receipt-brand small{display:block}.receipt-brand strong{font-size:.78rem;letter-spacing:.12em}.receipt-brand small{margin-top:5px;color:#68756d;font-size:.78rem}
+.receipt-mark{display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:13px;background:#14221e;color:#c6f36b;font-weight:950;letter-spacing:-.08em}
+.receipt-card h1{margin:10px 0 16px;font-size:clamp(34px,7vw,52px);line-height:1;letter-spacing:-.06em}
+.receipt-reference{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:10px;background:#f2f8e8;color:#14221e}.receipt-reference strong{overflow-wrap:anywhere;text-align:right}
