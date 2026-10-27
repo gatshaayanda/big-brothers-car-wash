@@ -33,7 +33,7 @@ for (const text of [".af-install-card", ".af-install-close", ".af-install-action
   if (!pwaCss.includes(text)) failures.push("Africhiko install-card styling is missing " + text + ".");
 }
 const sw = read("public/sw.js");
-if (!sw.includes("big-brothers-shell-v4") || !sw.includes("big-brothers-game-v4") || !sw.includes("/offline")) {
+if (!sw.includes("big-brothers-shell-v1") || !sw.includes("big-brothers-game-v1") || !sw.includes("/offline")) {
   failures.push("Service-worker cache isolation or offline fallback is missing.");
 }
 if (!sw.includes("const cacheCopy = response.clone();")) failures.push("Manifest response-cloning protection is missing.");
