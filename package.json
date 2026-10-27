@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "npm run verify:identity && npm run prepare:racing-assets && next build",
+    "dev": "node scripts/generate-icons.mjs && next dev",
+    "build": "node scripts/generate-icons.mjs && npm run verify:identity && npm run prepare:racing-assets && next build",
     "start": "next start",
     "lint": "eslint .",
     "verify:identity": "node scripts/verify-identity.mjs",
