@@ -235,3 +235,9 @@
  .big-brothers-footer .big-brothers-brand{width:100%}
  .big-brothers-footer>span{order:2}
 }
+
+/* Keep the hero useful when its optional video is unavailable offline. */
+.hero-video-fallback{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:clamp(20px,4vw,34px);background:radial-gradient(ellipse at 85% 10%,#ed1c2433,transparent 50%),#181818;color:#fff}
+.hero-video-fallback strong{font-family:"Space Grotesk",Arial,sans-serif;font-size:clamp(22px,3vw,32px);letter-spacing:-.04em;max-width:15ch}
+.hero-video-fallback span,.hero-video-fallback small{max-width:38ch;font-size:13px;line-height:1.6;color:#ffffffc7}
+.hero-video-fallback a{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:3px;background:#ed1c24;color:#fff;font-weight:800}
