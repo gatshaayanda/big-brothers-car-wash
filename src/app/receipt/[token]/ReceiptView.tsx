@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getIdToken, GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 
@@ -79,7 +80,7 @@ export default function ReceiptView({ token }: { token: string }) {
   }
 
   if (loading) return <main className="receipt-page"><section className="receipt-card"><p>Loading secure receipt…</p></section></main>;
-  if (error || !receipt) return <main className="receipt-page"><section className="receipt-card"><span className="receipt-mark">BB</span><p className="big-brothers-eyebrow">BIG BROTHERS CAR WASH</p><h1>Receipt unavailable.</h1><p>{error || "This receipt link is invalid or has expired."}</p><a className="big-brothers-button primary" href="/">Return to Big Brothers ↗</a></section></main>;
+  if (error || !receipt) return <main className="receipt-page"><section className="receipt-card"><span className="receipt-mark">BB</span><p className="big-brothers-eyebrow">BIG BROTHERS CAR WASH</p><h1>Receipt unavailable.</h1><p>{error || "This receipt link is invalid or has expired."}</p><Link className="big-brothers-button primary" href="/">Return to Big Brothers ↗</Link></section></main>;
 
   return <main className="receipt-page"><section className="receipt-card">
     <header className="receipt-brand"><span className="receipt-mark">BB</span><span><strong>BIG BROTHERS CAR WASH</strong><small>{receipt.locationName}</small></span></header>
