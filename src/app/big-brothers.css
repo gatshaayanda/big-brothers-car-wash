@@ -66,3 +66,172 @@
 .customer-account-summary article strong{font:600 32px "Space Grotesk",Arial,sans-serif;letter-spacing:-.06em}
 .customer-account-summary article small{color:#6b6b6b;font-size:11px;line-height:1.5}
 @media(max-width:680px){.customer-account-summary{grid-template-columns:1fr;gap:9px}.customer-account-summary article{grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:14px 16px}.customer-account-summary article span,.customer-account-summary article small{grid-column:1}.customer-account-summary article strong{grid-column:2;grid-row:1/3}.customer-account-summary article small{max-width:230px}}
+
+
+/* Big Brothers launch polish: customer-first hierarchy and real wash media */
+.vula{--ink:#171717;--paper:#fff;--brand-red:#e51f2a;--line:#e7e3e1;--muted:#696563;background:#fff;color:var(--ink);font-family:"DM Sans",Arial,sans-serif}
+.big-brothers-status{justify-content:flex-start;padding:8px max(20px,calc((100vw - 1240px)/2));background:#171717;color:#f8f7f6;font-size:11px;letter-spacing:.01em}
+.status-dot.online{background:#e51f2a}
+.big-brothers-nav{max-width:1240px;height:78px;padding:0 28px}
+.big-brothers-mark{background:#e51f2a;color:#fff;border-radius:50%;transform:none;letter-spacing:-.08em}
+.big-brothers-brand{letter-spacing:-.045em}
+.big-brothers-brand small{letter-spacing:.12em;color:#777}
+.big-brothers-nav nav{gap:25px;color:#4b4846}
+.big-brothers-cta{background:#e51f2a;color:#fff!important;border-radius:3px;padding:14px 18px}
+.big-brothers-hero{max-width:none;width:100%;padding:52px max(28px,calc((100vw - 1184px)/2)) 68px;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:54px;background:#f6f3f1;align-items:center}
+.big-brothers-hero-copy{max-width:560px}
+.big-brothers-eyebrow{color:#d71924;letter-spacing:.16em;font-size:10px;margin-bottom:16px}
+.big-brothers-hero h1{font-size:clamp(52px,6.2vw,86px);letter-spacing:-.075em;line-height:.91;margin-bottom:22px}
+.big-brothers-hero h1 em{color:#e51f2a}
+.big-brothers-hero-copy>p:not(.big-brothers-eyebrow){max-width:460px;font-size:16px;line-height:1.7;color:#5b5653}
+.big-brothers-actions{gap:12px;margin-top:28px}
+.big-brothers-button,.big-brothers-cta{min-height:48px;border-radius:3px;font-size:12px;letter-spacing:.01em}
+.big-brothers-button.primary{background:#e51f2a;color:#fff}
+.big-brothers-button.secondary{border:1px solid #c9c3bf;background:transparent;color:#242120}
+.hero-reassurance{font-size:12px!important;color:#777!important;margin-top:20px}
+.big-brothers-hero-media{position:relative;display:block;min-width:0;overflow:hidden;background:#1a1a1a;aspect-ratio:1.25;border-radius:4px;color:#fff;box-shadow:0 24px 60px #2017141c}
+.big-brothers-hero-media video{display:block;width:100%;height:100%;min-height:330px;object-fit:cover;background:#222}
+.hero-media-caption{position:absolute;left:0;right:0;bottom:0;padding:46px 22px 20px;display:flex;justify-content:space-between;align-items:end;gap:16px;background:linear-gradient(transparent,#000b 70%);pointer-events:none}
+.hero-media-caption small{display:block;font-size:9px;letter-spacing:.17em;color:#ffffffc7;margin-bottom:7px}
+.hero-media-caption strong{display:block;font-family:"Space Grotesk",Arial,sans-serif;font-size:clamp(20px,2.5vw,30px);letter-spacing:-.045em}
+.hero-media-arrow{display:grid;place-items:center;width:42px;height:42px;border:1px solid #ffffff80;border-radius:50%;font-size:18px}
+.big-brothers-section{max-width:1240px;padding:66px 28px}
+.section-title{margin-bottom:28px}
+.big-brothers-section h2,.big-brothers-bottom h2{letter-spacing:-.065em;line-height:1.02}
+#services{padding-top:72px;padding-bottom:76px}
+.big-brothers-services{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.service-card,.service-empty{border:0;border-top:2px solid #e51f2a;border-radius:0;background:#f7f5f3;padding:22px;min-height:225px}
+.service-category,.location-number{color:#8d2529;letter-spacing:.13em}
+.service-card h3{font-size:21px;line-height:1.08;margin:18px 0 10px}
+.service-card p{font-size:13px;line-height:1.65}
+.service-card-bottom{align-items:center;flex-wrap:wrap}
+.service-card-bottom strong{font-family:"Space Grotesk",Arial,sans-serif;font-size:20px;letter-spacing:-.04em}
+.service-card-bottom button,.text-link{color:#b91520;text-decoration:none;border-bottom:1px solid #e51f2a;padding:0 0 5px}
+.locations-section{max-width:none;border-top:1px solid #e7e3e1;border-bottom:1px solid #e7e3e1;background:#faf8f7}
+.locations-section>.section-title,.locations-section>.location-cards{max-width:1184px;margin-left:auto;margin-right:auto}
+.location-cards article,.location-cards article:nth-child(2){background:#fff;border:1px solid #e7e3e1;border-radius:3px;padding:28px}
+.location-cards h3{font-size:25px;margin:14px 0 8px}
+.location-cards p{min-height:0}
+.location-weather-section{padding-top:28px;padding-bottom:18px}
+.bb-weather-card{display:flex;align-items:center;gap:30px;padding:23px 26px;border:1px solid #e8e3e0;border-radius:3px;background:#fff}
+.bb-weather-main{flex:1}
+.bb-weather-main .big-brothers-eyebrow{margin-bottom:8px}
+.bb-weather-reading strong{font-size:36px;letter-spacing:-.07em}
+.bb-weather-reading span{font-size:14px;color:#6a625f}
+.bb-weather-main>small{color:#777}
+.bb-weather-metrics{display:flex;gap:28px}
+.bb-weather-metrics span{display:grid;gap:5px}
+.bb-weather-metrics small{color:#777;font-size:11px}
+.bb-weather-metrics strong{font-size:18px}
+.bb-weather-refresh{border:1px solid #d6d0cc;background:#fff;border-radius:3px;padding:11px 13px;font-size:11px}
+.bb-location-guide{padding-top:44px}
+.bb-location-videos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.bb-location-video{border:1px solid #e8e3e0;border-radius:3px;overflow:hidden;background:#fff}
+.bb-location-video video{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:#242424}
+.bb-location-video>div{padding:16px 17px 18px}
+.bb-location-video h3{font-family:"Space Grotesk",Arial,sans-serif;font-size:18px;letter-spacing:-.035em;margin:0 0 6px}
+.bb-location-video p{font-size:12px;line-height:1.6;color:#6c6663;margin:0}
+.bb-offline-media{margin-top:16px;padding:18px 20px;background:#f7f5f3;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.bb-offline-media strong{font-size:13px}
+.bb-offline-media p{font-size:12px;line-height:1.5;color:#6c6663;margin:5px 0 0}
+.request-section{max-width:1240px;grid-template-columns:.72fr 1.28fr;gap:60px;padding-top:76px;padding-bottom:84px}
+.request-section .section-title{position:static}
+.request-section .section-title>p:not(.big-brothers-eyebrow){font-size:14px;line-height:1.7}
+.request-section .big-brothers-notice.pending{padding:0;background:transparent;color:#777;border-left:2px solid #e51f2a;padding-left:12px;border-radius:0}
+.request-panel{border:1px solid #e7e3e1;border-radius:3px;box-shadow:0 14px 40px #1b12100b}
+.request-tabs button{background:#f7f5f3;color:#6b6561;padding:16px 8px;font-size:12px}
+.request-tabs button.active{color:#b91520;box-shadow:inset 0 -3px #e51f2a}
+.big-brothers-form{padding:27px}
+.form-intro strong{font-size:23px;letter-spacing:-.04em}
+.big-brothers-form label{font-size:12px;color:#45403e}
+.big-brothers-form input,.big-brothers-form select,.big-brothers-form textarea{color:#211e1d;border-color:#d9d3cf;border-radius:3px;padding:13px;font-size:14px}
+.big-brothers-form input:focus,.big-brothers-form select:focus,.big-brothers-form textarea:focus{outline:2px solid #e51f2a;outline-offset:1px}
+.mode-switch button{border-radius:3px}
+.mode-switch button.selected{background:#fff0f0;border-color:#e51f2a}
+.coverage-note{background:#faf1ef;border-radius:2px}
+.racing-section{padding-top:12px;padding-bottom:36px}
+.account-section{padding-top:36px}
+.account-section>.section-title{max-width:680px}
+.account-grid{display:grid;grid-template-columns:.9fr 1.05fr 1.05fr;gap:12px}
+.account-card{min-width:0;border:1px solid #e7e3e1;border-radius:3px;padding:22px;background:#fff}
+.account-card p{font-size:12px;line-height:1.65;color:#6c6663}
+.customer-uid{display:none}
+.reminder-disclaimer{padding-top:8px;border-top:1px solid #eee9e6}
+.big-brothers-bottom{background:#171717;color:#fff;text-align:left;padding:68px max(28px,calc((100vw - 1184px)/2))}
+.big-brothers-bottom .big-brothers-eyebrow{color:#ff6870}
+.big-brothers-bottom h2{font-size:clamp(42px,5vw,68px)}
+.big-brothers-bottom>p:not(.big-brothers-eyebrow){margin:0 0 24px;color:#d3cecb}
+.big-brothers-footer{max-width:1240px;padding:24px 28px;color:#777}
+.big-brothers-footer .big-brothers-mark{color:#fff}
+.big-brothers-footer>a:not(.big-brothers-brand){font-weight:600}
+.big-brothers-notice{border-radius:3px!important}
+@media(max-width:900px){
+ .big-brothers-hero{padding:42px 22px 48px;grid-template-columns:1fr 1fr;gap:25px}
+ .big-brothers-hero h1{font-size:clamp(46px,7vw,66px)}
+ .big-brothers-hero-media{aspect-ratio:1/1.12}
+ .big-brothers-hero-media video{min-height:300px}
+ .big-brothers-services{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .account-grid{grid-template-columns:1fr 1fr}
+ .loyalty-card{grid-column:1/-1}
+}
+@media(max-width:650px){
+ .big-brothers-status{font-size:10px;padding:8px 16px}
+ .big-brothers-nav{min-height:72px;padding:13px 16px;gap:12px}
+ .big-brothers-brand{font-size:15px;gap:9px}
+ .big-brothers-mark{width:37px;height:37px;font-size:18px}
+ .big-brothers-nav nav{gap:15px;overflow-x:auto;white-space:nowrap;padding:8px 0 2px}
+ .big-brothers-nav nav a:nth-child(3){display:none}
+ .big-brothers-cta{padding:11px 12px;min-height:42px;font-size:10px}
+ .big-brothers-hero{display:flex;flex-direction:column;align-items:stretch;padding:38px 16px 22px;gap:26px}
+ .big-brothers-hero h1{font-size:clamp(48px,14vw,68px)}
+ .big-brothers-hero-copy>p:not(.big-brothers-eyebrow){font-size:15px;line-height:1.65}
+ .big-brothers-actions{display:grid;grid-template-columns:1fr;gap:9px;margin-top:22px}
+ .big-brothers-button{width:100%;padding:14px 15px}
+ .hero-reassurance{font-size:11px!important;margin-top:13px}
+ .big-brothers-hero-media{aspect-ratio:1.15}
+ .big-brothers-hero-media video{min-height:0;height:100%;aspect-ratio:1.15;object-fit:cover}
+ .hero-media-caption{padding:38px 15px 15px}
+ .hero-media-caption strong{font-size:22px}
+ .hero-media-arrow{width:36px;height:36px}
+ .big-brothers-section{padding:42px 16px}
+ #services{padding-top:46px;padding-bottom:48px}
+ .big-brothers-section h2{font-size:clamp(34px,10vw,44px)}
+ .big-brothers-services{grid-template-columns:1fr;gap:9px}
+ .service-card,.service-empty{min-height:0;padding:20px}
+ .service-card h3{margin-top:12px}
+ .service-card-bottom{margin-top:15px}
+ .location-cards{grid-template-columns:1fr}
+ .location-cards article,.location-cards article:nth-child(2){padding:21px}
+ .location-weather-section{padding-top:18px;padding-bottom:8px}
+ .bb-weather-card{align-items:flex-start;flex-wrap:wrap;gap:15px;padding:18px}
+ .bb-weather-main{flex-basis:100%}
+ .bb-weather-reading strong{font-size:32px}
+ .bb-weather-metrics{gap:26px;flex:1}
+ .bb-weather-refresh{align-self:center}
+ .bb-location-guide{padding-top:36px}
+ .bb-location-videos{grid-template-columns:1fr;gap:11px}
+ .bb-location-video video{aspect-ratio:16/9}
+ .bb-location-video>div{padding:14px 15px}
+ .bb-offline-media{align-items:stretch;flex-direction:column;padding:16px;gap:12px}
+ .bb-offline-media .big-brothers-button{width:100%}
+ .request-section{display:flex;flex-direction:column;gap:22px;padding-top:48px;padding-bottom:52px}
+ .request-section .section-title{margin-bottom:0}
+ .request-panel{width:100%}
+ .request-tabs button{font-size:11px}
+ .big-brothers-form{padding:18px 15px}
+ .form-grid{grid-template-columns:1fr;gap:13px}
+ .full-field{grid-column:auto}
+ .form-grid>label,.big-brothers-form>label{width:100%}
+ .form-grid input,.form-grid select,.form-grid textarea{min-height:46px}
+ .big-brothers-form .submit-button{min-height:49px}
+ .racing-section{padding-top:8px;padding-bottom:24px}
+ .account-section{padding-top:28px}
+ .account-grid{grid-template-columns:1fr}
+ .loyalty-card{grid-column:auto}
+ .account-card{padding:19px}
+ .big-brothers-bottom{padding:48px 18px;text-align:left}
+ .big-brothers-bottom h2{font-size:clamp(40px,12vw,54px)}
+ .big-brothers-footer{padding:22px 16px;gap:13px}
+ .big-brothers-footer .big-brothers-brand{width:100%}
+ .big-brothers-footer>span{order:2}
+}
