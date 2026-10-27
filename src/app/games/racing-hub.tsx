@@ -38,7 +38,7 @@ export default function RacingHub({ embedded = false }: RacingHubProps) {
   const steeringStartAngle = useRef<number | null>(null);
   const [businessName, setBusinessName] = useState("Big Brothers Car Wash");
   const [toast, setToast] = useState<{ message: string; kind: "info" | "success" | "error" } | null>(null);
-  const showVulaToast = useCallback((message: string, kind: "info" | "success" | "error" = "info") => setToast({ message, kind }), []);
+  const showBigBrothersToast = useCallback((message: string, kind: "info" | "success" | "error" = "info") => setToast({ message, kind }), []);
   const controlsRef = useRef({ accelerate: false, brake: false, boost: false, steer: 0 });
   phaseRef.current = phase;
 
@@ -82,7 +82,7 @@ export default function RacingHub({ embedded = false }: RacingHubProps) {
     const next = signalRef.current === signal ? null : signal;
     signalRef.current = next;
     setActiveSignal(next);
-    if (next) showVulaToast((next === "left" ? "Left" : "Right") + " indicator on.", "info");
+    if (next) showBigBrothersToast((next === "left" ? "Left" : "Right") + " indicator on.", "info");
   }
 
   function startRace() {
@@ -92,7 +92,7 @@ export default function RacingHub({ embedded = false }: RacingHubProps) {
     setCountdownValue(3);
     phaseRef.current = "countdown";
     setPhase("countdown");
-    showVulaToast("Get ready — your 500 m warm-up starts in 3.", "info");
+    showBigBrothersToast("Get ready — your 500 m warm-up starts in 3.", "info");
   }
   useEffect(() => {
     if (phase !== "countdown") return;
@@ -101,7 +101,7 @@ export default function RacingHub({ embedded = false }: RacingHubProps) {
         setCountdownValue(0);
         phaseRef.current = "running";
         setPhase("running");
-        showVulaToast("Go! Steer around the road markers and use NOS when you need a burst.", "success");
+        showBigBrothersToast("Go! Steer around the road markers and use NOS when you need a burst.", "success");
       } else {
         setCountdownValue(value => value - 1);
       }
@@ -119,7 +119,7 @@ export default function RacingHub({ embedded = false }: RacingHubProps) {
   function restartRace() {
     raceRef.current = newRace(); setElapsed(0); setDistance(0); setSpeed(105); setHits(0); stopSteering(); signalRef.current = null; setActiveSignal(null); controlsRef.current.accelerate = false; controlsRef.current.brake = false; controlsRef.current.boost = false;
     setCountdownValue(3); phaseRef.current = "countdown"; setPhase("countdown");
-    showVulaToast("Race reset. Get ready to try again.", "info");
+    showBigBrothersToast("Race reset. Get ready to try again.", "info");
   }
 
   useEffect(() => {
@@ -169,9 +169,9 @@ export default function RacingHub({ embedded = false }: RacingHubProps) {
           steeringStartAngle.current = null; setWheelRotation(0); setBoostActive(false); signalRef.current = null; setActiveSignal(null);
           setElapsed(0); setDistance(0); setSpeed(105); setHits(value => value + 1); setCountdownValue(3);
           phaseRef.current = "countdown"; setPhase("countdown");
-          showVulaToast("Marker hit — restarting from the beginning. Steer a little earlier next time.", "error");
+          showBigBrothersToast("Marker hit — restarting from the beginning. Steer a little earlier next time.", "error");
         }
-        if (race.distance >= finishDistance) { race.distance = finishDistance; showVulaToast("Warm-up complete — nice driving!", "success"); controlsRef.current.steer = 0; controlsRef.current.accelerate = false; controlsRef.current.brake = false; controlsRef.current.boost = false; setBoostActive(false); steeringStartAngle.current = null; setWheelRotation(0); phaseRef.current = "finished"; setPhase("finished"); }
+        if (race.distance >= finishDistance) { race.distance = finishDistance; showBigBrothersToast("Warm-up complete — nice driving!", "success"); controlsRef.current.steer = 0; controlsRef.current.accelerate = false; controlsRef.current.brake = false; controlsRef.current.boost = false; setBoostActive(false); steeringStartAngle.current = null; setWheelRotation(0); phaseRef.current = "finished"; setPhase("finished"); }
         setElapsed(race.elapsed); setDistance(race.distance); setSpeed(race.speed);
       }
       context.clearRect(0, 0, width, height); context.fillStyle = "#8aa96e"; context.fillRect(0, 0, width, height); context.fillStyle = "#76965e";
@@ -225,13 +225,13 @@ export default function RacingHub({ embedded = false }: RacingHubProps) {
     return () => { window.removeEventListener("keydown", keyDown); window.removeEventListener("keyup", keyUp); window.removeEventListener("blur", releaseInputs); controlsRef.current.steer = 0; controlsRef.current.accelerate = false; controlsRef.current.brake = false; controlsRef.current.boost = false; };
   }, [pauseRace, embedded, expanded]);
 
-  if (embedded && !expanded) return <div className="race-inline-promo"><div><p className="big-brothers-eyebrow">VULA RACING · QUICK BREAK</p><h2>Got a minute? Take a lap.</h2><p>A quick 500 m drive. Find your rhythm and get back to your wash booking whenever you&apos;re ready.</p></div><button type="button" className="big-brothers-button primary" onClick={() => setExpanded(true)}>Play now ↗</button></div>;
+  if (embedded && !expanded) return <div className="race-inline-promo"><div><p className="big-brothers-eyebrow">BIG BROTHERS RACING · QUICK BREAK</p><h2>Got a minute? Take a lap.</h2><p>A quick 500 m drive. Find your rhythm and get back to your wash booking whenever you&apos;re ready.</p></div><button type="button" className="big-brothers-button primary" onClick={() => setExpanded(true)}>Play now ↗</button></div>;
   return <div className={"vula race-hub" + (embedded ? " race-hub-embedded" : "")}>
     {toast && <div role="status" aria-live="polite" style={{ position: "fixed", zIndex: 1000, top: "max(12px, env(safe-area-inset-top))", left: "50%", transform: "translateX(-50%)", width: "min(92vw, 460px)", padding: "12px 16px", borderRadius: 12, color: "#fff", background: toast.kind === "error" ? "#8f2929" : toast.kind === "success" ? "#245c36" : "#26352d", boxShadow: "0 8px 28px rgba(0,0,0,.25)", fontSize: 14, fontWeight: 600, textAlign: "center", pointerEvents: "none" }}>{toast.message}</div>}
     {!embedded && <><div className="big-brothers-status"><span className="status-dot online" />Big Brothers Racing · 2D warm-up · local test only</div>
-    <header className="big-brothers-nav"><Link href="/" className="big-brothers-brand"><span className="big-brothers-mark">V</span><span>{businessName}<small>Racing warm-up</small></span></Link><nav><Link href="/#request">Book a wash</Link><Link href="/#my-wash">My Wash</Link></nav></header>
-    <section className="big-brothers-section warmup-intro"><p className="big-brothers-eyebrow">VULA RACING · MECHANICS TEST</p><h1>Take the warm-up lap.</h1><p>A simple top-down 2D driving test. Steer freely, hit NOS for a burst of speed, and finish 500 m. We can tune these mechanics before bringing them into the in-account racing experience.</p><p className="warmup-boundary">This prototype does not use accounts, credits, upgrades, bookings, loyalty or receipts. Your controls and race run only in this open page.</p></section></>}
-    {embedded && <div className="race-inline-heading"><div><p className="big-brothers-eyebrow">VULA RACING · 500 M</p><h2>Take the warm-up lap.</h2><p>Steer freely and use NOS. Finish the run, then get back to your car wash.</p></div><button type="button" className="big-brothers-button secondary" onClick={() => { if (phaseRef.current === "running") pauseRace(); setExpanded(false); }}>Close game ×</button></div>}
+    <header className="big-brothers-nav"><Link href="/" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Racing warm-up</small></span></Link><nav><Link href="/#request">Book a wash</Link><Link href="/#my-wash">My Wash</Link></nav></header>
+    <section className="big-brothers-section warmup-intro"><p className="big-brothers-eyebrow">BIG BROTHERS RACING · MECHANICS TEST</p><h1>Take the warm-up lap.</h1><p>A simple top-down 2D driving test. Steer freely, hit NOS for a burst of speed, and finish 500 m. We can tune these mechanics before bringing them into the in-account racing experience.</p><p className="warmup-boundary">This prototype does not use accounts, credits, upgrades, bookings, loyalty or receipts. Your controls and race run only in this open page.</p></section></>}
+    {embedded && <div className="race-inline-heading"><div><p className="big-brothers-eyebrow">BIG BROTHERS RACING · 500 M</p><h2>Take the warm-up lap.</h2><p>Steer freely and use NOS. Finish the run, then get back to your car wash.</p></div><button type="button" className="big-brothers-button secondary" onClick={() => { if (phaseRef.current === "running") pauseRace(); setExpanded(false); }}>Close game ×</button></div>}
     <section className="big-brothers-section warmup-game">
       <div className="warmup-hud" aria-live="polite"><div><span>Distance</span><strong>{Math.round(distance)} <small>/ {finishDistance} m</small></strong></div><div><span>Speed</span><strong>{Math.round(speed)} <small>km/h</small></strong></div><div><span>Time</span><strong>{elapsed.toFixed(1)} <small>s</small></strong></div><div><span>Markers hit</span><strong>{hits}</strong></div></div>
       <div className="warmup-canvas-wrap"><canvas ref={canvasRef} aria-label="Top-down 2D road racing warm-up. Drag the virtual steering wheel on mobile or hold the left and right keys on desktop." role="img" />
@@ -240,6 +240,6 @@ export default function RacingHub({ embedded = false }: RacingHubProps) {
       <div className="warmup-controls"><div className="warmup-steering"><button ref={wheelRef} type="button" className="warmup-wheel" aria-label="Virtual steering wheel. Drag around the wheel to steer." aria-describedby="steering-help" disabled={phase !== "running"} style={{ transform: `rotate(${wheelRotation}deg)` }} onPointerDown={startSteering} onPointerMove={steerWheel} onPointerUp={stopSteering} onPointerCancel={stopSteering} onLostPointerCapture={stopSteering}><span className="wheel-ring"><span className="wheel-spoke vertical"/><span className="wheel-spoke horizontal"/><span className="wheel-hub"/></span><span className="wheel-caption">STEER</span></button><span id="steering-help" className="steering-caption">Drag the wheel left or right</span><div className="warmup-signals" aria-label="Turn indicators"><button type="button" aria-label="Toggle left indicator" disabled={phase !== "running"} aria-pressed={activeSignal === "left"} className={activeSignal === "left" ? "signal-active" : ""} onClick={() => toggleSignal("left")}>← Signal</button><button type="button" aria-label="Toggle right indicator" disabled={phase !== "running"} aria-pressed={activeSignal === "right"} className={activeSignal === "right" ? "signal-active" : ""} onClick={() => toggleSignal("right")}>Signal →</button></div></div><div className="warmup-driving"><button type="button" aria-label="Accelerate" disabled={phase !== "running"} onPointerDown={event => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); controlsRef.current.accelerate = true; }} onPointerUp={() => { controlsRef.current.accelerate = false; }} onPointerLeave={() => { controlsRef.current.accelerate = false; }} onPointerCancel={() => { controlsRef.current.accelerate = false; }}>Accelerate ↑</button><button type="button" aria-label="Brake" disabled={phase !== "running"} onPointerDown={event => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); controlsRef.current.brake = true; }} onPointerUp={() => { controlsRef.current.brake = false; }} onPointerLeave={() => { controlsRef.current.brake = false; }} onPointerCancel={() => { controlsRef.current.brake = false; }}>Brake ↓</button><button type="button" className="nos-button" aria-label="NOS boost" disabled={phase !== "running"} aria-pressed={boostActive} onPointerDown={event => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); controlsRef.current.boost = true; setBoostActive(true); }} onPointerUp={() => { controlsRef.current.boost = false; setBoostActive(false); }} onPointerLeave={() => { controlsRef.current.boost = false; setBoostActive(false); }} onPointerCancel={() => { controlsRef.current.boost = false; setBoostActive(false); }}>NOS ⚡</button></div><div className="warmup-actions">{phase === "ready" ? <button type="button" className="big-brothers-button primary" onClick={startRace}>Start race ↗</button> : phase === "countdown" ? <button type="button" className="big-brothers-button primary" disabled>Starting {countdownValue || 1}…</button> : phase === "running" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Pause race Ⅱ</button> : phase === "paused" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Resume race ▶</button> : <button type="button" className="big-brothers-button primary" onClick={startRace}>Run again ↗</button>}<button type="button" className="big-brothers-button secondary" onClick={restartRace}>Restart race ↻</button></div></div>
       <p className="warmup-help">Steer: drag the wheel on phones, or hold ← / → or A / D on desktop · Accelerate: ↑ / W · Brake: ↓ / S · NOS: hold the boost button or Shift · Indicators: ← Signal / Signal → · Pause: P / Esc.</p>
     </section>
-    {!embedded && <footer className="big-brothers-footer"><Link href="/" className="big-brothers-brand"><span className="big-brothers-mark">V</span><span>{businessName}<small>Wash. Care. Go.</small></span></Link><Link href="/#request">Book a wash</Link><Link href="/#my-wash">My Wash</Link></footer>}
+    {!embedded && <footer className="big-brothers-footer"><Link href="/" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></Link><Link href="/#request">Book a wash</Link><Link href="/#my-wash">My Wash</Link></footer>}
   </div>;
 }
