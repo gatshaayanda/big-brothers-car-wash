@@ -30,7 +30,6 @@ export default function Home() {
   const [serviceId, setServiceId] = useState("");
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
-  const [timePickerOpen, setTimePickerOpen] = useState(false);
   const [tab, setTab] = useState<"book" | "queue" | "fleet">("queue");
   const [repeatPrefill, setRepeatPrefill] = useState<{customerName?:string;phone?:string;vehicleType?:string;vehicleRegistration?:string}|null>(null);
   const [connectionError, setConnectionError] = useState("");
@@ -242,7 +241,7 @@ export default function Home() {
       {tab==="book"&&<><div className="mode-switch"><button type="button" className={mode==="site"?"selected":""} onClick={()=>setMode("site")}>At the wash</button><button type="button" className={mode==="mobile"?"selected":""} onClick={()=>setMode("mobile")}>Mobile service</button></div>{mode==="mobile"&&<p className="coverage-note">{mobileCoverage.length?"Coverage will be checked against: "+mobileCoverage.join(", "):"Mobile coverage is not yet published. This is a request for review, not a confirmed mobile booking."}</p>}</>}
       {tab==="fleet"&&<label>Business / fleet name<input name="businessName" required maxLength={160} placeholder="Business name"/></label>}
       <div className="form-grid"><label>Your name<input name="customerName" required maxLength={120} autoComplete="name" placeholder="Full name"/></label><label>WhatsApp number<input name="phone" inputMode="tel" required maxLength={40} autoComplete="tel" placeholder="+267 …"/></label><p className="field-hint full-field">Staff can use this number to send your completed-wash receipt and secure account link on WhatsApp. This form does not send an automatic message.</p><label>Vehicle type<input name="vehicleType" required maxLength={80} placeholder="Sedan, SUV, bakkie…"/></label><label>Registration (optional)<input name="vehicleRegistration" maxLength={30} placeholder="Vehicle registration"/></label>
-      {tab==="book"&&<><label>Service<select value={serviceId} onChange={e=>setServiceId(e.target.value)}><option value="">General car wash request</option>{activeServices.map(s=><option key={s.id} value={s.id}>{s.name}{typeof s.price==="number"?" · "+money(s.price):""}</option>)}</select></label><label className="full-field">Preferred date and time<input type="hidden" name="scheduledFor" value={bookingDate && bookingTime ? `${bookingDate}T${bookingTime}` : ""}/><button type="button" className={"time-picker-trigger " + (bookingDate && bookingTime ? "has-selection" : "")} onClick={()=>setTimePickerOpen(true)} aria-haspopup="dialog" aria-expanded={timePickerOpen}>{bookingDate && bookingTime ? new Date(`${bookingDate}T${bookingTime}`).toLocaleString("en-BW",{weekday:"short",day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}) : "Choose a date and time"} <span aria-hidden="true">↗</span></button></label><label>Area / address<input name="address" maxLength={500} required={mode==="mobile"} placeholder={mode==="mobile"?"Area, street or landmark":"Optional site note"}/></label><label>Payment preference<select name="paymentMethod" defaultValue="pay-on-site"><option value="pay-on-site">Pay at the wash / on completion</option><option value="online-payment-request">Request online payment instructions</option></select></label></>}
+      {tab==="book"&&<><label>Service<select value={serviceId} onChange={e=>setServiceId(e.target.value)}><option value="">General car wash request</option>{activeServices.map(s=><option key={s.id} value={s.id}>{s.name}{typeof s.price==="number"?" · "+money(s.price):""}</option>)}</select></label><label>Preferred date<input type="date" name="preferredDate" min={new Date().toISOString().slice(0,10)} value={bookingDate} onChange={e=>setBookingDate(e.target.value)} required/></label><label>Preferred time<input type="time" name="preferredTime" min="08:00" max="17:00" step={1800} value={bookingTime} onChange={e=>setBookingTime(e.target.value)} required/></label><input type="hidden" name="scheduledFor" value={bookingDate && bookingTime ? `${bookingDate}T${bookingTime}` : ""}/><label>Area / address<input name="address" maxLength={500} required={mode==="mobile"} placeholder={mode==="mobile"?"Area, street or landmark":"Optional site note"}/></label><label>Payment preference<select name="paymentMethod" defaultValue="pay-on-site"><option value="pay-on-site">Pay at the wash / on completion</option><option value="online-payment-request">Request online payment instructions</option></select></label></>}
       {tab==="queue"&&<label>Service<select value={serviceId} onChange={e=>setServiceId(e.target.value)}><option value="">General walk-in service</option>{activeServices.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>}
       {tab==="fleet"&&<><label>Number of vehicles<input name="vehicleCount" type="number" min="1" max="10000" defaultValue="2" required/></label><label>Email (optional)<input name="email" type="email" maxLength={254} placeholder="you@company.com"/></label><label>Service needs<input name="fleetNeeds" maxLength={200} placeholder="e.g. regular cleaning"/></label><label>Preferred schedule<input name="preferredSchedule" maxLength={200} placeholder="Days / frequency"/></label><label>Preferred location<input name="preferredLocation" maxLength={200} defaultValue={locationName}/></label></>}
       <label className="full-field">Notes (optional)<textarea name="notes" maxLength={1000} rows={3} placeholder="Anything the team should know?"/></label></div>{connectionError && <p className="big-brothers-notice pending">The live service list is unavailable. You can still send a general walk-in request.</p>}<button className="big-brothers-button primary submit-button" disabled={busy}>{busy?"Sending…":tab==="book"?"Send booking request":tab==="queue"?"Join the queue":"Send fleet enquiry"} ↗</button>{notice&&<p role="status" className={"big-brothers-notice "+notice.kind}>{notice.text}</p>}</form></div></section>
@@ -275,28 +274,6 @@ export default function Home() {
         {chatOpen ? "Close help" : "Need a hand?"}
       </button>
     </aside>
-    {timePickerOpen && (
-      <div className="time-picker-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setTimePickerOpen(false); }}>
-        <section className="time-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="time-picker-title">
-          <button type="button" className="time-picker-close" aria-label="Close date and time picker" onClick={() => setTimePickerOpen(false)}>×</button>
-          <p className="big-brothers-eyebrow">BOOK A WASH</p>
-          <h2 id="time-picker-title">Choose a time.</h2>
-          <p className="time-picker-intro">Pick your preferred date and time. The team will confirm the booking request.</p>
-          <label>Date<input type="date" min={new Date().toISOString().slice(0, 10)} value={bookingDate} onChange={event => setBookingDate(event.target.value)} /></label>
-          <div className="time-picker-label">Preferred time</div>
-          <div className="time-picker-slots">
-            {Array.from({ length: 19 }, (_, i) => {
-              const minutes = 8 * 60 + i * 30;
-              const hour = Math.floor(minutes / 60);
-              const minute = minutes % 60;
-              const value = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-              return <button type="button" key={value} className={bookingTime === value ? "selected" : ""} onClick={() => setBookingTime(value)}>{new Date(2000, 0, 1, hour, minute).toLocaleTimeString("en-BW", { hour: "numeric", minute: "2-digit" })}</button>;
-            })}
-          </div>
-          <p className="time-picker-footnote">Preferred slots are requests, not confirmed availability.</p>
-          <button type="button" className="big-brothers-button primary time-picker-confirm" disabled={!bookingDate || !bookingTime || new Date(`${bookingDate}T${bookingTime}`).getTime() <= Date.now()} onClick={() => setTimePickerOpen(false)}>Use this time ↗</button>
-        </section>
-      </div>
-    )}
+
   </main>;
 }
