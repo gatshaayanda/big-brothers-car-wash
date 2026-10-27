@@ -88,7 +88,8 @@ export default function LocationWeather() {
           if (existing) await cache.delete(url);
           const response = await fetch(url, { cache: "no-store" });
           const contentType = (response.headers.get("content-type") || "").toLowerCase();
-          const contentLength = Number(response.headers.get("content-length") || 0);
+          const contentLengthHeader = response.headers.get("content-length");
+          const contentLength = contentLengthHeader === null ? null : Number(contentLengthHeader);
           if (!response.ok || !contentType.includes("video") || contentLength === 0) {
             throw new Error("A location video could not be downloaded completely. Check your connection and available device storage, then try again.");
           }
