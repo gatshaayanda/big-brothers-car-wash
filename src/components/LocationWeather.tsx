@@ -29,7 +29,7 @@ function condition(code: number) {
   return "Cloudy conditions";
 }
 
-export default function LocationWeather() {
+export default function LocationWeather({ showLocationGuide = true }: { showLocationGuide?: boolean }) {
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
   const [weatherState, setWeatherState] = useState<"loading" | "ready" | "stale" | "error">("loading");
   const [saving, setSaving] = useState(false);
@@ -80,8 +80,8 @@ export default function LocationWeather() {
 
   useEffect(() => {
     void loadWeather();
-    void checkOfflineMedia();
-  }, [loadWeather, checkOfflineMedia]);
+    if (showLocationGuide) void checkOfflineMedia();
+  }, [loadWeather, checkOfflineMedia, showLocationGuide]);
 
   async function saveForOffline() {
     if (saving) return;
@@ -144,7 +144,7 @@ export default function LocationWeather() {
         <button type="button" className="bb-weather-refresh" onClick={() => void loadWeather()} disabled={weatherState === "loading"}>{weatherState === "loading" ? "Loading…" : "Refresh weather"}</button>
       </div>
     </section>
-    <section className="big-brothers-section bb-location-guide" id="find-us">
+    {showLocationGuide && <section className="big-brothers-section bb-location-guide" id="find-us">
       <div className="section-title">
         <p className="big-brothers-eyebrow">YOUR FIRST VISIT</p>
         <h2>Find us. Pull in. Get clean.</h2>
@@ -161,6 +161,6 @@ export default function LocationWeather() {
         <button type="button" className="big-brothers-button secondary" disabled={saving || offlineReady} onClick={() => void saveForOffline()}>{saving ? "Saving videos…" : offlineReady ? "Saved on this device" : "Save videos for offline"}</button>
       </div>
       {mediaStatus && <p className="big-brothers-notice pending" role="status" aria-live="polite">{mediaStatus}</p>}
-    </section>
+    </section>}
   </>;
 }
