@@ -202,6 +202,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Location videos are cached only after the customer explicitly saves them.
+  // Support HTTP byte ranges when playing a complete cached MP4 offline.
+  if (/^\/videos\/(?:Bays|Left|Right)\.mp4$/i.test(url.pathname)) {
+    event.respondWith(locationVideoResponse(request));
+    return;
+  }
+
   if (url.pathname.startsWith("/game-assets/racing-kit/")) {
     event.respondWith(cacheFirst(request, GAME_CACHE));
     return;
@@ -254,4 +261,38 @@ async function trimCache(cacheName, maxEntries) {
   const keys = await cache.keys();
   if (keys.length <= maxEntries) return;
   await Promise.all(keys.slice(0, keys.length - maxEntries).map((request) => cache.delete(request)));
+}
+
+
+async function locationVideoResponse(request) {
+  const cache = await caches.open(MEDIA_CACHE);
+  const cached = await cache.match(request.url);
+  if (!cached) {
+    try { return await fetch(request); }
+    catch { return Response.error(); }
+  }
+
+  const range = request.headers.get("range");
+  if (!range) return cached;
+
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+  if (!match) return new Response(null, { status: 416, headers: { "Content-Range": "bytes */" + (Number(cached.headers.get("content-length")) || 0) } });
+
+  const body = await cached.arrayBuffer();
+  const size = body.byteLength;
+  let start = match[1] ? Number(match[1]) : Math.max(0, size - Number(match[2] || 0));
+  let end = match[2] && match[1] ? Math.min(Number(match[2]), size - 1) : size - 1;
+  if (!match[1] && match[2]) end = size - 1;
+  if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start >= size || end < start) {
+    return new Response(null, { status: 416, headers: { "Content-Range": "bytes */" + size } });
+  }
+  const headers = new Headers({
+    "Content-Type": cached.headers.get("content-type") || "video/mp4",
+    "Content-Length": String(end - start + 1),
+    "Content-Range": "bytes " + start + "-" + end + "/" + size,
+    "Accept-Ranges": "bytes",
+  });
+  const lastModified = cached.headers.get("last-modified");
+  if (lastModified) headers.set("Last-Modified", lastModified);
+  return new Response(body.slice(start, end + 1), { status: 206, statusText: "Partial Content", headers });
 }
