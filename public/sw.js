@@ -48,8 +48,8 @@ self.addEventListener("notificationclick", (event) => {
   }));
 });
 
-const CACHE_VERSION = "big-brothers-shell-v4";
-const GAME_CACHE = "big-brothers-game-v4";
+const CACHE_VERSION = "big-brothers-shell-v1";
+const GAME_CACHE = "big-brothers-game-v1";
 const MEDIA_CACHE = "big-brothers-media-v1";
 const SHELL_CACHE = CACHE_VERSION;
 const STATIC_LIMIT = 160;
@@ -119,7 +119,7 @@ async function precacheRacingAssets() {
 
     const modelUrl = new URL(selected.path, self.location.origin);
     if (modelUrl.origin !== self.location.origin || !modelUrl.pathname.startsWith("/game-assets/racing-kit/")) {
-      console.warn("Skipped a racing asset outside Vula's local asset directory.");
+      console.warn("Skipped a racing asset outside Big Brothers local asset directory.");
       return;
     }
     const modelResponse = await fetchAndCache(modelUrl.href, GAME_CACHE);
@@ -159,16 +159,12 @@ self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     const obsolete = new Set([
-      "big-brothers-shell-v1", "big-brothers-shell-v2", "big-brothers-shell-v3",
-      "big-brothers-game-v1", "big-brothers-game-v2", "big-brothers-game-v3",
-      "theplug-shell-v1", "theplug-media-v1",
-      "iteration13-shell-v1", "iteration13-media-v1"
+      "big-brothers-shell-v2", "big-brothers-shell-v3", "big-brothers-shell-v4",
+      "big-brothers-game-v2", "big-brothers-game-v3", "big-brothers-game-v4",
+      "big-brothers-media-v0"
     ]);
     await Promise.all(keys.filter((key) =>
-      (obsolete.has(key) || key.startsWith("theplug-shell-") || key.startsWith("theplug-media-")
-        || (key.startsWith("iteration13-shell-") && key !== SHELL_CACHE)
-        || (key.startsWith("iteration13-media-") && key !== MEDIA_CACHE))
-      && key !== SHELL_CACHE && key !== GAME_CACHE && key !== MEDIA_CACHE
+      obsolete.has(key) && key !== SHELL_CACHE && key !== GAME_CACHE && key !== MEDIA_CACHE
     ).map((key) => caches.delete(key)));
     await self.clients.claim();
   })());
