@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     const existingData = existing.data() || {};
     const expiry = Date.parse(String(existingData.expiresAt || ""));
     if (existing.exists && existingData.revoked !== true && existingData.token && Number.isFinite(expiry) && expiry > Date.now()) {
+      await receiptRef.set({ amount, paymentStatus: String(paymentStatus), updatedAt: new Date().toISOString() }, { merge: true });
       const url = new URL("/receipt/" + String(existingData.token), request.url).toString();
       return NextResponse.json({ url, receiptRef: String(existingData.receiptRef || ""), reused: true }, { headers: { "Cache-Control": "no-store" } });
     }

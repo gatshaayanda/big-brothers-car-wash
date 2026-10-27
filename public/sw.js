@@ -48,9 +48,9 @@ self.addEventListener("notificationclick", (event) => {
   }));
 });
 
-const CACHE_VERSION = "big-brothers-shell-v1";
-const GAME_CACHE = "big-brothers-game-v1";
-const MEDIA_CACHE = "big-brothers-media-v1";
+const CACHE_VERSION = "big-brothers-shell-v2";
+const GAME_CACHE = "big-brothers-game-v2";
+const MEDIA_CACHE = "big-brothers-media-v2";
 const SHELL_CACHE = CACHE_VERSION;
 const STATIC_LIMIT = 160;
 const PUBLIC_PAGE_LIMIT = 16;
@@ -159,9 +159,9 @@ self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     const obsolete = new Set([
-      "big-brothers-shell-v2", "big-brothers-shell-v3", "big-brothers-shell-v4",
-      "big-brothers-game-v2", "big-brothers-game-v3", "big-brothers-game-v4",
-      "big-brothers-media-v0"
+      "big-brothers-shell-v1", "big-brothers-shell-v3", "big-brothers-shell-v4",
+      "big-brothers-game-v1", "big-brothers-game-v3", "big-brothers-game-v4",
+      "big-brothers-media-v0", "big-brothers-media-v1"
     ]);
     await Promise.all(keys.filter((key) =>
       obsolete.has(key) && key !== SHELL_CACHE && key !== GAME_CACHE && key !== MEDIA_CACHE
