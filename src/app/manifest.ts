@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
     name: "Big Brothers Car Wash",
-    short_name: "Vula's",
+    short_name: "Big Bros",
     description: "Book a car wash, request mobile service, and follow requests online or offline.",
     start_url: "/",
     scope: "/",
