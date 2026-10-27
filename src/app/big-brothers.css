@@ -57,3 +57,12 @@
 .bb-offline-media p{margin:5px 0 0;color:#666;font-size:12px;line-height:1.6}
 .bb-offline-media .big-brothers-button{flex-shrink:0}
 @media(max-width:760px){.bb-weather-card{grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:16px}.bb-weather-metrics{grid-column:1/-1;order:3}.bb-weather-refresh{grid-column:2;grid-row:1;align-self:start}.bb-location-videos{grid-template-columns:1fr;gap:13px}.bb-location-video video{aspect-ratio:16/9}.bb-offline-media{align-items:stretch;flex-direction:column}.bb-offline-media .big-brothers-button{width:100%}}
+
+
+.customer-account-greeting{margin:0 0 7px;color:#a71920;font-size:15px;font-weight:700}
+.customer-account-summary{width:min(1120px,calc(100% - 36px));margin:0 auto 28px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.customer-account-summary article{display:grid;gap:7px;padding:18px 20px;border:1px solid #e8e8e8;border-radius:12px;background:#fff}
+.customer-account-summary article span{color:#555;font-size:12px;font-weight:700}
+.customer-account-summary article strong{font:600 32px "Space Grotesk",Arial,sans-serif;letter-spacing:-.06em}
+.customer-account-summary article small{color:#6b6b6b;font-size:11px;line-height:1.5}
+@media(max-width:680px){.customer-account-summary{grid-template-columns:1fr;gap:9px}.customer-account-summary article{grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:14px 16px}.customer-account-summary article span,.customer-account-summary article small{grid-column:1}.customer-account-summary article strong{grid-column:2;grid-row:1/3}.customer-account-summary article small{max-width:230px}}
