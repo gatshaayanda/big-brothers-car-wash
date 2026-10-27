@@ -26,6 +26,11 @@ export function subscribeCustomerBookings(uid: string, cb: (items: VulaBooking[]
     cb(snap.docs.map(item => ({ id: item.id, ...item.data() }) as VulaBooking).sort((a,b) => b.createdAt.localeCompare(a.createdAt)));
   }, fail);
 }
+export function subscribeCustomerQueue(uid: string, cb: (items: VulaQueueEntry[]) => void, fail: (e: Error) => void): Unsubscribe {
+  return onSnapshot(query(collection(db, "queueEntries"), where("customerId", "==", uid)), { includeMetadataChanges: true }, snap => {
+    cb(snap.docs.map(item => ({ id: item.id, ...item.data() }) as VulaQueueEntry).sort((a,b) => b.createdAt.localeCompare(a.createdAt)));
+  }, fail);
+}
 export function subscribeLoyaltyAccount(uid: string, cb: (value: Record<string, unknown> | null) => void, fail: (e: Error) => void): Unsubscribe {
   return onSnapshot(doc(db, "loyaltyAccounts", uid), snap => cb(snap.exists() ? snap.data() : null), fail);
 }
