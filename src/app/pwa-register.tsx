@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -19,25 +18,18 @@ export default function PwaRegister() {
 
   useEffect(() => {
     setOffline(!navigator.onLine);
-
     const online = () => {
       setOffline(false);
       setReconnecting(true);
       window.setTimeout(() => setReconnecting(false), 1200);
     };
-    const offlineNow = () => {
-      setReconnecting(false);
-      setOffline(true);
-    };
-    // Match Africhiko: intercept Chrome's automatic banner and retain the
-    // real browser event for the branded Install button to invoke.
+    const offlineNow = () => { setReconnecting(false); setOffline(true); };
     const installPrompt = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
       setInstallCardDismissed(false);
       setInstallable(true);
     };
-
     window.addEventListener("online", online);
     window.addEventListener("offline", offlineNow);
     window.addEventListener("beforeinstallprompt", installPrompt);
@@ -47,7 +39,7 @@ export default function PwaRegister() {
       if (registration?.waiting && navigator.serviceWorker.controller) setUpdateReady(registration.waiting);
     };
     const register = async () => {
-      if (!( "serviceWorker" in navigator)) return;
+      if (!("serviceWorker" in navigator)) return;
       try {
         registration = await navigator.serviceWorker.register("/sw.js");
         inspect();
@@ -58,13 +50,13 @@ export default function PwaRegister() {
         });
         await registration.update();
         inspect();
-      } catch {}
+      } catch {
+        // Keep the online app usable when service-worker registration is unavailable.
+      }
     };
-
     void register();
     const controllerChange = () => { if (reloadForUpdate.current) window.location.reload(); };
     navigator.serviceWorker?.addEventListener("controllerchange", controllerChange);
-
     return () => {
       window.removeEventListener("online", online);
       window.removeEventListener("offline", offlineNow);
@@ -76,7 +68,6 @@ export default function PwaRegister() {
   async function install() {
     const prompt = deferredPrompt;
     if (!prompt) return;
-    // Invoke the genuine browser prompt directly from the customer's click.
     await prompt.prompt();
     await prompt.userChoice;
     setDeferredPrompt(null);
@@ -86,9 +77,7 @@ export default function PwaRegister() {
   function applyUpdate() {
     reloadForUpdate.current = true;
     if (updateReady) {
-      try {
-        updateReady.postMessage({ type: "SKIP_WAITING" });
-      } catch {}
+      try { updateReady.postMessage({ type: "SKIP_WAITING" }); } catch {}
     }
     window.setTimeout(() => {
       if (reloadForUpdate.current) window.location.reload();
@@ -96,12 +85,12 @@ export default function PwaRegister() {
   }
 
   return <>
-    {offline && <div className="offlineBanner" role="status" aria-live="polite"><span aria-hidden="true">⚡</span> Offline · The service demo saves orders and admin edits locally on this device. Firebase-backed routes need a connection.</div>}
-    {!offline && reconnecting && <div className="offlineBanner reconnectingBanner" role="status" aria-live="polite"><span aria-hidden="true">↻</span> Reconnected · Big Brothers Car Wash can reach the network again. Saved requests remain on this device until synced.</div>}
-    {installable && !installCardDismissed && <aside className="big-brothers-install-card" aria-label="Install Big Brothers Car Wash">
-      <div className="big-brothers-install-brand"><span className="big-brothers-install-mark" aria-hidden="true">V</span><span><strong>VULA'S CAR WASH</strong><small>WASH · CARE · GO</small></span></div>
-      <button className="big-brothers-install-close" type="button" aria-label="Dismiss install prompt" onClick={() => setInstallCardDismissed(true)}>×</button>
-      <button className="big-brothers-install-action" type="button" onClick={() => void install()}>Install Big Brothers Car Wash <span aria-hidden="true">↗</span></button>
+    {offline && <div className="offlineBanner" role="status" aria-live="polite">Offline · New requests stay on this device until the server confirms they have synced.</div>}
+    {!offline && reconnecting && <div className="offlineBanner reconnectingBanner" role="status" aria-live="polite">Reconnected · Big Brothers Car Wash can reach the network again. Pending requests still need server confirmation.</div>}
+    {installable && !installCardDismissed && <aside className="af-install-card" aria-label="Install Big Brothers Car Wash">
+      <div className="af-install-brand"><span className="af-install-mark" aria-hidden="true">BB<span>✦</span></span><span><strong>BIG BROTHERS</strong><small>CAR WASH · G-WEST</small></span></div>
+      <button className="af-install-close" type="button" aria-label="Dismiss install prompt" onClick={() => setInstallCardDismissed(true)}>×</button>
+      <button className="af-install-action" type="button" onClick={() => void install()}>Install Big Brothers <span aria-hidden="true">↗</span></button>
     </aside>}
     {updateReady && <div className="pwaUpdate" role="status" aria-live="polite"><div><strong>Big Brothers Car Wash update is ready</strong><span>Refresh when you are ready.</span></div><button type="button" className="button buttonPrimary" onClick={applyUpdate}>Refresh</button></div>}
   </>;
