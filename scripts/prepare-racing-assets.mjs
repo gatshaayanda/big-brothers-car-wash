@@ -51,7 +51,13 @@ function safeRelative(name) {
   return normalized;
 }
 
-if (!fs.existsSync(archive)) throw new Error("Missing Kenney Racing Kit archive: " + archive);
+if (!fs.existsSync(archive)) {
+  fs.mkdirSync(path.dirname(archive), { recursive: true });
+  const sourceUrl = "https://raw.githubusercontent.com/gatshaayanda/vulas-car-wash/3115dc8fbc199c3d8fdbfd9dd15fb7ea005d992c/game-assets/source-zips/kenney_racing-kit.zip";
+  const response = await fetch(sourceUrl);
+  if (!response.ok) throw new Error("Could not retrieve the pinned CC0 Kenney Racing Kit archive (HTTP " + response.status + ").");
+  fs.writeFileSync(archive, Buffer.from(await response.arrayBuffer()));
+}
 const zip = fs.readFileSync(archive);
 const entries = entriesOf(zip).filter((entry) => !entry.name.endsWith("/"));
 const models = entries.filter((entry) => /\.(glb|gltf)$/i.test(entry.name));
