@@ -275,7 +275,7 @@ async function locationVideoResponse(request) {
   const range = request.headers.get("range");
   if (!range) return cached;
 
-  const match = /^bytes=(\\d*)-(\\d*)$/.exec(range.trim());
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
   if (!match) return new Response(null, { status: 416, headers: { "Content-Range": "bytes */" + (Number(cached.headers.get("content-length")) || 0) } });
 
   const body = await cached.arrayBuffer();
