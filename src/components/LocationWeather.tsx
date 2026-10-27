@@ -61,7 +61,7 @@ export default function LocationWeather() {
           return;
         }
       } catch { /* Ignore invalid or unavailable local weather cache. */ }
-      setWeatherState("error");
+      setWeatherState(current => current === "ready" || current === "stale" ? "stale" : "error");
     }
   }, []);
 
@@ -136,7 +136,7 @@ export default function LocationWeather() {
       <div className="bb-weather-card">
         <div className="bb-weather-main">
           <p className="big-brothers-eyebrow">GABORONE · CURRENT CONDITIONS</p>
-          {weather ? <div className="bb-weather-reading"><strong>{Math.round(weather.temperature_2m)}°C</strong><span>{condition(weather.weather_code)}</span></div> : <p role="status" className="bb-weather-state">{weatherState === "loading" ? "Checking current conditions…" : "Current weather is unavailable right now."}</p>}
+          {weather ? <div className="bb-weather-reading"><strong>{Math.round(weather.temperature_2m)}°C</strong><span>{condition(weather.weather_code)}</span></div> : <p role="status" className="bb-weather-state">{weatherState === "loading" ? "Checking current conditions…" : "Live weather is unavailable right now. You can still browse services and request a wash; the team confirms availability."}</p>}
           {weather && <p className="bb-weather-feels">Feels like {Math.round(weather.apparent_temperature)}°C</p>}
           <small>{weatherState === "stale" ? "Last available reading " + updated + " local time · saved on this device · may be out of date · " : updated ? "Updated " + updated + " local time · " : ""}Weather by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> (CC BY 4.0)</small>
         </div>
