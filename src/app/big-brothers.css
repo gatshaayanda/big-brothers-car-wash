@@ -241,3 +241,57 @@
 .hero-video-fallback strong{font-family:"Space Grotesk",Arial,sans-serif;font-size:clamp(22px,3vw,32px);letter-spacing:-.04em;max-width:15ch}
 .hero-video-fallback span,.hero-video-fallback small{max-width:38ch;font-size:13px;line-height:1.6;color:#ffffffc7}
 .hero-video-fallback a{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:3px;background:#ed1c24;color:#fff;font-weight:800}
+
+
+/* Owner-approved home hierarchy: queue intake, customer account, then racing. */
+.queue-intro h2{font-family:"Space Grotesk",Arial,sans-serif;font-size:clamp(40px,6vw,66px);font-weight:600;letter-spacing:-.07em;line-height:.98;margin:0 0 20px}
+.queue-intro h2 em{font-style:normal;color:var(--brand-red)}
+.queue-intro>p:not(.big-brothers-eyebrow){max-width:38ch;font-size:15px;line-height:1.75;color:#555}
+.queue-intro .queue-trust-note{margin-top:22px;padding:12px 14px;border-left:3px solid var(--brand-red);background:#fff5f5;font-size:12px!important;color:#5e3030!important}
+.request-section{padding-top:36px;padding-bottom:64px}
+.request-section .section-title{position:static;align-self:start}
+.request-panel{box-shadow:0 12px 36px #1818180a}
+.request-tabs{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px}
+.request-tabs strong{font-size:11px;letter-spacing:.12em}
+.request-tabs button{border:1px solid var(--line);background:white;border-radius:6px;padding:10px 12px;font-size:12px;font-weight:700}
+.field-hint{margin:0;font-size:11px;line-height:1.55;color:#68615f}
+.account-section{padding-top:54px;padding-bottom:58px}
+.account-section-heading{max-width:800px}
+.account-section-heading h2{max-width:16ch}
+.account-portal-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.account-portal-actions .big-brothers-button{min-height:46px}
+.account-grid-home{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;margin-top:24px}
+.account-grid-home .account-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.account-grid-home .account-card>p{margin:0}
+.account-grid-home .loyalty-points{margin-top:8px}
+.account-grid-home .account-card .text-link{margin-top:auto;padding-top:10px}
+.account-card-heading p{font-size:11px;line-height:1.55;color:var(--muted);margin:8px 0 0}
+.account-weather{width:100%;margin-top:4px}
+.account-weather .location-weather-section{max-width:none;margin:0;padding:0}
+.account-weather .bb-weather-card{max-width:none;margin:0;display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;padding:0;border:0;border-radius:0;background:transparent}
+.account-weather .bb-weather-main{min-width:0;flex:1 1 130px}
+.account-weather .bb-weather-main .big-brothers-eyebrow{margin-bottom:8px;font-size:9px}
+.account-weather .bb-weather-reading strong{font-size:32px}
+.account-weather .bb-weather-reading span,.account-weather .bb-weather-feels,.account-weather .bb-weather-main>small{font-size:10px}
+.account-weather .bb-weather-metrics{display:flex;gap:12px;flex-wrap:wrap}
+.account-weather .bb-weather-metrics span{min-width:62px}
+.account-weather .bb-weather-refresh{min-height:38px;padding:8px 10px;font-size:11px}
+.account-reminders-card h3{font-family:"Space Grotesk",Arial,sans-serif;font-size:24px;letter-spacing:-.04em;margin:8px 0 0}
+.account-reminders-card .big-brothers-button{width:100%;margin-top:4px}
+.account-reminders-card .reminder-toggle{margin:8px 0}
+.account-reminders-card .reminder-disclaimer{font-size:10px;line-height:1.5}
+.racing-section{border-top:1px solid var(--line);padding-top:48px}
+.racing-section-intro{max-width:780px;margin:0 0 24px}
+.racing-section-intro h2{font-family:"Space Grotesk",Arial,sans-serif;font-size:clamp(34px,4.5vw,54px);letter-spacing:-.065em;line-height:1;margin:0 0 14px}
+.racing-section-intro>p:not(.big-brothers-eyebrow){max-width:60ch;font-size:13px;line-height:1.7;color:var(--muted)}
+.racing-reward-note{padding:12px 14px;border-left:3px solid var(--brand-red);background:#fff5f5;color:#5e3030!important}
+.bb-help-widget{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;align-items:flex-end;flex-direction:column;gap:10px}
+.bb-help-launcher{display:flex;align-items:center;gap:9px;min-height:48px;padding:10px 15px;border:0;border-radius:999px;background:#181818;color:#fff;font-size:12px;font-weight:800;box-shadow:0 8px 26px #0002}
+.bb-help-launcher span{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--brand-red);font-size:16px}
+.bb-help-panel{width:min(340px,calc(100vw - 32px));padding:20px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 18px 50px #0002}
+.bb-help-panel .big-brothers-eyebrow{margin-bottom:8px}
+.bb-help-panel h2{font:600 24px "Space Grotesk",Arial,sans-serif;letter-spacing:-.04em;margin:0 0 8px}
+.bb-help-panel>p:not(.big-brothers-eyebrow){font-size:11px;line-height:1.6;color:var(--muted);margin:0 0 12px}
+.bb-help-panel>a{display:block;padding:12px 0;border-top:1px solid var(--line);font-size:12px;font-weight:700}
+@media(max-width:900px){.account-grid-home{grid-template-columns:1fr 1fr}.account-grid-home .account-reminders-card{grid-column:1/-1}}
+@media(max-width:650px){.request-section{padding-top:28px;padding-bottom:38px}.queue-intro h2{font-size:clamp(40px,12vw,54px)}.account-section{padding-top:38px;padding-bottom:40px}.account-grid-home{grid-template-columns:1fr}.account-grid-home .account-reminders-card{grid-column:auto}.account-portal-actions{display:grid;grid-template-columns:1fr}.account-portal-actions .big-brothers-button{width:100%}.racing-section{padding-top:34px}.bb-help-widget{right:12px;bottom:12px}.bb-help-launcher{min-height:44px}.bb-help-panel{max-height:70vh;overflow:auto}}
