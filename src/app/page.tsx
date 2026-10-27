@@ -57,6 +57,8 @@ export default function Home() {
     return () => { stopAuth(); stops.forEach(stop => stop()); window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
   }, []);
 
+  useEffect(() => { if (new URLSearchParams(window.location.search).get("journey") === "book") setTab("book"); }, []);
+
   useEffect(() => {
     if (!userId) { setMyBookings([]); setMyQueueEntries([]); setLoyaltyPoints(0); setRemindersEnabled(false); return; }
     const fail = () => {};
