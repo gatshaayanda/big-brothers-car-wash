@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { GoogleAuthProvider, linkWithPopup, onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import { GoogleAuthProvider, linkWithPopup, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, hasFirebaseWebConfig } from "@/lib/firebase/client";
 import { enableVulaPushNotifications } from "@/lib/firebase/big-brothers-notifications";
@@ -24,6 +24,9 @@ export default function Home() {
   const [linkNotice, setLinkNotice] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);
   const [busy, setBusy] = useState(false);
+  const [queueHandoff, setQueueHandoff] = useState<"synced" | "offline" | null>(null);
+  const [queueReference, setQueueReference] = useState("");
+  const [handoffError, setHandoffError] = useState("");
   const [mode, setMode] = useState<"site" | "mobile">("site");
   const [serviceId, setServiceId] = useState("");
   const [bookingDate, setBookingDate] = useState("");
@@ -119,12 +122,14 @@ export default function Home() {
     try {
       const user = await ensureUser(); if (!user) return;
       const remaining: typeof drafts = [];
+      const queueDraft = drafts.find(draft => draft.collection === "queueEntries");
       for (const draft of drafts) {
         try { const id = draft.id || crypto.randomUUID(); await saveCustomerRecord(user.uid, String(draft.data.customerName || draft.data.contactName || ""), String(draft.data.phone || ""), String(draft.data.email || user.email || "")); await setDoc(doc(db, draft.collection, id), { ...draft.data, customerId: user.uid, updatedAt: stamp() }); }
         catch { remaining.push(draft); }
       }
       localStorage.setItem(pendingKey, JSON.stringify(remaining));
       setNotice(remaining.length ? { kind: "pending", text: remaining.length + " saved request(s) still have not synced." } : { kind: "success", text: "Saved requests have synced to Big Brothers' system. Bookings still need staff confirmation." });
+      if (!remaining.length && queueDraft) { setQueueReference(queueDraft.id || ""); setQueueHandoff("synced"); }
     } catch { setNotice({ kind: "pending", text: "Sync is not complete. Your saved requests remain on this device." }); }
   }
 
@@ -161,20 +166,62 @@ export default function Home() {
       }
       if (!navigator.onLine || !hasFirebaseWebConfig) {
         const saved = JSON.parse(localStorage.getItem(pendingKey) || "[]") as Array<unknown>;
-        saved.push({ id: crypto.randomUUID(), collection: collectionName, data }); localStorage.setItem(pendingKey, JSON.stringify(saved)); formElement.reset();
+        const localId = crypto.randomUUID(); saved.push({ id: localId, collection: collectionName, data }); localStorage.setItem(pendingKey, JSON.stringify(saved)); formElement.reset();
+        if (tab === "queue") { setQueueReference(localId); setQueueHandoff("offline"); }
         setNotice({ kind: "pending", text: "Saved on this device only. It is not visible to the team or a confirmed booking until it syncs." }); return;
       }
       const user = await ensureUser();
       if (!user) throw new Error("Online service is not configured yet. Your request has not been sent.");
       await saveCustomerRecord(user.uid, customerName, phone, String(form.get("email") || user.email || ""));
-      const writePromise = setDoc(doc(collection(db, collectionName)), { ...data, customerId: user.uid });
+      const requestRef = doc(collection(db, collectionName));
+      const writePromise = setDoc(requestRef, { ...data, customerId: user.uid });
       setNotice({ kind: "pending", text: "Sending securely to Big Brothers' system…" });
       await writePromise;
       formElement.reset();
+      if (tab === "queue") { setQueueReference(requestRef.id); setQueueHandoff("synced"); }
       setNotice({ kind: "success", text: "Request received by Big Brothers' system. Staff still need to confirm the booking, mobile coverage or fleet arrangement." });
     } catch (error) {
       setNotice({ kind: "error", text: error instanceof Error ? error.message : "We couldn't send this request. Please try again when connected." });
     } finally { setBusy(false); }
+  }
+
+  async function finishQueueHandoff() {
+    setHandoffError("");
+    try {
+      await signOut(auth);
+      setQueueHandoff(null);
+      setQueueReference("");
+      setNotice(null);
+      setLinkNotice("");
+      setReminderNotice("");
+      setPushNotice("");
+      setMyBookings([]);
+      setMyQueueEntries([]);
+      setLoyaltyPoints(0);
+      setRemindersEnabled(false);
+      setIsGuest(true);
+    } catch {
+      setHandoffError("This session could not be cleared. Keep this screen open and try again before handing the phone to another customer.");
+    }
+  }
+
+  function discardOfflineQueueDraft() {
+    try {
+      const drafts = JSON.parse(localStorage.getItem(pendingKey) || "[]") as Array<{id?: string}>;
+      localStorage.setItem(pendingKey, JSON.stringify(drafts.filter(draft => draft.id !== queueReference)));
+      void finishQueueHandoff();
+    } catch {
+      setHandoffError("The saved draft could not be removed. Do not hand this phone to another customer until the session is cleared.");
+    }
+  }
+
+  if (queueHandoff) {
+    return <main className="vula queue-handoff-page"><section className="queue-handoff-card" aria-labelledby="queue-handoff-title">
+      <span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH · WALK-IN</span>
+      <h1 id="queue-handoff-title">{queueHandoff === "synced" ? "You're in the queue." : "Your request is saved here."}</h1>
+      {queueHandoff === "synced" ? <><p>Your entry has reached the shared queue. Staff can now see it and update its status.</p><p className="queue-reference">Queue reference <strong>{queueReference || "Recorded"}</strong></p><p>Want to check this job and your future bookings later? Secure this guest session with Google before you finish.</p><button type="button" className="big-brothers-button secondary" onClick={() => void linkGuestAccount()}>Keep my history with Google</button>{linkNotice && <p role="status" className="big-brothers-notice pending">{linkNotice}</p>}<button type="button" className="big-brothers-button primary" onClick={() => void finishQueueHandoff()}>Finish & hand back phone</button></> : <><p>This request is not yet in the shared queue. Keep this screen open until the phone reconnects and the server confirms the upload.</p><p className="queue-reference">Saved draft <strong>{queueReference || "On this device"}</strong></p><button type="button" className="big-brothers-button secondary" disabled={!online} onClick={() => void syncOfflineRequests()}>Retry sync</button><button type="button" className="big-brothers-button secondary" onClick={discardOfflineQueueDraft}>Discard saved request & clear session</button></>}
+      {handoffError && <p role="alert" className="big-brothers-notice error">{handoffError}</p>}
+    </section></main>;
   }
 
   return <main className="vula">
