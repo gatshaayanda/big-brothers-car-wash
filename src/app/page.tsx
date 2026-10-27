@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, hasFirebaseWebConfig } from "@/lib/firebase/client";
@@ -246,7 +247,7 @@ export default function Home() {
       {tab==="fleet"&&<><label>Number of vehicles<input name="vehicleCount" type="number" min="1" max="10000" defaultValue="2" required/></label><label>Email (optional)<input name="email" type="email" maxLength={254} placeholder="you@company.com"/></label><label>Service needs<input name="fleetNeeds" maxLength={200} placeholder="e.g. regular cleaning"/></label><label>Preferred schedule<input name="preferredSchedule" maxLength={200} placeholder="Days / frequency"/></label><label>Preferred location<input name="preferredLocation" maxLength={200} defaultValue={locationName}/></label></>}
       <label className="full-field">Notes (optional)<textarea name="notes" maxLength={1000} rows={3} placeholder="Anything the team should know?"/></label></div>{connectionError && <p className="big-brothers-notice pending">The live service list is unavailable. You can still send a general walk-in request.</p>}<button className="big-brothers-button primary submit-button" disabled={busy}>{busy?"Sending…":tab==="book"?"Send booking request":tab==="queue"?"Join the queue":"Send fleet enquiry"} ↗</button>{notice&&<p role="status" className={"big-brothers-notice "+notice.kind}>{notice.text}</p>}</form></div></section>
     <section className="big-brothers-section account-section" id="my-account">
-      <div className="section-title account-section-heading"><p className="big-brothers-eyebrow">YOUR CUSTOMER ACCOUNT</p><h2>My Big Brothers Car Wash Account.</h2><p>Your completed-wash receipt and secure account link can be sent to your WhatsApp by staff. Open your account to manage your details, receipts, bookings and reminders.</p><div className="account-portal-actions"><a href="/account" className="big-brothers-button primary">My account & receipts ↗</a><a href="/?journey=book#request" className="big-brothers-button secondary">Book my next wash ↗</a><button type="button" className="big-brothers-button secondary" onClick={shareInvite}>Invite friends & family ↗</button></div>{inviteNotice && <p role="status" className="big-brothers-notice pending">{inviteNotice}</p>}</div>
+      <div className="section-title account-section-heading"><p className="big-brothers-eyebrow">YOUR CUSTOMER ACCOUNT</p><h2>My Big Brothers Car Wash Account.</h2><p>Your completed-wash receipt and secure account link can be sent to your WhatsApp by staff. Open your account to manage your details, receipts, bookings and reminders.</p><div className="account-portal-actions"><a href="/account" className="big-brothers-button primary">My account & receipts ↗</a><Link href="/?journey=book#request" className="big-brothers-button secondary">Book my next wash ↗</Link><button type="button" className="big-brothers-button secondary" onClick={shareInvite}>Invite friends & family ↗</button></div>{inviteNotice && <p role="status" className="big-brothers-notice pending">{inviteNotice}</p>}</div>
       <div className="account-grid account-grid-home">
         <article className="account-card loyalty-card"><span className="service-category">LOYALTY BALANCE</span><strong className="loyalty-points">{loyaltyPoints}</strong><span>points</span><p>Points are maintained by Big Brothers staff. Automatic points and discounts are not active until the business confirms the rules.</p><a className="text-link" href="/account">View my account details ↗</a></article>
         <article className="account-card account-weather-card"><div className="account-card-heading"><span className="service-category">G-WEST WEATHER</span><p>Current conditions are a guide, not a promise about service availability.</p></div><div className="account-weather"><LocationWeather showLocationGuide={false}/></div></article>
@@ -264,7 +265,7 @@ export default function Home() {
           <p>This guide opens real app pages and actions; it is not a live agent chat.</p>
           <a href="#request" onClick={() => setChatOpen(false)}>Join the walk-in queue ↗</a>
           <a href="/account" onClick={() => setChatOpen(false)}>My account &amp; receipts ↗</a>
-          <a href="/?journey=book#request" onClick={() => setChatOpen(false)}>Book another wash ↗</a>
+          <Link href="/?journey=book#request" onClick={() => setChatOpen(false)}>Book another wash ↗</Link>
           <a href="#big-brothers-racing" onClick={() => setChatOpen(false)}>Play Big Brothers Racing ↗</a>
           <a href="#my-account" onClick={() => setChatOpen(false)}>Weather &amp; reminders ↗</a>
         </section>
