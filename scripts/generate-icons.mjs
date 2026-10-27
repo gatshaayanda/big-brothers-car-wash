@@ -3,7 +3,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 
 const output = path.join(process.cwd(), "public");
-const palette = { background: [20, 34, 30, 255], red: [237, 28, 36, 255], white: [245, 246, 241, 255] };
+const palette = { background: [24, 24, 24, 255], red: [237, 28, 36, 255], white: [255, 255, 255, 255] };
 
 function crc32(buffer) {
   let crc = 0xffffffff;
