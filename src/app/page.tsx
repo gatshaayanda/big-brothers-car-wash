@@ -33,6 +33,7 @@ export default function Home() {
   const [bookingTime, setBookingTime] = useState("");
   const [timePickerOpen, setTimePickerOpen] = useState(false);
   const [tab, setTab] = useState<"book" | "queue" | "fleet">("queue");
+  const [repeatPrefill, setRepeatPrefill] = useState<{customerName?:string;phone?:string;vehicleType?:string;vehicleRegistration?:string}|null>(null);
   const [connectionError, setConnectionError] = useState("");
   const [myBookings, setMyBookings] = useState<VulaBooking[]>([]);
   const [myQueueEntries, setMyQueueEntries] = useState<VulaQueueEntry[]>([]);
@@ -45,6 +46,22 @@ export default function Home() {
   const locationName = typeof settings.locationName === "string" && settings.locationName.trim() ? settings.locationName : "G-West";
   const activeServices = useMemo(() => services.filter(s => s.active), [services]);
   const upcomingBookings = myBookings.filter(item => !["completed","cancelled"].includes(item.status) && Number.isFinite(Date.parse(item.scheduledFor)) && Date.parse(item.scheduledFor) >= Date.now() && Date.parse(item.scheduledFor) - Date.now() <= 24 * 60 * 60 * 1000);
+
+  useEffect(() => {
+    try { const raw = sessionStorage.getItem("big-brothers-repeat-wash"); if (raw) { const draft = JSON.parse(raw) as {customerName?:string;phone?:string;vehicleType?:string;vehicleRegistration?:string}; sessionStorage.removeItem("big-brothers-repeat-wash"); setRepeatPrefill(draft); setTab("book"); } } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (tab !== "book" || !repeatPrefill) return;
+    const form = document.querySelector<HTMLFormElement>(".big-brothers-form");
+    if (!form) return;
+    for (const [name, value] of Object.entries({customerName:repeatPrefill.customerName,phone:repeatPrefill.phone,vehicleType:repeatPrefill.vehicleType,vehicleRegistration:repeatPrefill.vehicleRegistration})) {
+      const field = form.elements.namedItem(name);
+      if (field instanceof HTMLInputElement && typeof value === "string" && value) field.value = value;
+    }
+    setNotice({kind:"pending",text:"Your saved details are filled in. Check the vehicle and service, then send your new booking request."});
+    setRepeatPrefill(null);
+  }, [tab, repeatPrefill]);
 
   useEffect(() => {
     setOnline(navigator.onLine);
