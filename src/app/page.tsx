@@ -2,11 +2,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { GoogleAuthProvider, linkWithPopup, onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
+import { onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, hasFirebaseWebConfig } from "@/lib/firebase/client";
 import { enableVulaPushNotifications } from "@/lib/firebase/big-brothers-notifications";
-import { saveReminderPreferences, subscribeCustomerBookings, subscribeCustomerQueue, subscribeLoyaltyAccount, subscribeReminderPreferences, subscribeServices, subscribeSettings, type VulaBooking, type VulaQueueEntry, type VulaService } from "@/lib/firebase/big-brothers-data";
+import { saveReminderPreferences, subscribeLoyaltyAccount, subscribeReminderPreferences, subscribeServices, subscribeSettings, type VulaService } from "@/lib/firebase/big-brothers-data";
 import "./big-brothers.css";
 import RacingWarmup from "./games/racing-warmup";
 import LocationWeather from "@/components/LocationWeather";
@@ -21,8 +21,6 @@ export default function Home() {
   const [settings, setSettings] = useState<Record<string, unknown>>({});
   const [online, setOnline] = useState(true);
   const [userId, setUserId] = useState("");
-  const [isGuest, setIsGuest] = useState(true);
-  const [linkNotice, setLinkNotice] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);
   const [busy, setBusy] = useState(false);
   const [queueHandoff, setQueueHandoff] = useState<"synced" | "offline" | null>(null);
@@ -36,18 +34,16 @@ export default function Home() {
   const [tab, setTab] = useState<"book" | "queue" | "fleet">("queue");
   const [repeatPrefill, setRepeatPrefill] = useState<{customerName?:string;phone?:string;vehicleType?:string;vehicleRegistration?:string}|null>(null);
   const [connectionError, setConnectionError] = useState("");
-  const [heroVideoUnavailable, setHeroVideoUnavailable] = useState(false);
-  const [myBookings, setMyBookings] = useState<VulaBooking[]>([]);
-  const [myQueueEntries, setMyQueueEntries] = useState<VulaQueueEntry[]>([]);
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [reminderNotice, setReminderNotice] = useState("");
   const [pushNotice, setPushNotice] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [inviteNotice, setInviteNotice] = useState("");
   const mobileCoverage = Array.isArray(settings.mobileCoverage) ? settings.mobileCoverage as string[] : [];
   const businessName = typeof settings.businessName === "string" && settings.businessName.trim() ? settings.businessName : "Big Brothers Car Wash";
   const locationName = typeof settings.locationName === "string" && settings.locationName.trim() ? settings.locationName : "G-West";
   const activeServices = useMemo(() => services.filter(s => s.active), [services]);
-  const upcomingBookings = myBookings.filter(item => !["completed","cancelled"].includes(item.status) && Number.isFinite(Date.parse(item.scheduledFor)) && Date.parse(item.scheduledFor) >= Date.now() && Date.parse(item.scheduledFor) - Date.now() <= 24 * 60 * 60 * 1000);
 
   useEffect(() => {
     try { const raw = sessionStorage.getItem("big-brothers-repeat-wash"); if (raw) { const draft = JSON.parse(raw) as {customerName?:string;phone?:string;vehicleType?:string;vehicleRegistration?:string}; sessionStorage.removeItem("big-brothers-repeat-wash"); setRepeatPrefill(draft); setTab("book"); } } catch {}
@@ -69,7 +65,7 @@ export default function Home() {
     setOnline(navigator.onLine);
     const onOnline = () => { setOnline(true); void syncOfflineRequests(); };
     const onOffline = () => { setOnline(false); setNotice({ kind: "pending", text: "Offline: requests can be saved on this device, but the team cannot see them until they sync." }); };
-    const stopAuth = onAuthStateChanged(auth, user => { setUserId(user?.uid ?? ""); setIsGuest(user?.isAnonymous ?? true); });
+    const stopAuth = onAuthStateChanged(auth, user => { setUserId(user?.uid ?? ""); });
     const stops = [subscribeServices(setServices, error => setConnectionError(error.message)), subscribeSettings(value => setSettings(value ?? {}), () => {})];
     window.addEventListener("online", onOnline); window.addEventListener("offline", onOffline);
     if (navigator.onLine) void syncOfflineRequests();
@@ -79,29 +75,14 @@ export default function Home() {
   useEffect(() => { if (new URLSearchParams(window.location.search).get("journey") === "book") setTab("book"); }, []);
 
   useEffect(() => {
-    if (!userId) { setMyBookings([]); setMyQueueEntries([]); setLoyaltyPoints(0); setRemindersEnabled(false); return; }
+    if (!userId) { setLoyaltyPoints(0); setRemindersEnabled(false); return; }
     const fail = () => {};
     const stops = [
-      subscribeCustomerBookings(userId, setMyBookings, fail),
-      subscribeCustomerQueue(userId, setMyQueueEntries, fail),
       subscribeLoyaltyAccount(userId, value => setLoyaltyPoints(Number(value?.pointsBalance ?? 0)), fail),
       subscribeReminderPreferences(userId, value => setRemindersEnabled(Boolean(value?.enabled)), fail),
     ];
     return () => stops.forEach(stop => stop());
   }, [userId]);
-
-  async function linkGuestAccount() {
-    const user = auth.currentUser;
-    if (!user || !user.isAnonymous) { setLinkNotice("This session is already linked to a sign-in method."); return; }
-    try {
-      await linkWithPopup(user, new GoogleAuthProvider());
-      setIsGuest(false);
-      setLinkNotice("Your guest session is now linked to Google. Your Big Brothers customer ID and loyalty balance stay with this account on supported devices.");
-    } catch (error) {
-      const code = typeof error === "object" && error !== null && "code" in error ? String((error as {code?:unknown}).code) : "";
-      setLinkNotice(code === "auth/credential-already-in-use" ? "That Google account is already linked to another Firebase account. Staff will need to help reconcile existing loyalty records." : error instanceof Error ? error.message : "We could not link this session. Try again while online.");
-    }
-  }
 
   async function saveReminderChoice() {
     if (!userId || !navigator.onLine) { setReminderNotice("Connect to the internet and submit a request first to save this preference."); return; }
@@ -113,6 +94,19 @@ export default function Home() {
     if (!userId || !navigator.onLine) { setPushNotice("Connect and submit an online request first."); return; }
     try { await enableVulaPushNotifications(userId); await saveReminderPreferences(userId, true); setRemindersEnabled(true); setPushNotice("Push reminders are enabled on this device for confirmed bookings."); }
     catch (error) { setPushNotice(error instanceof Error ? error.message : "Push reminders could not be enabled."); }
+  }
+
+  async function shareInvite() {
+    const url = window.location.origin + "/";
+    const message = "Join me at Big Brothers Car Wash to queue for a wash and play Big Brothers Racing: " + url;
+    try {
+      if (navigator.share) { await navigator.share({ title: "Big Brothers Car Wash", text: message, url }); setInviteNotice("Invite ready to share."); return; }
+      if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(message); setInviteNotice("Invite link copied. Send it to friends or family."); return; }
+      setInviteNotice("Share this link with friends and family: " + url);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+      setInviteNotice("Sharing is unavailable here. Copy this link to invite friends: " + url);
+    }
   }
 
   async function saveCustomerRecord(uid: string, name: string, phone: string, email: string) {
@@ -166,7 +160,7 @@ export default function Home() {
     if (!customerName || !phone || !vehicleType) { setNotice({ kind: "error", text: "Enter your name, phone number and vehicle type." }); return; }
     setBusy(true); setNotice(null);
     try {
-      const common: Record<string, unknown> = { customerName, phone, vehicleType, vehicleRegistration, notes, createdAt: now, updatedAt: now };
+      const common: Record<string, unknown> = { customerName, phone, whatsappNumber: phone, vehicleType, vehicleRegistration, notes, createdAt: now, updatedAt: now };
       let collectionName: string; let data: Record<string, unknown>;
       if (tab === "book") {
         const address = String(form.get("address") ?? "").trim(); const scheduledInput = String(form.get("scheduledFor") ?? "");
@@ -200,7 +194,7 @@ export default function Home() {
       await writePromise;
       formElement.reset();
       if (tab === "queue") { setQueueReference(requestRef.id); setQueueHandoff("synced"); }
-      setNotice({ kind: "success", text: "Request received by Big Brothers' system. Staff still need to confirm the booking, mobile coverage or fleet arrangement." });
+      setNotice({ kind: "success", text: tab === "queue" ? "You’re on the shared queue. Staff can send your secure receipt and account link to this WhatsApp number after the wash is completed." : "Your booking request reached Big Brothers. The team will check availability and confirm it with you." });
     } catch (error) {
       setNotice({ kind: "error", text: error instanceof Error ? error.message : "We couldn't send this request. Please try again when connected." });
     } finally { setBusy(false); }
@@ -213,14 +207,10 @@ export default function Home() {
       setQueueHandoff(null);
       setQueueReference("");
       setNotice(null);
-      setLinkNotice("");
       setReminderNotice("");
       setPushNotice("");
-      setMyBookings([]);
-      setMyQueueEntries([]);
       setLoyaltyPoints(0);
       setRemindersEnabled(false);
-      setIsGuest(true);
     } catch {
       setHandoffError("This session could not be cleared. Keep this screen open and try again before handing the phone to another customer.");
     }
@@ -240,31 +230,26 @@ export default function Home() {
     return <main className="vula queue-handoff-page"><section className="queue-handoff-card" aria-labelledby="queue-handoff-title">
       <span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH · WALK-IN</span>
       <h1 id="queue-handoff-title">{queueHandoff === "synced" ? "You're in the queue." : "Your request is saved here."}</h1>
-      {queueHandoff === "synced" ? <><p>Your entry has reached the shared queue. Staff can now see it and update its status.</p><p className="queue-reference">Queue reference <strong>{queueReference || "Recorded"}</strong></p><p>Want to check this job and your future bookings later? Secure this guest session with Google before you finish.</p><button type="button" className="big-brothers-button secondary" onClick={() => void linkGuestAccount()}>Keep my history with Google</button>{linkNotice && <p role="status" className="big-brothers-notice pending">{linkNotice}</p>}<button type="button" className="big-brothers-button primary" onClick={() => void finishQueueHandoff()}>Finish & hand back phone</button></> : <><p>This request is not yet in the shared queue. Keep this screen open until the phone reconnects and the server confirms the upload.</p><p className="queue-reference">Saved draft <strong>{queueReference || "On this device"}</strong></p><button type="button" className="big-brothers-button secondary" disabled={!online} onClick={() => void syncOfflineRequests()}>Retry sync</button><button type="button" className="big-brothers-button secondary" onClick={discardOfflineQueueDraft}>Discard saved request & clear session</button></>}
+      {queueHandoff === "synced" ? <><p>Your entry has reached the shared queue. Staff can now see it and update its status.</p><p className="queue-reference">Queue reference <strong>{queueReference || "Recorded"}</strong></p><p>After the wash is completed, staff can send your receipt and account link to this WhatsApp number. You do not need to create an account on the wash attendant’s phone.</p><a className="big-brothers-button primary" href="/games">Race while you wait ↗</a><button type="button" className="big-brothers-button primary" onClick={() => void finishQueueHandoff()}>Finish & hand back phone</button></> : <><p>This request is not yet in the shared queue. Keep this screen open until the phone reconnects and the server confirms the upload.</p><p className="queue-reference">Saved draft <strong>{queueReference || "On this device"}</strong></p><button type="button" className="big-brothers-button secondary" disabled={!online} onClick={() => void syncOfflineRequests()}>Retry sync</button><button type="button" className="big-brothers-button secondary" onClick={discardOfflineQueueDraft}>Discard saved request & clear session</button></>}
       {handoffError && <p role="alert" className="big-brothers-notice error">{handoffError}</p>}
     </section></main>;
   }
 
   return <main className="vula">
     <div className="big-brothers-status"><span className={"status-dot " + (online ? "online" : "")}/>{online ? "Online · Ready to help" : "Offline · Requests stay on this device until confirmed"}</div>
-    <header className="big-brothers-nav"><a href="#top" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></a><nav><a href="#services">Services</a><a href="#locations">Locations</a><a href="/account">My account</a></nav><a className="big-brothers-cta" href="#request" onClick={() => setTab("queue")}>Join the queue ↗</a></header>
-    <section className="big-brothers-hero" id="top"><div className="big-brothers-hero-copy"><p className="big-brothers-eyebrow">G-WEST · GABORONE</p><h1>Pull in.<br/><em>Leave shining.</em></h1><p>Quick, careful car care from the Big Brothers team. Join the walk-in queue, see the wash options, and know what to expect before you arrive.</p><div className="big-brothers-actions"><a className="big-brothers-button primary" href="#request" onClick={() => setTab("queue")}>Join the queue <span aria-hidden="true">↗</span></a><a className="big-brothers-button secondary" href="#services">Explore wash services</a></div><p className="hero-reassurance">Walk-ins welcome · No account needed to send a request</p></div><div className="big-brothers-hero-media"><video src="/videos/Bays.mp4" autoPlay loop muted playsInline preload="auto" aria-label="Video preview of the Big Brothers wash bays" onError={() => setHeroVideoUnavailable(true)} onCanPlay={() => setHeroVideoUnavailable(false)}/>{heroVideoUnavailable && <div className="hero-video-fallback" role="status"><strong>Wash-bay preview unavailable</strong><span>{online ? "The video could not load right now." : "You are offline, but you can still prepare a wash request."}</span><a href="#request" onClick={() => setTab("queue")}>Join the walk-in queue ↗</a><small>{online ? "Keep browsing the wash options while the preview is unavailable." : "Offline drafts stay on this device until the server confirms they have synced."}</small></div>}<span className="hero-media-caption"><span><small>TAKE A LOOK AROUND</small><strong>See the wash bays</strong></span><span className="hero-media-arrow" aria-hidden="true">↗</span></span></div></section>
-    <section className="big-brothers-section" id="services"><div className="section-title"><p className="big-brothers-eyebrow">THE SERVICE MENU</p><h2>Pick your clean.</h2><p>Services and prices are managed by the team. No unverified prices are assumed.</p></div><div className="big-brothers-services">{activeServices.length ? activeServices.map(service=><article className="service-card" key={service.id}><span className="service-category">{service.category || "CAR WASH"}</span><h3>{service.name}</h3><p>{service.description || "Ask the team about this service."}</p><div className="service-card-bottom"><strong>{money(service.price)}</strong><button type="button" onClick={()=>{setServiceId(service.id);setTab("book");document.getElementById("request")?.scrollIntoView({behavior:"smooth"});}}>Choose service ↗</button></div></article>) : <article className="service-empty"><span>01 / SERVICES</span><h3>Service menu is being set up.</h3><p>Send a general request now. Staff can publish confirmed services and prices from the dashboard.</p><a href="#request" className="text-link">Request a wash ↗</a></article>}</div>{connectionError&&<p className="big-brothers-notice pending">Live catalogue unavailable: {connectionError}</p>}</section>
-    <section className="big-brothers-section locations-section" id="locations"><div className="section-title"><p className="big-brothers-eyebrow">COME THROUGH OR CALL US OUT</p><h2>Two ways to get clean.</h2></div><div className="location-cards"><article><span className="location-number">01</span><h3>Visit the wash</h3><p>{locationName} · {String(settings.address || "Exact address to be confirmed")} · {String(settings.openingHours || "Opening hours to be confirmed")}</p><a href="#request" onClick={()=>setMode("site")} className="text-link">Book at the wash ↗</a></article><article><span className="location-number">02</span><h3>Mobile service</h3><p>{mobileCoverage.length ? "Published coverage: " + mobileCoverage.join(", ") : "Coverage has not yet been confirmed. Send an area request and staff will check before accepting."}</p><a href="#request" onClick={()=>setMode("mobile")} className="text-link">Check my area ↗</a></article></div></section>
-    <LocationWeather />
-    <section className="big-brothers-section request-section" id="request"><div className="section-title"><p className="big-brothers-eyebrow">START HERE</p><h2>Start with the queue.</h2><p>Join the walk-in queue first. You can request a future booking or fleet care whenever you need it.</p><p className="big-brothers-notice pending">A request is not a confirmed appointment. Staff confirmation is required.</p></div><div className="request-panel"><div className="request-tabs">{(["queue","book","fleet"] as const).map(value=><button type="button" key={value} className={tab===value?"active":""} onClick={()=>setTab(value)}>{value==="book"?"Book a wash":value==="queue"?"Walk-in queue":"Fleet care"}</button>)}</div><form onSubmit={submitRequest} className="big-brothers-form"><div className="form-intro"><strong>{tab==="book"?"Request a booking":tab==="queue"?"Join the walk-in queue":"Fleet and business enquiries"}</strong><span>{tab==="book"?"Staff check and confirm your preferred slot.":tab==="queue"?"Staff manage queue order and wait times.":"Tell us what your vehicles need."}</span></div>
-      {tab==="book"&&<><div className="mode-switch"><button type="button" className={mode==="site"?"selected":""} onClick={()=>setMode("site")}>At the wash</button><button type="button" className={mode==="mobile"?"selected":""} onClick={()=>setMode("mobile")}>Mobile service</button></div>{mode==="mobile"&&<p className="coverage-note">{mobileCoverage.length?"Coverage will be checked against: "+mobileCoverage.join(", "):"Mobile coverage is not yet published. This is a request for review, not a confirmed mobile booking."}</p>}</>}
-      {tab==="fleet"&&<label>Business / fleet name<input name="businessName" required maxLength={160} placeholder="Business name"/></label>}
-      <div className="form-grid"><label>Your name<input name="customerName" required maxLength={120} autoComplete="name" placeholder="Full name"/></label><label>Phone number<input name="phone" required maxLength={40} autoComplete="tel" placeholder="Phone number"/></label><label>Vehicle type<input name="vehicleType" required maxLength={80} placeholder="Sedan, SUV, bakkie…"/></label><label>Registration (optional)<input name="vehicleRegistration" maxLength={30} placeholder="Vehicle registration"/></label>
-      {tab==="book"&&<><label>Service<select value={serviceId} onChange={e=>setServiceId(e.target.value)}><option value="">General car wash request</option>{activeServices.map(s=><option key={s.id} value={s.id}>{s.name}{typeof s.price==="number"?" · "+money(s.price):""}</option>)}</select></label><label className="full-field">Preferred date and time<input type="hidden" name="scheduledFor" value={bookingDate && bookingTime ? `${bookingDate}T${bookingTime}` : ""}/><button type="button" className={"time-picker-trigger " + (bookingDate && bookingTime ? "has-selection" : "")} onClick={()=>setTimePickerOpen(true)} aria-haspopup="dialog" aria-expanded={timePickerOpen}>{bookingDate && bookingTime ? new Date(`${bookingDate}T${bookingTime}`).toLocaleString("en-BW",{weekday:"short",day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}) : "Choose a date and time"} <span aria-hidden="true">↗</span></button></label><label>Area / address<input name="address" maxLength={500} required={mode==="mobile"} placeholder={mode==="mobile"?"Area, street or landmark":"Optional site note"}/></label><label>Payment preference<select name="paymentMethod" defaultValue="pay-on-site"><option value="pay-on-site">Pay at the wash / on completion</option><option value="online-payment-request">Request online payment instructions</option></select></label></>}
-      {tab==="queue"&&<label>Service<select value={serviceId} onChange={e=>setServiceId(e.target.value)}><option value="">General walk-in service</option>{activeServices.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>}
-      {tab==="fleet"&&<><label>Number of vehicles<input name="vehicleCount" type="number" min="1" max="10000" defaultValue="2" required/></label><label>Email (optional)<input name="email" type="email" maxLength={254} placeholder="you@company.com"/></label><label>Service needs<input name="fleetNeeds" maxLength={200} placeholder="e.g. regular cleaning"/></label><label>Preferred schedule<input name="preferredSchedule" maxLength={200} placeholder="Days / frequency"/></label><label>Preferred location<input name="preferredLocation" maxLength={200} defaultValue={locationName}/></label></>}
-      <label className="full-field">Notes (optional)<textarea name="notes" maxLength={1000} rows={3} placeholder="Anything the team should know?"/></label></div><button className="big-brothers-button primary submit-button" disabled={busy}>{busy?"Sending…":tab==="book"?"Send booking request":tab==="queue"?"Join the queue":"Send fleet enquiry"} ↗</button>{notice&&<p role="status" className={"big-brothers-notice "+notice.kind}>{notice.text}</p>}</form></div></section>
-    
-    <section className="big-brothers-section racing-section" id="big-brothers-racing" aria-label="Big Brothers Racing"><RacingWarmup embedded /></section>
-    <section className="big-brothers-section account-section" id="my-wash"><div className="section-title"><p className="big-brothers-eyebrow">YOUR WASH SPACE</p><h2>My requests & loyalty.</h2><p>Booking updates are shared live when online. Points are maintained by staff using the business's confirmed loyalty policy.</p></div><div className="account-grid"><article className="account-card loyalty-card"><span className="service-category">LOYALTY BALANCE</span><strong className="loyalty-points">{loyaltyPoints}</strong><span>points</span><p>Points are not automatically awarded until Big Brothers confirms the earning rules. Keep this guest session on the same device, or show staff this session ID when asking about points.</p><small className="customer-uid">{isGuest?"Guest session ID":"Customer account ID"}: {userId || "Created after your first online request"}</small>{userId&&isGuest&&<button type="button" className="big-brothers-button secondary" onClick={()=>void linkGuestAccount()}>Keep my loyalty with Google</button>}{linkNotice&&<p className="big-brothers-notice pending">{linkNotice}</p>}<label className="reminder-toggle"><input type="checkbox" checked={remindersEnabled} onChange={e=>setRemindersEnabled(e.target.checked)}/> Save in-app booking reminder preference</label><button type="button" className="big-brothers-button secondary" onClick={()=>void saveReminderChoice()} disabled={!userId || !online}>Save preference</button><button type="button" className="big-brothers-button primary" onClick={()=>void enablePush()} disabled={!userId || !online}>Enable push reminders</button><p className="reminder-disclaimer">Push alerts require browser permission and the Firebase Web Push key. Confirmed bookings are checked every five minutes; only upcoming confirmed bookings are sent.</p>{reminderNotice&&<p className="big-brothers-notice pending">{reminderNotice}</p>}{pushNotice&&<p className="big-brothers-notice pending">{pushNotice}</p>}</article><article className="account-card"><span className="service-category">MY BOOKINGS</span>{upcomingBookings.length>0&&<div className="upcoming-reminder"><strong>Upcoming in the next 24 hours</strong>{upcomingBookings.map(item=><p key={item.id}>{item.serviceName} · {new Date(item.scheduledFor).toLocaleString()}</p>)}</div>}{myBookings.length?myBookings.slice(0,5).map(item=><div className="customer-booking" key={item.id}><strong>{item.serviceName}</strong><span>{item.status} · {item.scheduledFor||"Time to be agreed"}</span><small>{item.serviceMode==="mobile"?"Mobile request":"At the wash"} · {item.phone}</small></div>):<p className="account-empty">{userId?"No booking requests are linked to this guest session yet.":"Your requests will appear here after you submit your first online request."}</p>}</article><article className="account-card"><span className="service-category">MY WALK-IN QUEUE</span>{myQueueEntries.length ? myQueueEntries.slice(0,5).map(item=><div className="customer-booking" key={item.id}><strong>{item.serviceName}</strong><span>{item.status} · Joined {item.createdAt ? new Date(item.createdAt).toLocaleString() : "time unavailable"}</span><small>{item.vehicleType}{item.vehicleRegistration ? " · " + item.vehicleRegistration : ""}</small></div>) : <p className="account-empty">{userId ? "No walk-in queue entries are linked to this guest session yet." : "Your queue history will appear here after you join online."}</p>}</article></div></section>
-    <section className="big-brothers-bottom"><p className="big-brothers-eyebrow">READY WHEN YOU ARE</p><h2>Your car called.</h2><p>Let's get it clean. Every booking is confirmed by the team.</p><a href="#request" className="big-brothers-button primary" onClick={() => setTab("queue")}>Join the walk-in queue ↗</a></section>
+    <header className="big-brothers-nav"><a href="#top" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></a><nav><a href="#my-account">My account</a><a href="#big-brothers-racing">Racing</a></nav><a className="big-brothers-cta" href="#request" onClick={() => setTab("queue")}>Join the queue ↗</a></header>
+    <section className="big-brothers-section request-section" id="request"><div className="section-title"><p className="big-brothers-eyebrow">WALK-IN INTAKE</p><h2>{tab === "book" ? "Plan your next wash." : <>Join the<br/><em>walk-in queue.</em></>}</h2><p>{tab === "book" ? "Request a preferred date and time. The team will confirm availability with you." : "Hand the phone to the car owner. We’ll use their WhatsApp number to share their receipt and account link after the wash is completed."}</p><p className="big-brothers-notice pending">No account or payment is required to join the queue.</p></div><div className="request-panel">{tab === "book" && <div className="request-tabs"><strong>FUTURE WASH REQUEST</strong><button type="button" onClick={() => setTab("queue")}>Back to walk-in queue</button></div>}<form onSubmit={submitRequest} className="big-brothers-form"><div className="form-intro"><strong>{tab === "book" ? "Request your next wash" : "Customer details"}</strong><span>{tab === "book" ? "Choose a preferred date and time; the team will confirm availability." : "Your details go to the shared staff queue. We only confirm a queue entry after the server accepts it."}</span></div>
+    <section className="big-brothers-section account-section" id="my-account">
+      <div className="section-title account-section-heading"><p className="big-brothers-eyebrow">YOUR CUSTOMER ACCOUNT</p><h2>My Big Brothers Car Wash Account.</h2><p>Your completed-wash receipt and secure account link can be sent to your WhatsApp by staff. Open your account to manage your details, receipts, bookings and reminders.</p><div className="account-portal-actions"><a href="/account" className="big-brothers-button primary">My account & receipts ↗</a><a href="/?journey=book#request" className="big-brothers-button secondary">Book my next wash ↗</a><button type="button" className="big-brothers-button secondary" onClick={shareInvite}>Invite friends & family ↗</button></div>{inviteNotice && <p role="status" className="big-brothers-notice pending">{inviteNotice}</p>}</div>
+      <div className="account-grid account-grid-home">
+        <article className="account-card loyalty-card"><span className="service-category">LOYALTY BALANCE</span><strong className="loyalty-points">{loyaltyPoints}</strong><span>points</span><p>Points are maintained by Big Brothers staff. Automatic points and discounts are not active until the business confirms the rules.</p><a className="text-link" href="/account">View my account details ↗</a></article>
+        <article className="account-card account-weather-card"><div className="account-card-heading"><span className="service-category">G-WEST WEATHER</span><p>Current conditions are a guide, not a promise about service availability.</p></div><div className="account-weather"><LocationWeather showLocationGuide={false}/></div></article>
+        <article className="account-card account-reminders-card"><span className="service-category">STAY IN THE LOOP</span><h3>Booking reminders</h3><p>Choose an in-app reminder preference or enable push alerts on this device. Push needs browser permission and the configured Firebase Web Push key.</p><label className="reminder-toggle"><input type="checkbox" checked={remindersEnabled} onChange={e=>setRemindersEnabled(e.target.checked)}/> In-app booking reminders</label><button type="button" className="big-brothers-button secondary" onClick={()=>void saveReminderChoice()} disabled={!userId || !online}>Save preference</button><button type="button" className="big-brothers-button primary" onClick={()=>void enablePush()} disabled={!userId || !online}>Enable push reminders</button><p className="reminder-disclaimer">Only upcoming confirmed bookings are eligible for configured push reminders. Permission or a saved preference alone does not confirm delivery.</p>{reminderNotice&&<p className="big-brothers-notice pending">{reminderNotice}</p>}{pushNotice&&<p className="big-brothers-notice pending">{pushNotice}</p>}</article>
+      </div>
+    </section>
+    <section className="big-brothers-section racing-section" id="big-brothers-racing" aria-label="Big Brothers Racing"><div className="racing-section-intro"><p className="big-brothers-eyebrow">WHILE YOUR WASH IS GETTING READY</p><h2>Big Brothers Racing.</h2><p>Take a quick solo race, chase your personal best, and invite family or friends to try the track.</p><p className="racing-reward-note"><strong>High-score discounts are coming soon.</strong> Game scores do not earn or redeem discounts yet.</p></div><RacingWarmup embedded /></section>
     <footer className="big-brothers-footer"><a href="#top" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></a><span>G-West, Gaborone · Wash. Care. Go.</span><a href="/account">My account</a><a href="/games">Racing garage</a><a href="/iphone-install">Install on iPhone</a><a href="/admin">Staff sign in</a></footer>
-    {timePickerOpen && <div className="time-picker-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setTimePickerOpen(false);}}><section className="time-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="time-picker-title"><button type="button" className="time-picker-close" aria-label="Close date and time picker" onClick={()=>setTimePickerOpen(false)}>×</button><p className="big-brothers-eyebrow">BOOK A WASH</p><h2 id="time-picker-title">Choose a time.</h2><p className="time-picker-intro">Pick your preferred date and time. The team will confirm the booking request.</p><label>Date<input type="date" min={new Date().toISOString().slice(0,10)} value={bookingDate} onChange={event=>setBookingDate(event.target.value)}/></label><div className="time-picker-label">Preferred time</div><div className="time-picker-slots">{Array.from({length:19},(_,i)=>{const minutes=8*60+i*30;const hour=Math.floor(minutes/60);const minute=minutes%60;const value=`${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}`;return <button type="button" key={value} className={bookingTime===value?"selected":""} onClick={()=>setBookingTime(value)}>{new Date(2000,0,1,hour,minute).toLocaleTimeString("en-BW",{hour:"numeric",minute:"2-digit"})}</button>})}</div><p className="time-picker-footnote">Preferred slots are requests, not confirmed availability.</p><button type="button" className="big-brothers-button primary time-picker-confirm" disabled={!bookingDate||!bookingTime||new Date(`${bookingDate}T${bookingTime}`).getTime()<=Date.now()} onClick={()=>setTimePickerOpen(false)}>Use this time ↗</button></section></div>}
+    <aside className="bb-help-widget" aria-label="Customer quick help">{chatOpen && <section className="bb-help-panel" aria-labelledby="bb-help-title"><p className="big-brothers-eyebrow">QUICK HELP</p><h2 id="bb-help-title">What do you need?</h2><p>This guide opens real app pages and actions; it is not a live agent chat.</p><a href="#request" onClick={()=>setChatOpen(false)}>Join the walk-in queue ↗</a><a href="/account" onClick={()=>setChatOpen(false)}>My account & receipts ↗</a><a href="/?journey=book#request" onClick={()=>setChatOpen(false)}>Book another wash ↗</a><a href="#big-brothers-racing" onClick={()=>setChatOpen(false)}>Play Big Brothers Racing ↗</a><a href="#my-account" onClick={()=>setChatOpen(false)}>Weather & reminders ↗</a></section>}<button type="button" className="bb-help-launcher" aria-expanded={chatOpen} onClick={()=>setChatOpen(open=>!open)}><span aria-hidden="true">{chatOpen?"×":"?"}</span>{chatOpen?"Close help":"Need a hand?"}</button></aside>
+{timePickerOpen && <div className="time-picker-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setTimePickerOpen(false);}}><section className="time-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="time-picker-title"><button type="button" className="time-picker-close" aria-label="Close date and time picker" onClick={()=>setTimePickerOpen(false)}>×</button><p className="big-brothers-eyebrow">BOOK A WASH</p><h2 id="time-picker-title">Choose a time.</h2><p className="time-picker-intro">Pick your preferred date and time. The team will confirm the booking request.</p><label>Date<input type="date" min={new Date().toISOString().slice(0,10)} value={bookingDate} onChange={event=>setBookingDate(event.target.value)}/></label><div className="time-picker-label">Preferred time</div><div className="time-picker-slots">{Array.from({length:19},(_,i)=>{const minutes=8*60+i*30;const hour=Math.floor(minutes/60);const minute=minutes%60;const value=`${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}`;return <button type="button" key={value} className={bookingTime===value?"selected":""} onClick={()=>setBookingTime(value)}>{new Date(2000,0,1,hour,minute).toLocaleTimeString("en-BW",{hour:"numeric",minute:"2-digit"})}</button>})}</div><p className="time-picker-footnote">Preferred slots are requests, not confirmed availability.</p><button type="button" className="big-brothers-button primary time-picker-confirm" disabled={!bookingDate||!bookingTime||new Date(`${bookingDate}T${bookingTime}`).getTime()<=Date.now()} onClick={()=>setTimePickerOpen(false)}>Use this time ↗</button></section></div>}
   </main>;
 }
