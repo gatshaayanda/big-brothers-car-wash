@@ -57,7 +57,7 @@ export default function LocationWeather() {
   useEffect(() => {
     void loadWeather();
     void caches.open("big-brothers-media-v2").then(async cache => {
-      const cached = await Promise.all(videos.map(video => cache.match(video.src)));
+      const cached = await Promise.all(videos.map(video => cache.match(new URL(video.src, window.location.origin).href)));
       setOfflineReady(cached.every(Boolean));
     }).catch(() => setOfflineReady(false));
   }, [loadWeather]);
@@ -76,7 +76,7 @@ export default function LocationWeather() {
           if (!response.ok || !response.headers.get("content-type")?.includes("video")) {
             throw new Error("A location video could not be downloaded. Check your connection and try again.");
           }
-          await cache.put(video.src, response);
+          await cache.put(new URL(video.src, window.location.origin).href, response);
         }
         completed += 1;
         setMediaStatus("Saved " + completed + " of " + videos.length + " videos for this device.");
