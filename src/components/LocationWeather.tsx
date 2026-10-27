@@ -54,36 +54,63 @@ export default function LocationWeather() {
     }
   }, []);
 
+  const checkOfflineMedia = useCallback(async () => {
+    try {
+      const cache = await caches.open("big-brothers-media-v2");
+      const cached = await Promise.all(videos.map(async video => {
+        const response = await cache.match(new URL(video.src, window.location.origin).href);
+        return Boolean(response && response.ok && (response.headers.get("content-type") || "").toLowerCase().includes("video"));
+      }));
+      setOfflineReady(cached.every(Boolean));
+    } catch {
+      setOfflineReady(false);
+    }
+  }, []);
+
   useEffect(() => {
     void loadWeather();
-    void caches.open("big-brothers-media-v2").then(async cache => {
-      const cached = await Promise.all(videos.map(video => cache.match(new URL(video.src, window.location.origin).href)));
-      setOfflineReady(cached.every(Boolean));
-    }).catch(() => setOfflineReady(false));
-  }, [loadWeather]);
+    void checkOfflineMedia();
+  }, [loadWeather, checkOfflineMedia]);
 
   async function saveForOffline() {
     if (saving) return;
     setSaving(true);
+    setOfflineReady(false);
     setMediaStatus("Preparing videos for offline playback. Keep this page open; the files total about 104 MB.");
     try {
       const cache = await caches.open("big-brothers-media-v2");
       let completed = 0;
       for (const video of videos) {
-        const existing = await cache.match(video.src);
-        if (!existing) {
-          const response = await fetch(video.src, { cache: "no-store" });
-          if (!response.ok || !response.headers.get("content-type")?.includes("video")) {
-            throw new Error("A location video could not be downloaded. Check your connection and try again.");
+        const url = new URL(video.src, window.location.origin).href;
+        let existing = await cache.match(url);
+        const validExisting = existing && existing.ok && (existing.headers.get("content-type") || "").toLowerCase().includes("video");
+        if (!validExisting) {
+          if (existing) await cache.delete(url);
+          const response = await fetch(url, { cache: "no-store" });
+          const contentType = (response.headers.get("content-type") || "").toLowerCase();
+          const contentLength = Number(response.headers.get("content-length") || 0);
+          if (!response.ok || !contentType.includes("video") || contentLength === 0) {
+            throw new Error("A location video could not be downloaded completely. Check your connection and available device storage, then try again.");
           }
-          await cache.put(new URL(video.src, window.location.origin).href, response);
+          await cache.put(url, response.clone());
+          existing = await cache.match(url);
+          if (!existing || !existing.ok || !(existing.headers.get("content-type") || "").toLowerCase().includes("video")) {
+            await cache.delete(url);
+            throw new Error("A saved video could not be verified in offline storage. Check device storage and try again.");
+          }
         }
         completed += 1;
-        setMediaStatus("Saved " + completed + " of " + videos.length + " videos for this device.");
+        setMediaStatus("Saved and verified " + completed + " of " + videos.length + " videos on this device.");
+      }
+
+      const verified = await Promise.all(videos.map(video => cache.match(new URL(video.src, window.location.origin).href)));
+      if (!verified.every(response => response && response.ok && (response.headers.get("content-type") || "").toLowerCase().includes("video"))) {
+        throw new Error("Not every video is available in offline storage yet. Keep this page open and try saving again.");
       }
       setOfflineReady(true);
-      setMediaStatus("All three location videos are saved for offline playback on this device.");
+      setMediaStatus("All three location videos are saved and verified for offline playback on this device.");
     } catch (error) {
+      await checkOfflineMedia();
       setMediaStatus(error instanceof Error ? error.message : "Videos could not be saved for offline use. Try again while connected.");
     } finally {
       setSaving(false);
