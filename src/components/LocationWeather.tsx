@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+const weatherCacheKey = "big-brothers-car-wash:last-weather:v1";
+
 type CurrentWeather = {
   temperature_2m: number;
   apparent_temperature: number;
@@ -29,13 +31,13 @@ function condition(code: number) {
 
 export default function LocationWeather() {
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
-  const [weatherState, setWeatherState] = useState<"loading" | "ready" | "error">("loading");
+  const [weatherState, setWeatherState] = useState<"loading" | "ready" | "stale" | "error">("loading");
   const [saving, setSaving] = useState(false);
   const [mediaStatus, setMediaStatus] = useState("");
   const [offlineReady, setOfflineReady] = useState(false);
 
   const loadWeather = useCallback(async () => {
-    setWeatherState("loading");
+    setWeatherState(current => current === "ready" || current === "stale" ? current : "loading");
     try {
       const params = new URLSearchParams({
         latitude: "-24.6282",
@@ -46,10 +48,19 @@ export default function LocationWeather() {
       const response = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString(), { cache: "no-store", signal: AbortSignal.timeout(8000) });
       if (!response.ok) throw new Error("Weather unavailable");
       const data = await response.json() as { current?: CurrentWeather };
-      if (!data.current || typeof data.current.temperature_2m !== "number") throw new Error("Weather data missing");
+      if (!data.current || typeof data.current.temperature_2m !== "number" || typeof data.current.time !== "string") throw new Error("Weather data missing");
       setWeather(data.current);
       setWeatherState("ready");
+      try { localStorage.setItem(weatherCacheKey, JSON.stringify({ current: data.current, savedAt: Date.now() })); } catch { /* Weather stays usable if storage is blocked or full. */ }
     } catch {
+      try {
+        const cached = JSON.parse(localStorage.getItem(weatherCacheKey) || "null") as { current?: CurrentWeather } | null;
+        if (cached?.current && typeof cached.current.temperature_2m === "number" && typeof cached.current.time === "string") {
+          setWeather(cached.current);
+          setWeatherState("stale");
+          return;
+        }
+      } catch { /* Ignore invalid or unavailable local weather cache. */ }
       setWeatherState("error");
     }
   }, []);
@@ -127,7 +138,7 @@ export default function LocationWeather() {
           <p className="big-brothers-eyebrow">GABORONE · CURRENT CONDITIONS</p>
           {weather ? <div className="bb-weather-reading"><strong>{Math.round(weather.temperature_2m)}°C</strong><span>{condition(weather.weather_code)}</span></div> : <p role="status" className="bb-weather-state">{weatherState === "loading" ? "Checking current conditions…" : "Current weather is unavailable right now."}</p>}
           {weather && <p className="bb-weather-feels">Feels like {Math.round(weather.apparent_temperature)}°C</p>}
-          <small>{updated ? "Updated " + updated + " local time · " : ""}Weather by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> (CC BY 4.0)</small>
+          <small>{weatherState === "stale" ? "Last available reading " + updated + " local time · saved on this device · may be out of date · " : updated ? "Updated " + updated + " local time · " : ""}Weather by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> (CC BY 4.0)</small>
         </div>
         {weather && <div className="bb-weather-metrics"><span><small>Humidity</small><strong>{weather.relative_humidity_2m}%</strong></span><span><small>Wind</small><strong>{Math.round(weather.wind_speed_10m)} km/h</strong></span></div>}
         <button type="button" className="bb-weather-refresh" onClick={() => void loadWeather()} disabled={weatherState === "loading"}>{weatherState === "loading" ? "Loading…" : "Refresh weather"}</button>
