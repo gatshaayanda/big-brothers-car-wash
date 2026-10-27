@@ -1,28 +1,19 @@
 rules_version = '2';
 service firebase.storage {
- match /b/{bucket}/o {
-  function isAdmin(){return request.auth!=null&&firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))&&firestore.get(/databases/(default)/documents/admins/$(request.auth.uid)).data.role in ['owner','staff','Owner','Staff'];}
-  match /boemoMedia/{fileName}{allow read:if true;allow write:if isAdmin()&&request.resource.size<12*1024*1024&&request.resource.contentType.matches('image/.*');}
-  match /storefrontMedia/{fileName} {
-    allow read: if true;
-    allow write: if isAdmin() && request.resource.size < 12*1024*1024 && request.resource.contentType.matches('image/.*');
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/admins/$(request.auth.uid)).data.role in ['owner', 'staff'];
+    }
+    match /gallery/{fileName} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.size < 12 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin();
+    }
+    match /{allPaths=**} { allow read, write: if false; }
   }
-  match /conversationAttachments/{conversationId}/{messageId}/{fileName}{
-    allow read: if request.auth!=null
-      && (
-        (firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
-          && firestore.get(/databases/(default)/documents/admins/$(request.auth.uid)).data.role in ['owner','staff','Owner','Staff'])
-        || firestore.get(/databases/(default)/documents/conversations/$(conversationId)).data.customerId==request.auth.uid
-      );
-    allow write: if request.auth!=null
-      && (
-        (firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
-          && firestore.get(/databases/(default)/documents/admins/$(request.auth.uid)).data.role in ['owner','staff','Owner','Staff'])
-        || firestore.get(/databases/(default)/documents/conversations/$(conversationId)).data.customerId==request.auth.uid
-      )
-      && request.resource.size<10*1024*1024
-      && (request.resource.contentType.matches('image/.*')||request.resource.contentType=='application/pdf');
-  }
-  match /{allPaths=**}{allow read,write:if false;}
- }
 }

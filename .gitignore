@@ -13,3 +13,7 @@ firestore-debug.log
 scripts/import/contacts/*.vcf
 scripts/import/contacts/*.csv
 scripts/import/contacts/*.json
+
+# Generated assets are prepared from the pinned public CC0 racing kit during builds.
+game-assets/source-zips/*.zip
+/public/game-assets/racing-kit/

@@ -2,486 +2,200 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
     function signedIn() {
       return request.auth != null;
     }
 
-    function isOwner(uid) {
+    function owns(uid) {
       return signedIn() && request.auth.uid == uid;
     }
 
     function isAdmin() {
       return signedIn()
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['owner', 'staff', 'Owner', 'Staff'];
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['owner', 'staff'];
     }
 
-    function validOrder() {
-      // Every customer order must belong to a Firebase Auth session. Guests use Anonymous Auth; this is still authentication, not a sign-in requirement.
+    function validText(value, maxLength) {
+      return value is string && value.size() <= maxLength;
+    }
+
+    function validCustomerRecord(uid) {
       return request.resource.data.keys().hasOnly([
-          'customerId',
-          'createdAt',
-          'customerName',
-          'phone',
-          'mode',
-          'scheduledFor',
-          'deliveryLocation',
-          'instructions',
-          'items',
-          'total',
-          'status'
+          'uid', 'name', 'email', 'phone', 'vehicleRegistrations',
+          'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.uid == uid
+        && validText(request.resource.data.name, 120)
+        && validText(request.resource.data.email, 254)
+        && validText(request.resource.data.phone, 40)
+        && request.resource.data.vehicleRegistrations is list
+        && request.resource.data.vehicleRegistrations.size() <= 20
+        && validText(request.resource.data.createdAt, 40)
+        && validText(request.resource.data.updatedAt, 40);
+    }
+
+    function validBooking(uid) {
+      return request.resource.data.keys().hasOnly([
+          'customerId', 'customerName', 'phone', 'vehicleType',
+          'vehicleRegistration', 'serviceId', 'serviceName',
+          'serviceMode', 'locationId', 'address', 'scheduledFor',
+          'notes', 'priceQuote', 'paymentMethod', 'paymentStatus',
+          'status', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.keys().hasAll([
-          'createdAt',
-          'customerName',
-          'phone',
-          'mode',
-          'scheduledFor',
-          'deliveryLocation',
-          'instructions',
-          'items',
-          'total',
-          'status'
+          'customerId', 'customerName', 'phone', 'vehicleType',
+          'serviceId', 'serviceName', 'serviceMode', 'scheduledFor',
+          'status', 'createdAt', 'updatedAt'
         ])
-        && request.resource.data.createdAt is string
-        && request.resource.data.customerName is string
-        && request.resource.data.phone is string
-        && request.resource.data.mode in ['pickup', 'delivery']
-        && request.resource.data.scheduledFor is string
-        && request.resource.data.deliveryLocation is string
-        && request.resource.data.instructions is string
-        && request.resource.data.items is list
-        && request.resource.data.items.size() > 0
-        && request.resource.data.total is number
-        && request.resource.data.total >= 0
-        && request.resource.data.status == 'New'
+        && request.resource.data.customerId == uid
+        && validText(request.resource.data.customerName, 120)
+        && validText(request.resource.data.phone, 40)
+        && validText(request.resource.data.vehicleType, 80)
+        && validText(request.resource.data.vehicleRegistration, 30)
+        && validText(request.resource.data.serviceId, 120)
+        && validText(request.resource.data.serviceName, 120)
+        && request.resource.data.serviceMode in ['site', 'mobile']
+        && validText(request.resource.data.locationId, 120)
+        && validText(request.resource.data.address, 500)
+        && validText(request.resource.data.scheduledFor, 40)
+        && validText(request.resource.data.notes, 1000)
+        && validText(request.resource.data.createdAt, 40)
+        && validText(request.resource.data.updatedAt, 40)
+        && request.resource.data.status == 'requested'
         && (
-          !request.resource.data.keys().hasAny(['customerId'])
-          || request.resource.data.customerId is string
+          !request.resource.data.keys().hasAny(['priceQuote'])
+          || (request.resource.data.priceQuote is number
+              && request.resource.data.priceQuote >= 0)
+        )
+        && (
+          !request.resource.data.keys().hasAny(['paymentMethod'])
+          || validText(request.resource.data.paymentMethod, 60)
+        )
+        && (
+          !request.resource.data.keys().hasAny(['paymentStatus'])
+          || request.resource.data.paymentStatus == 'unpaid'
         );
     }
 
-    function validCustomer(uid) {
+    function validQueueEntry(uid) {
       return request.resource.data.keys().hasOnly([
-          'uid',
-          'name',
-          'email',
-          'phone',
-          'preferredDeliveryLocation',
-          'notes',
-          'createdAt',
-          'updatedAt'
+          'customerId', 'customerName', 'phone', 'vehicleType',
+          'vehicleRegistration', 'serviceId', 'serviceName',
+          'locationId', 'notes', 'status', 'createdAt', 'updatedAt'
         ])
-        && request.resource.data.uid == uid
-        && request.resource.data.name is string
-        && request.resource.data.email is string
-        && request.resource.data.phone is string
-        && request.resource.data.preferredDeliveryLocation is string
-        && request.resource.data.notes is string
-        && request.resource.data.createdAt is string
-        && request.resource.data.updatedAt is string;
+        && request.resource.data.customerId == uid
+        && validText(request.resource.data.customerName, 120)
+        && validText(request.resource.data.phone, 40)
+        && validText(request.resource.data.vehicleType, 80)
+        && validText(request.resource.data.vehicleRegistration, 30)
+        && validText(request.resource.data.serviceId, 120)
+        && validText(request.resource.data.serviceName, 120)
+        && validText(request.resource.data.locationId, 120)
+        && validText(request.resource.data.notes, 1000)
+        && request.resource.data.status == 'waiting'
+        && validText(request.resource.data.createdAt, 40)
+        && validText(request.resource.data.updatedAt, 40);
     }
 
-    function validReconciliation() {
+    function validFleetRequest(uid) {
       return request.resource.data.keys().hasOnly([
-        'date',
-        'actualCash',
-        'actualETransfer',
-        'actualOther',
-        'notes',
-        'updatedAt'
-      ])
-      && request.resource.data.keys().hasAll([
-        'date',
-        'actualCash',
-        'actualETransfer',
-        'actualOther',
-        'notes',
-        'updatedAt'
-      ])
-      && request.resource.data.date is string
-      && request.resource.data.actualCash is number
-      && request.resource.data.actualCash >= 0
-      && request.resource.data.actualETransfer is number
-      && request.resource.data.actualETransfer >= 0
-      && request.resource.data.actualOther is number
-      && request.resource.data.actualOther >= 0
-      && request.resource.data.notes is string
-      && request.resource.data.updatedAt is string;
+          'customerId', 'businessName', 'contactName', 'phone',
+          'email', 'vehicleCount', 'vehicleTypes', 'serviceNeeds',
+          'preferredLocation', 'preferredSchedule', 'notes',
+          'status', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.customerId == uid
+        && validText(request.resource.data.businessName, 160)
+        && validText(request.resource.data.contactName, 120)
+        && validText(request.resource.data.phone, 40)
+        && validText(request.resource.data.email, 254)
+        && request.resource.data.vehicleCount is int
+        && request.resource.data.vehicleCount > 0
+        && request.resource.data.vehicleCount <= 10000
+        && request.resource.data.vehicleTypes is list
+        && request.resource.data.serviceNeeds is list
+        && validText(request.resource.data.preferredLocation, 200)
+        && validText(request.resource.data.preferredSchedule, 200)
+        && validText(request.resource.data.notes, 1500)
+        && request.resource.data.status == 'new'
+        && validText(request.resource.data.createdAt, 40)
+        && validText(request.resource.data.updatedAt, 40);
     }
 
     match /admins/{uid} {
-      allow read: if isOwner(uid);
-      allow create, update, delete: if false;
+      allow read: if owns(uid) || isAdmin();
+      // Provision staff records only through a trusted admin process/console.
+      allow write: if false;
     }
 
     match /customers/{uid} {
-      allow read: if isOwner(uid);
-      allow create, update: if isOwner(uid) && validCustomer(uid);
+      allow read: if owns(uid) || isAdmin();
+      allow create, update: if owns(uid) && validCustomerRecord(uid);
       allow delete: if false;
     }
 
-    match /orders/{orderId} {
-      allow create: if validOrder()
-        && request.resource.data.keys().hasAll(['customerId'])
-        && isOwner(request.resource.data.customerId);
-
-      allow read: if isAdmin()
-        || (
-          resource.data.keys().hasAny(['customerId'])
-          && isOwner(resource.data.customerId)
-        );
-
-      allow update, delete: if isAdmin();
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
     }
 
-    match /menu/{itemId} {
+    match /gallery/{imageId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     match /businessSettings/{settingId} {
       allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    match /notificationPreferences/{uid} {
-      allow read: if isOwner(uid);
-      allow create, update: if isOwner(uid)
-        && request.resource.data.keys().hasOnly(['enabled','leadMinutes','updatedAt'])
-        && request.resource.data.enabled is bool
-        && request.resource.data.leadMinutes in [5,10,15,20,30,45,60]
-        && request.resource.data.updatedAt is string;
-      allow delete: if isOwner(uid);
-    }
-
-    match /notificationTokens/{uid}/tokens/{tokenId} {
-      allow create, update: if isOwner(uid)
-        && request.resource.data.keys().hasOnly(['token','admin','updatedAt'])
-        && request.resource.data.token is string
-        && request.resource.data.token.size() > 0
-        && request.resource.data.admin is bool
-        && request.resource.data.updatedAt is string;
-      allow delete: if isOwner(uid);
-      allow read: if false;
-    }
-
-    match /conversations/{conversationId} {
-      allow create: if signedIn()
-        && request.resource.data.customerId == request.auth.uid
-        && request.resource.data.title is string
-        && request.resource.data.status == 'open'
-        && request.resource.data.createdAt is string
-        && request.resource.data.updatedAt is string
-        && request.resource.data.lastMessageAt is string
-        && request.resource.data.lastMessagePreview is string
-        && request.resource.data.unreadForCustomer is bool
-        && request.resource.data.unreadForAdmin is bool;
-      allow read: if isAdmin() || (signedIn() && resource.data.customerId == request.auth.uid);
-      allow update: if isAdmin()
-        || (signedIn()
-          && resource.data.customerId == request.auth.uid
-          && request.resource.data.customerId == resource.data.customerId
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt','lastMessageAt','lastMessagePreview','unreadForCustomer','unreadForAdmin','customerLastReadAt']));
-      allow delete: if isAdmin();
-
-      match /messages/{messageId} {
-        allow read: if isAdmin() || (signedIn() && get(/databases/$(database)/documents/conversations/$(conversationId)).data.customerId == request.auth.uid);
-        allow create: if signedIn()
-          && request.resource.data.senderId == request.auth.uid
-          && request.resource.data.senderRole in ['customer','admin']
-          && request.resource.data.text is string
-          && request.resource.data.text.size() <= 2000
-          && request.resource.data.createdAt is string
-          && (
-            (request.resource.data.senderRole == 'customer' && get(/databases/$(database)/documents/conversations/$(conversationId)).data.customerId == request.auth.uid)
-            || (request.resource.data.senderRole == 'admin' && isAdmin())
-          );
-        allow update, delete: if false;
-      }
-    }
-
-    match /sourcingRequests/{requestId} {
-      function validSourcingRequest() {
-        return request.resource.data.keys().hasOnly([
-            'customerId',
-            'customerName',
-            'phone',
-            'product',
-            'size',
-            'colour',
-            'notes',
-            'attachment',
-            'createdAt',
-            'updatedAt',
-            'status',
-            'deliveryMethod'
-          ])
-          && request.resource.data.keys().hasAll([
-            'customerId',
-            'customerName',
-            'phone',
-            'product',
-            'size',
-            'colour',
-            'notes',
-            'attachment',
-            'createdAt',
-            'updatedAt',
-            'status',
-            'deliveryMethod'
-          ])
-          && request.resource.data.customerId == request.auth.uid
-          && request.resource.data.customerName is string
-          && request.resource.data.phone is string
-          && request.resource.data.product is string
-          && request.resource.data.product.size() > 0
-          && request.resource.data.size is string
-          && request.resource.data.colour is string
-          && request.resource.data.notes is string
-          && request.resource.data.createdAt is string
-          && request.resource.data.updatedAt is string
-          && request.resource.data.status == 'New Request'
-          && request.resource.data.deliveryMethod in ['delivery', 'collection']
-          && (
-            request.resource.data.attachment == null
-            || (
-              request.resource.data.attachment is map
-              && request.resource.data.attachment.keys().hasOnly(['url', 'name', 'type', 'size'])
-              && request.resource.data.attachment.url is string
-              && request.resource.data.attachment.name is string
-              && request.resource.data.attachment.type is string
-              && request.resource.data.attachment.size is number
-              && request.resource.data.attachment.size <= 10485760
-            )
-          );
-      }
-
-      allow create: if signedIn() && !isAdmin() && validSourcingRequest();
-      allow read: if isAdmin() || (signedIn() && resource.data.customerId == request.auth.uid);
-      allow update: if isAdmin();
-      allow delete: if false;
-    }
-
-    match /storefrontContent/{contentId} {
-      function validStorefrontContent() {
-        return request.resource.data.keys().hasOnly([
-            'type', 'category', 'title', 'description', 'imageUrl',
-            'price', 'originalPrice', 'status', 'audience', 'startsAt',
-            'endsAt', 'ctaLabel', 'sortOrder', 'createdAt', 'updatedAt'
-          ])
-          && request.resource.data.keys().hasAll([
-            'type', 'title', 'description', 'imageUrl', 'price', 'status',
-            'audience', 'startsAt', 'endsAt', 'ctaLabel', 'sortOrder',
-            'createdAt', 'updatedAt'
-          ])
-          && request.resource.data.type in ['find', 'deal']
-          && (
-            !request.resource.data.keys().hasAny(['category'])
-            || request.resource.data.category in [
-              'Sneakers', 'Apparel', 'Accessories', 'Kids', 'Other'
-            ]
-          )
-          && request.resource.data.title is string
-          && request.resource.data.title.size() > 0
-          && request.resource.data.title.size() <= 100
-          && request.resource.data.description is string
-          && request.resource.data.imageUrl is string
-          && request.resource.data.imageUrl.size() > 0
-          && request.resource.data.status in [
-            'draft', 'scheduled', 'published', 'paused', 'archived'
-          ]
-          && request.resource.data.audience in ['everyone', 'circle']
-          && request.resource.data.startsAt is string
-          && request.resource.data.endsAt is string
-          && request.resource.data.ctaLabel is string
-          && request.resource.data.sortOrder is number
-          && request.resource.data.createdAt is string
-          && request.resource.data.updatedAt is string
-          && request.resource.data.price is number
-          && request.resource.data.price >= 0
-          && (
-            !request.resource.data.keys().hasAny(['originalPrice'])
-            || (
-              request.resource.data.originalPrice is number
-              && request.resource.data.originalPrice > 0
-            )
-          )
-          && (
-            request.resource.data.type != 'deal'
-            || (
-              request.resource.data.keys().hasAll(['price', 'originalPrice'])
-              && request.resource.data.originalPrice > request.resource.data.price
-            )
-          );
-      }
-
-      allow read: if isAdmin()
-        || (
-          resource.data.status in ['published', 'scheduled']
-          && resource.data.audience == 'everyone'
-        );
-
-      allow create: if isAdmin() && validStorefrontContent();
-      allow update: if isAdmin() && validStorefrontContent();
-      allow delete: if isAdmin();
-    }
-
-    match /memberships/{uid} {
-      allow read: if isAdmin() || isOwner(uid);
       allow create, update, delete: if isAdmin();
     }
 
-    match /memberSettings/{uid} {
-      allow read: if isAdmin() || isOwner(uid) || resource.data.showInCircle == true;
-      allow create, update: if isOwner(uid)
-        && request.auth.token.firebase.sign_in_provider != 'anonymous'
-        && request.resource.data.keys().hasOnly(['uid','displayName','sharePurchases','showInCircle','updatedAt'])
-        && request.resource.data.uid == uid
-        && request.resource.data.displayName is string
-        && request.resource.data.sharePurchases in ['private','friends','public']
-        && request.resource.data.showInCircle is bool
-        && request.resource.data.updatedAt is string;
-      allow delete: if false;
-    }
-
-    match /memberFeedPreferences/{uid} {
-      function isConnectedMember(otherUid) {
-        return exists(/databases/$(database)/documents/friendConnections/$(request.auth.uid + '_' + otherUid))
-          || exists(/databases/$(database)/documents/friendConnections/$(otherUid + '_' + request.auth.uid));
-      }
-      function validFeedPreferences() {
-        return request.resource.data.keys().hasOnly(['uid','shareInterests','interests','updatedAt'])
-          && request.resource.data.keys().hasAll(['uid','shareInterests','interests','updatedAt'])
-          && request.resource.data.uid == uid
-          && request.resource.data.shareInterests is bool
-          && request.resource.data.interests is map
-          && request.resource.data.interests.keys().hasOnly(['newDrops','seasonalBuys','loyaltyUpdates'])
-          && request.resource.data.interests.newDrops is bool
-          && request.resource.data.interests.seasonalBuys is bool
-          && request.resource.data.interests.loyaltyUpdates is bool
-          && request.resource.data.updatedAt is string;
-      }
-      allow read: if isAdmin() || isOwner(uid)
-        || (signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous'
-          && resource.data.shareInterests == true && isConnectedMember(uid));
-      allow create, update: if isOwner(uid)
-        && request.auth.token.firebase.sign_in_provider != 'anonymous'
-        && validFeedPreferences();
-      allow delete: if false;
-    }
-
-    match /friendInvites/{inviteId} {
-      allow create: if signedIn()
-        && request.auth.token.firebase.sign_in_provider != 'anonymous'
-        && request.resource.data.keys().hasOnly(['inviterUid','inviterName','status','createdAt','expiresAt'])
-        && request.resource.data.inviterUid == request.auth.uid
-        && request.resource.data.inviterName is string
-        && request.resource.data.status == 'pending'
-        && request.resource.data.createdAt is string
-        && request.resource.data.expiresAt is timestamp
-        && request.resource.data.expiresAt > request.time;
-      allow read: if isAdmin() || (signedIn() && (resource.data.inviterUid == request.auth.uid || (resource.data.status == 'pending' && resource.data.expiresAt > request.time)));
-      allow update: if signedIn()
-        && request.auth.token.firebase.sign_in_provider != 'anonymous'
-        && resource.data.status == 'pending'
-        && resource.data.expiresAt > request.time
-        && resource.data.inviterUid != request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','recipientUid','acceptedAt'])
-        && request.resource.data.status == 'accepted'
-        && request.resource.data.recipientUid == request.auth.uid
-        && request.resource.data.acceptedAt is string;
-      allow delete: if isAdmin() || (signedIn() && resource.data.inviterUid == request.auth.uid && resource.data.status == 'pending');
-    }
-
-    match /friendConnections/{connectionId} {
-      function validAcceptedInvite() {
-        let invitePath = /databases/$(database)/documents/friendInvites/$(request.resource.data.inviteId);
-        return request.resource.data.keys().hasOnly(['memberA','memberB','inviteId','createdAt'])
-          && request.resource.data.keys().hasAll(['memberA','memberB','inviteId','createdAt'])
-          && request.resource.data.memberA is string
-          && request.resource.data.memberB is string
-          && (
-            connectionId == request.resource.data.memberA + '_' + request.resource.data.memberB
-            || connectionId == request.resource.data.memberB + '_' + request.resource.data.memberA
-          )
-          && request.resource.data.inviteId is string
-          && request.resource.data.createdAt is string
-          && existsAfter(invitePath)
-          && getAfter(invitePath).data.status == 'accepted'
-          && getAfter(invitePath).data.recipientUid == request.auth.uid
-          && (
-            (getAfter(invitePath).data.inviterUid == request.resource.data.memberA
-              && getAfter(invitePath).data.recipientUid == request.resource.data.memberB)
-            || (getAfter(invitePath).data.inviterUid == request.resource.data.memberB
-              && getAfter(invitePath).data.recipientUid == request.resource.data.memberA)
-          );
-      }
-
-      allow get: if isAdmin() || (signedIn()
-        && (!exists(/databases/$(database)/documents/friendConnections/$(connectionId))
-          || resource.data.memberA == request.auth.uid
-          || resource.data.memberB == request.auth.uid));
-      allow list: if isAdmin() || (signedIn()
-        && (resource.data.memberA == request.auth.uid || resource.data.memberB == request.auth.uid));
-      allow create: if signedIn()
-        && request.auth.token.firebase.sign_in_provider != 'anonymous'
-        && validAcceptedInvite();
-      allow update: if false;
-      allow delete: if isAdmin() || (signedIn()
-        && (resource.data.memberA == request.auth.uid || resource.data.memberB == request.auth.uid));
-    }
-
-    match /communityActivity/{activityId} {
-      function validPublishedActivity() {
-        let sourcePath = /databases/$(database)/documents/sourcingRequests/$(request.resource.data.sourceRequestId);
-        let settingsPath = /databases/$(database)/documents/memberSettings/$(request.resource.data.ownerUid);
-        return request.resource.data.keys().hasOnly(['ownerUid','sourceRequestId','productLabel','audience','status','createdAt','updatedAt','publishedAt'])
-          && request.resource.data.keys().hasAll(['ownerUid','sourceRequestId','productLabel','audience','status','createdAt','updatedAt','publishedAt'])
-          && request.resource.data.ownerUid is string
-          && request.resource.data.sourceRequestId is string
-          && request.resource.data.productLabel is string
-          && request.resource.data.productLabel.size() > 0
-          && request.resource.data.productLabel.size() <= 120
-          && request.resource.data.audience in ['friends','public']
-          && request.resource.data.status == 'published'
-          && request.resource.data.createdAt is string
-          && request.resource.data.updatedAt is string
-          && request.resource.data.publishedAt is string
-          && exists(sourcePath)
-          && get(sourcePath).data.customerId == request.resource.data.ownerUid
-          && get(sourcePath).data.status in ['Delivered','Collected']
-          && exists(settingsPath)
-          && get(settingsPath).data.sharePurchases == request.resource.data.audience;
-      }
-
+    match /bookings/{bookingId} {
+      allow create: if signedIn() && validBooking(request.auth.uid);
       allow read: if isAdmin()
-        || (signedIn() && resource.data.ownerUid == request.auth.uid)
-        || (resource.data.status == 'published' && resource.data.audience == 'public')
-        || (signedIn() && resource.data.status == 'published' && resource.data.audience == 'friends'
-          && resource.data.ownerUid != request.auth.uid
-          && (
-            exists(/databases/$(database)/documents/friendConnections/$(resource.data.ownerUid + '_' + request.auth.uid))
-            || exists(/databases/$(database)/documents/friendConnections/$(request.auth.uid + '_' + resource.data.ownerUid))
-          ));
-      allow create: if isAdmin() && validPublishedActivity();
+        || (signedIn() && resource.data.customerId == request.auth.uid);
       allow update: if isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
-        && request.resource.data.status in ['published','archived']
-        && request.resource.data.updatedAt is string;
-      allow delete: if isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+        || (
+          signedIn()
+          && resource.data.customerId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status == 'cancelled'
+          && resource.data.status in ['requested', 'confirmed']
+        );
+      allow delete: if false;
     }
 
-    match /customerJourneyEvents/{eventId} {
-      allow read: if isAdmin();
-      // Events are written only by the authenticated server route, never directly by clients.
-      allow create, update, delete: if false;
+    match /queueEntries/{entryId} {
+      allow create: if signedIn() && validQueueEntry(request.auth.uid);
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.customerId == request.auth.uid);
+      allow update, delete: if isAdmin();
     }
 
-    match /dailyReconciliations/{date} {
-      allow read: if isAdmin();
-      allow create, update: if isAdmin() && validReconciliation();
+    match /fleetRequests/{requestId} {
+      allow create: if signedIn() && validFleetRequest(request.auth.uid);
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.customerId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    match /loyaltyAccounts/{uid} {
+      allow read: if owns(uid) || isAdmin();
+      // Balance and points are never customer-editable.
+      allow write: if isAdmin();
+    }
+
+    match /reminderPreferences/{uid} {
+      allow read: if owns(uid) || isAdmin();
+      allow create, update: if owns(uid)
+        && request.resource.data.keys().hasOnly([
+          'enabled', 'channels', 'updatedAt'
+        ])
+        && request.resource.data.enabled is bool
+        && request.resource.data.channels is list
+        && validText(request.resource.data.updatedAt, 40);
+      allow delete: if owns(uid) || isAdmin();
     }
 
     match /{document=**} {

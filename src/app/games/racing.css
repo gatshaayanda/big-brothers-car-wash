@@ -1,0 +1,53 @@
+.race-hub{min-height:100vh;background:#f7f8f3;color:#172820}.warmup-intro{max-width:980px!important;padding-bottom:22px!important}.warmup-intro h1{font:700 clamp(42px,7vw,76px)/.98 "Space Grotesk",system-ui,sans-serif;letter-spacing:-.055em;margin:14px 0}.warmup-intro>p:not(.big-brothers-eyebrow){max-width:720px;color:#5f6c61;line-height:1.7}.warmup-boundary{margin-top:18px;padding:12px 15px;border-left:4px solid #9fc957;background:#edf3e5;border-radius:0 8px 8px 0;font-size:13px}.warmup-game{max-width:980px!important;padding-top:12px!important}.warmup-hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}.warmup-hud>div{display:grid;gap:5px;padding:13px 15px;background:#fff;border:1px solid #dce3d7;border-radius:9px}.warmup-hud span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#657264;font-weight:700}.warmup-hud strong{font:700 clamp(20px,3vw,28px)/1.1 "Space Grotesk",system-ui,sans-serif}.warmup-hud small{font:600 11px system-ui;color:#687568}.warmup-canvas-wrap{position:relative;height:clamp(380px,65vw,560px);overflow:hidden;border:1px solid #cfd8c9;border-radius:12px;background:#8aa96d;box-shadow:0 16px 35px #1a2a2012}.warmup-canvas-wrap canvas{display:block;width:100%;height:100%;touch-action:pan-y}.warmup-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;text-align:center;padding:22px;background:#172820a8;color:#fff;backdrop-filter:blur(3px)}.warmup-overlay>span{font-size:10px;letter-spacing:.18em;font-weight:800;color:#c6f36b}.warmup-overlay strong{font:700 clamp(28px,5vw,42px)/1.1 "Space Grotesk",system-ui,sans-serif}.warmup-overlay p{max-width:440px;margin:0;color:#e3e9df;font-size:13px;line-height:1.6}.warmup-controls{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:14px}.warmup-steering,.warmup-actions{display:flex;gap:9px;flex-wrap:wrap}.warmup-steering button{min-width:92px;min-height:48px;border:1px solid #ccd6c8;border-radius:8px;background:#fff;color:#172820;font-weight:800;cursor:pointer;touch-action:manipulation}.warmup-steering button:disabled{opacity:.4}.warmup-help{font-size:11px;line-height:1.6;color:#687568;margin-top:14px}.race-hub .big-brothers-nav nav a{white-space:nowrap}@media(max-width:640px){.warmup-hud{grid-template-columns:repeat(2,minmax(0,1fr))}.warmup-canvas-wrap{height:440px}.warmup-controls{align-items:stretch;flex-direction:column}.warmup-steering button{flex:1}.warmup-actions{display:grid;grid-template-columns:1fr 1fr}.warmup-actions .big-brothers-button{padding:12px 8px;font-size:12px}.warmup-intro{padding-top:35px!important}}@media(prefers-reduced-motion:reduce){.warmup-canvas-wrap{scroll-behavior:auto}}
+/* Inline home-page game: expand in place so the booking journey stays on screen. */
+.race-inline-promo{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:clamp(20px,4vw,36px);border:1px solid #dce3d7;border-radius:16px;background:#fff}
+.race-inline-promo h2,.race-inline-heading h2{font:700 clamp(26px,4vw,42px)/1.05 "Space Grotesk",system-ui,sans-serif;letter-spacing:-.04em;margin:8px 0}
+.race-inline-promo p:not(.big-brothers-eyebrow),.race-inline-heading p:not(.big-brothers-eyebrow){color:#5f6c61;line-height:1.6;max-width:600px}
+.race-hub-embedded{background:transparent;min-height:0}
+.race-inline-heading{max-width:980px;margin:0 auto;padding:10px 0 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.race-hub-embedded .warmup-game{padding-top:0!important}
+.race-hub-embedded .warmup-canvas-wrap canvas{touch-action:none}
+.race-hub-embedded .warmup-steering button{touch-action:none;user-select:none;-webkit-user-select:none}
+@media(max-width:640px){.race-inline-promo{align-items:flex-start;flex-direction:column}.race-inline-heading{flex-direction:column}.race-inline-heading .big-brothers-button{align-self:flex-start}}
+
+.warmup-driving{display:flex;gap:9px;flex-wrap:wrap}
+.warmup-driving button{min-width:100px;min-height:58px;border:1px solid #ccd6c8;border-radius:12px;background:#eaf3d8;color:#172820;font-weight:800;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.warmup-driving button[aria-label="Brake"]{background:#f4e5df;border-color:#e2c8bd}
+.warmup-driving button:disabled{opacity:.45}
+.warmup-steering{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px}
+.warmup-steering .warmup-wheel{width:104px;height:104px;min-width:104px;min-height:104px;flex:0 0 auto;display:grid;place-items:center;position:relative;padding:0;border:0;border-radius:50%;background:transparent;color:#172820;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transition:transform 70ms linear;outline-offset:4px}
+.warmup-wheel:active{cursor:grabbing}
+.warmup-wheel:disabled{opacity:.45;cursor:default}
+.wheel-ring{position:absolute;inset:4px;border:9px solid #34483d;border-radius:50%;background:linear-gradient(145deg,#ffffff,#dfe7da);box-shadow:inset 0 0 0 2px #aebbad,0 4px 0 #b5c2b0;display:block}
+.wheel-spoke{position:absolute;left:50%;top:50%;display:block;background:#34483d;border-radius:5px;transform:translate(-50%,-50%)}
+.wheel-spoke.vertical{width:8px;height:34px;top:37%}
+.wheel-spoke.horizontal{width:43px;height:8px;top:66%}
+.wheel-hub{position:absolute;left:50%;top:50%;width:20px;height:20px;border-radius:50%;background:#c6f36b;border:4px solid #34483d;transform:translate(-50%,-50%)}
+.wheel-caption{position:absolute;bottom:17px;font-size:8px;letter-spacing:.12em;font-weight:900;color:#172820;pointer-events:none}
+.steering-caption{font-size:10px;color:#687568;text-align:center;line-height:1.3}
+.warmup-help{margin-bottom:0}
+@media(max-width:640px){
+  .warmup-controls{display:grid;grid-template-columns:minmax(104px,.8fr) minmax(0,1.2fr);align-items:center;gap:12px}
+  .warmup-steering{min-width:0}
+  .warmup-steering .warmup-wheel{width:92px;height:92px;min-width:92px;min-height:92px}
+  .warmup-driving{display:grid;grid-template-columns:1fr;gap:9px;min-width:0}
+  .warmup-driving button{min-width:0;min-height:58px;width:100%;padding:10px 6px;font-size:12px}
+  .warmup-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+  .warmup-actions .big-brothers-button{padding:12px 8px;font-size:12px}
+  .warmup-help{grid-column:1/-1}
+}
+@media(max-width:360px){.warmup-steering .warmup-wheel{width:80px;height:80px;min-width:80px;min-height:80px}.warmup-wheel .wheel-caption{bottom:13px}}
+
+/* NOS is a dedicated, press-and-hold boost control; preserve the existing mobile layout. */
+.warmup-driving .nos-button{background:#dff0a8;border:2px solid #91b83e;color:#20351d;font-weight:900;box-shadow:inset 0 -3px 0 #b7d875}
+.warmup-driving .nos-button[aria-pressed="true"]{background:#b7ed4e;box-shadow:0 0 0 3px #b7ed4e55,inset 0 -3px 0 #83b92a;transform:translateY(1px)}
+@media(max-width:640px){.warmup-driving .nos-button{min-height:58px}}
+
+
+.warmup-signals{display:flex;justify-content:center;gap:5px;width:100%;margin-top:2px}
+.warmup-steering .warmup-signals button{min-width:0;min-height:32px;padding:5px 8px;border:1px solid #cdd8c7;border-radius:7px;background:#fff;color:#475447;font-size:10px;font-weight:800;line-height:1;touch-action:manipulation}
+.warmup-steering .warmup-signals button.signal-active{background:#fff0c8;border-color:#e3a82e;color:#79500a;box-shadow:inset 0 0 0 1px #e3a82e}
+.warmup-signals button:focus-visible{outline:3px solid #709f34;outline-offset:2px}
+@media(max-width:640px){.warmup-signals{gap:4px}.warmup-steering .warmup-signals button{flex:1;padding:5px 3px;font-size:9px}}
+
+.warmup-steering .warmup-signals button:disabled{opacity:.45;cursor:not-allowed}
