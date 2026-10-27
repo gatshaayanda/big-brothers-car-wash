@@ -1,56 +1,36 @@
 import fs from "node:fs";
 import path from "node:path";
-
 const root = process.cwd();
-const ignoredDirs = new Set([".git","node_modules",".next","coverage"]);
-const ignoredFiles = new Set(["AGENTS.md","scripts/verify-identity.mjs"]);
-const textExtensions = new Set([".ts",".tsx",".js",".mjs",".css",".json",".webmanifest",".md",".yml",".yaml",".txt",".html",".svg"]);
 const failures = [];
-function walk(dir) {
-  const files = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (ignoredDirs.has(entry.name)) continue;
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) files.push(...walk(full)); else files.push(full);
-  }
-  return files;
+function read(relative) { return fs.readFileSync(path.join(root, relative), "utf8"); }
+function exists(relative) { return fs.existsSync(path.join(root, relative)); }
+
+// Next.js src/app/manifest.ts is the single source of /manifest.webmanifest.
+// Do not require a duplicate public/manifest.webmanifest file.
+const appManifest = read("src/app/manifest.ts");
+if (!appManifest.includes("Big Brothers Car Wash") || !appManifest.includes('short_name: "Vula\'s"') || appManifest.includes("Iteration 13")) failures.push("app manifest identity mismatch");
+for (const icon of ["big-brothers-icon-180.png", "big-brothers-icon-192.png", "big-brothers-icon-512.png"]) {
+  if (!exists("public/" + icon)) failures.push("Vula PWA icon asset missing: " + icon);
+  if (!appManifest.includes("/" + icon)) failures.push("Vula PWA icon missing from app manifest: " + icon);
 }
-for (const file of walk(root)) {
-  const rel = path.relative(root, file).replaceAll(path.sep, "/");
-  if (ignoredFiles.has(rel) || !textExtensions.has(path.extname(file).toLowerCase())) continue;
-  const content = fs.readFileSync(file, "utf8");
-  if (/boemo-joos-food-deals|namane-tyres\.vercel\.app|yusuf-clothing-line\.vercel\.app/i.test(content)) failures.push(rel + ": inherited project URL remains");
+if (!appManifest.includes('form_factor: "wide"') || !appManifest.includes("/pwa-screenshot-wide.svg")) failures.push("wide PWA install screenshot missing from manifest");
+if (!appManifest.includes("/pwa-screenshot-mobile.svg")) failures.push("mobile PWA install screenshot missing from manifest");
+for (const screenshot of ["pwa-screenshot-wide.svg", "pwa-screenshot-mobile.svg"]) {
+  if (!exists("public/" + screenshot)) failures.push("PWA screenshot asset missing: " + screenshot);
 }
-const manifest = JSON.parse(fs.readFileSync(path.join(root, "public/manifest.webmanifest"), "utf8"));
-if (manifest.name !== "Iteration 13 | Service Studio") failures.push("manifest: wrong application name");
-if (manifest.short_name !== "Iteration 13") failures.push("manifest: wrong short name");
-if (manifest.theme_color !== "#155eef") failures.push("manifest: wrong theme color");
-if (!manifest.icons?.some(icon => icon.src === "/iteration13-icon.svg" || icon.src === "/iteration13-icon-192.png")) failures.push("manifest: prototype icon missing");
-for (const iconPath of ["/iteration13-icon.svg", "/iteration13-icon-192.png", "/iteration13-icon-512.png"]) {
-  if (!manifest.icons?.some(icon => icon.src === iconPath)) failures.push("manifest: icon missing " + iconPath);
-  if (!fs.existsSync(path.join(root, "public", iconPath.slice(1)))) failures.push("manifest icon asset missing " + iconPath);
-}
-const appManifest = fs.readFileSync(path.join(root, "src/app/manifest.ts"), "utf8");
-if (!appManifest.includes('name: "Iteration 13 | Service Studio"')) failures.push("app manifest: wrong application name");
-if (appManifest.includes("The Plug") || appManifest.includes("plug-icon")) failures.push("app manifest: inherited The Plug identity remains");
-for (const iconPath of ["/iteration13-icon-192.png", "/iteration13-icon-512.png"]) if (!appManifest.includes(iconPath)) failures.push("app manifest: missing " + iconPath);
-if (!fs.existsSync(path.join(root, "public/iteration13-icon.svg"))) failures.push("prototype icon file missing");
-if (!fs.existsSync(path.join(root, "public/iteration13-icon-180.png"))) failures.push("Apple install icon file missing");
-const layout = fs.readFileSync(path.join(root, "src/app/layout.tsx"), "utf8");
-for (const expected of ["Iteration 13 | Service Studio", "applicationName:\"Iteration 13\""]) if (!layout.includes(expected)) failures.push("layout: missing " + expected);
-// Validate Apple install metadata semantically; whitespace and additional metadata fields are harmless.
-if (!/appleWebApp\s*:\s*\{[^}]*\bcapable\s*:\s*true\b[^}]*\btitle\s*:\s*["']Iteration 13["']/s.test(layout)) failures.push('layout: missing appleWebApp capable=true and title="Iteration 13"');
-const sw = fs.readFileSync(path.join(root, "public/sw.js"), "utf8");
-if (!/iteration13-shell-v\d+/.test(sw)) failures.push("service worker: missing isolated cache namespace");
-if (!sw.includes("/iteration13-icon.svg")) failures.push("service worker: prototype icon missing from app shell");
-if (!sw.includes("/iphone-install") || !sw.includes("/iphone-install.svg")) failures.push("service worker: iPhone installation guide is not cached for offline use");
-const installGuidePath = path.join(root, "src/app/iphone-install/page.tsx");
-if (!fs.existsSync(installGuidePath)) failures.push("iPhone installation guide route missing");
-else if (!fs.readFileSync(installGuidePath, "utf8").includes("https://youtu.be/et2_1AcBYlg")) failures.push("iPhone installation guide: walkthrough link missing");
-if (!fs.existsSync(path.join(root, "public/iphone-install.svg"))) failures.push("iPhone installation illustration missing");
-if (failures.length) {
-  console.error("IDENTITY VERIFICATION FAILED");
-  failures.forEach(failure => console.error(" - " + failure));
-  process.exit(1);
-}
-console.log("IDENTITY VERIFIED — Iteration 13 app metadata and service-worker cache are isolated.");
+const layout = read("src/app/layout.tsx");
+for (const text of ["Big Brothers Car Wash", "big-brothers.css", "PwaRegister", 'manifest: "/manifest.webmanifest"']) if (!layout.includes(text)) failures.push("layout missing " + text);
+const pwaRegister = read("src/app/pwa-register.tsx");
+for (const text of ["beforeinstallprompt", "prompt.prompt()", "big-brothers-install-card", "big-brothers-install-close", "big-brothers-install-action"]) if (!pwaRegister.includes(text)) failures.push("PWA install lifecycle missing " + text);
+const sw = read("public/sw.js");
+if (!sw.includes("big-brothers-shell-v3") || !sw.includes("/offline")) failures.push("service worker cache namespace or offline shell missing");
+if (sw.includes('icon: "/big-brothers-icon.svg"') || sw.includes('badge: "/big-brothers-icon.svg"')) failures.push("service worker notification still references the failing SVG icon");
+if (!sw.includes("const cacheCopy = response.clone();")) failures.push("service worker response cloning fix missing");
+const home = read("src/app/page.tsx");
+for (const text of ["Big Brothers Car Wash", "bookings", "queueEntries", "fleetRequests", "syncOfflineRequests"]) if (!home.includes(text)) failures.push("customer app missing " + text);
+const data = read("src/lib/firebase/big-brothers-data.ts");
+for (const text of ["subscribeBookings", "subscribeQueue", "subscribeFleet", "subscribeServices", "subscribeSettings"]) if (!data.includes(text)) failures.push("Firebase data layer missing " + text);
+const rules = read("firestore.rules");
+for (const text of ["match /bookings/", "match /queueEntries/", "match /fleetRequests/", "function isAdmin()"]) if (!rules.includes(text)) failures.push("Firestore security rules missing " + text);
+if (failures.length) { console.error("IDENTITY / FOUNDATION VERIFICATION FAILED"); failures.forEach(item => console.error(" - " + item)); process.exit(1); }
+console.log("VULA FOUNDATION VERIFIED — app identity, canonical PWA manifest, install icons/screenshots, cache isolation, customer data layer and security rules are present.");

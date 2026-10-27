@@ -11,7 +11,7 @@ export async function GET() {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "",
   };
-  return new Response("self.__THE_PLUG_FIREBASE_CONFIG__ = " + JSON.stringify(config) + ";", {
+  return new Response("self.__BIG_BROTHERS_FIREBASE_CONFIG__ = " + JSON.stringify(config) + ";", {
     headers: {
       "Content-Type": "application/javascript; charset=utf-8",
       "Cache-Control": "no-store, max-age=0",

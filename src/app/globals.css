@@ -351,25 +351,25 @@ h1 em{font-style:normal;color:var(--plug-blue);text-shadow:0 0 22px rgba(8,102,2
  .plugInstallLanding .plugButton:hover,.plugInstallBenefitGrid article:hover{transform:none}
 }
 
-/* Branded install invitation — The Plug owns the story, the browser owns final consent. */
+/* Vula-branded install invitation; the browser owns final install consent. */
 .plugInstallModal{position:relative;width:min(100%,500px);max-height:min(92dvh,860px);overflow:auto;padding:26px;border-radius:25px;background:#fff;color:#111;box-shadow:0 28px 90px rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.75);animation:plugInstallEnter .24s ease-out}
-.plugInstallModal:before{content:"";position:absolute;inset:0 0 auto;height:6px;background:linear-gradient(90deg,#0866ff 0 72%,#ed1c24 72% 100%)}
+.plugInstallModal:before{content:"";position:absolute;inset:0 0 auto;height:6px;background:linear-gradient(90deg,#9fc957 0 72%,#14221e 72% 100%)}
 .plugInstallTop{display:flex;align-items:center;gap:10px;margin:2px 0 28px}
-.plugInstallMark{display:grid;place-items:center;width:43px;height:43px;flex:none;border-radius:50%;background:#111;color:#fff;border:3px solid #0866ff;font-weight:1000;font-size:1.15rem}
+.plugInstallMark{display:grid;place-items:center;width:43px;height:43px;flex:none;border-radius:50%;background:#111;color:#fff;border:3px solid #9fc957;font-weight:1000;font-size:1.15rem}
 .plugInstallTag{font-size:.62rem;font-weight:1000;letter-spacing:.14em;color:#666}
 .plugInstallClose{margin-left:auto;width:36px;height:36px;border:1px solid #e3e3e3;border-radius:50%;background:#fff;color:#555;font-size:1.45rem;line-height:1;cursor:pointer}
-.plugInstallKicker{font-size:.65rem;letter-spacing:.16em;font-weight:1000;color:#0866ff}
+.plugInstallKicker{font-size:.65rem;letter-spacing:.16em;font-weight:1000;color:#9fc957}
 .plugInstallModal h2{margin:10px 0 13px;font-family:Arial,Helvetica,sans-serif;font-size:clamp(2.7rem,10vw,4.2rem);line-height:.87;letter-spacing:-.08em;color:#111}
-.plugInstallModal h2 em{font-style:normal;color:#0866ff}
+.plugInstallModal h2 em{font-style:normal;color:#9fc957}
 .plugInstallModal>p:not(.plugInstallFootnote){font-size:.92rem;line-height:1.65;color:#555;margin:0}
 .plugInstallModalBenefits{display:grid;gap:0;margin:21px 0 20px;border-top:1px solid #ececec}
 .plugInstallModalBenefits>span{display:grid;grid-template-columns:34px 1fr;gap:2px 10px;padding:11px 0;border-bottom:1px solid #ececec}
-.plugInstallModalBenefits b{grid-row:span 2;color:#0866ff;font-size:.7rem;padding-top:2px}
+.plugInstallModalBenefits b{grid-row:span 2;color:#9fc957;font-size:.7rem;padding-top:2px}
 .plugInstallModalBenefits strong{font-size:.8rem}
 .plugInstallModalBenefits small{color:#777;font-size:.72rem;line-height:1.45}
 .plugInstallPrimary,.plugInstallSecondary{width:100%;min-height:51px;border-radius:11px;font-weight:950;cursor:pointer}
-.plugInstallPrimary{border:0;background:#0866ff;color:#fff;box-shadow:0 10px 24px rgba(8,102,255,.22);font-size:.88rem}
-.plugInstallPrimary:hover{background:#0757dc}
+.plugInstallPrimary{border:0;background:#c6f36b;color:#14221e;box-shadow:0 10px 24px rgba(20,34,30,.16);font-size:.88rem}
+.plugInstallPrimary:hover{background:#7ea83d}
 .plugInstallSecondary{margin-top:8px;border:1px solid #dedede;background:#fff;color:#333;font-size:.82rem}
 .plugInstallFootnote{margin:13px 0 0;text-align:center;color:#888;font-size:.65rem;line-height:1.45}
 .plugInstallSteps{margin-top:22px;padding-top:18px;border-top:1px solid #ececec}
