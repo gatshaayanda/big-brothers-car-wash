@@ -101,6 +101,6 @@ export default function ReceiptView({ token }: { token: string }) {
     <button className="big-brothers-button secondary" type="button" onClick={() => void claimJob()} disabled={claiming}>{claiming ? "Securing your account…" : "Claim this job with Google"}</button>
     {receipt.claimed && <p className="receipt-claim-note">This receipt has already been claimed. Sign in with the account that claimed it to view the job history.</p>}
     {claimMessage && <p className="big-brothers-notice pending" role="status">{claimMessage}</p>}
-    <a className="receipt-next-step" href="/?journey=book#request">Request another wash ↗</a>
+    <Link className="receipt-next-step" href="/?journey=book#request">Request another wash ↗</Link>
   </section></main>;
 }
