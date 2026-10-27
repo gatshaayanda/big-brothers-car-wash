@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "Big Brothers Car Wash", statusBarStyle: "default" }
 };
 
-export const viewport: Viewport = { themeColor: "#c6f36b", colorScheme: "light" };
+export const viewport: Viewport = { themeColor: "#ed1c24", colorScheme: "light" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en"><body>

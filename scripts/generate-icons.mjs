@@ -3,7 +3,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 
 const output = path.join(process.cwd(), "public");
-const palette = { background: [20, 34, 30, 255], lime: [198, 243, 107, 255], white: [245, 246, 241, 255] };
+const palette = { background: [20, 34, 30, 255], red: [237, 28, 36, 255], white: [245, 246, 241, 255] };
 
 function crc32(buffer) {
   let crc = 0xffffffff;
@@ -49,7 +49,7 @@ function render(size) {
       for (let col = 0; col < glyphB[row].length; col++) {
         if (glyphB[row][col] !== "1") continue;
         for (let dy = 0; dy < scale; dy++) for (let dx = 0; dx < scale; dx++) {
-          put(left + (letter * 6 + col) * scale + dx, top + row * scale + dy, palette.lime);
+          put(left + (letter * 6 + col) * scale + dx, top + row * scale + dy, palette.red);
         }
       }
     }
