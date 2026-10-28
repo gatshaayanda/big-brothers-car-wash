@@ -136,3 +136,6 @@ This section records the product owner's latest explicit direction and takes pre
 - Nielsen Norman Group's progressive-disclosure guidance recommends placing advanced/secondary tasks where they become relevant rather than presenting everything at once: https://www.nngroup.com/articles/progressive-disclosure/
 - A preregistered set of experiments and a large field experiment on app adoption found that choice sequence and wording can affect adoption of app features. Use this to justify contextual, optional reminder prompts—not coercive defaults or premature permission requests: https://business.columbia.edu/faculty/research/nudging-app-adoption-choice-architecture-facilitates-consumer-uptake-mobile-apps
 - QA the real journey with a staff phone and a customer's own phone: intake, accepted queue, staff receipt-link sharing after completion, secure account/receipt claim, repeat-wash request, optional reminders, share invitation, and racing. Test small screens and confirm no customer data survives a completed shared-phone handoff.
+
+### Build and navigation guard
+- Use `next/link` for internal route navigation (for example, links to `/` or `/account`) so the Next.js `no-html-link-for-pages` lint rule passes. Keep ordinary `<a>` elements for external destinations and in-page anchors.
