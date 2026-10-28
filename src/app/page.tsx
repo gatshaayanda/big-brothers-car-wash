@@ -244,6 +244,9 @@ export default function Home() {
       const user = await ensureUser();
       if (!user) throw new Error("Online service is not configured yet. Your request has not been sent.");
       await saveCustomerRecord(user.uid, customerName, phone, String(form.get("email") || user.email || ""));
+      if (tab === "queue") {
+        await setDoc(doc(db, "reminderPreferences", user.uid), { tipReminderPreference: tipPreference, updatedAt: now }, { merge: true });
+      }
       const requestRef = doc(collection(db, collectionName));
       const writePromise = setDoc(requestRef, { ...data, customerId: user.uid });
       setNotice({ kind: "pending", text: "Sending securely to Big Brothers' system…" });
