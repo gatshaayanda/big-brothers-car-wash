@@ -33,6 +33,12 @@ export default function ReceiptView({ token }: { token: string }) {
   const [claiming, setClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState("");
   const [suggestedDates, setSuggestedDates] = useState<string[]>([]);
+  const [reviewRating, setReviewRating] = useState("5");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewPublicConsent, setReviewPublicConsent] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [reviewBusy, setReviewBusy] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +56,28 @@ export default function ReceiptView({ token }: { token: string }) {
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [token]);
+
+  async function submitReview(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (reviewBusy || reviewSubmitted) return;
+    setReviewBusy(true);
+    setReviewMessage("");
+    try {
+      const response = await fetch("/api/receipts/" + encodeURIComponent(token) + "/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: Number(reviewRating), comment: reviewComment, publicConsent: reviewPublicConsent }),
+      });
+      const data = await response.json().catch(() => ({})) as { submitted?: boolean; error?: string; message?: string };
+      if (!response.ok || !data.submitted) throw new Error(data.error || "Review could not be saved.");
+      setReviewSubmitted(true);
+      setReviewMessage(data.message || "Thank you for your feedback.");
+    } catch (reason) {
+      setReviewMessage(reason instanceof Error ? reason.message : "Review could not be saved.");
+    } finally {
+      setReviewBusy(false);
+    }
+  }
 
   async function claimJob() {
     setClaiming(true);
@@ -109,6 +137,7 @@ export default function ReceiptView({ token }: { token: string }) {
     <button className="big-brothers-button secondary" type="button" onClick={() => void claimJob()} disabled={claiming}>{claiming ? "Securing your account…" : "Claim this job with Google"}</button>
     {receipt.claimed && <p className="receipt-claim-note">This receipt has already been claimed. Sign in with the account that claimed it to view the job history.</p>}
     {claimMessage && <p className="big-brothers-notice pending" role="status">{claimMessage}</p>}
+    <section className="receipt-next-booking receipt-review"><h2>How was your wash?</h2><p>Your feedback is optional and helps Big Brothers improve. Public display is separate and requires your permission; the team reviews it before anything appears publicly.</p>{reviewSubmitted ? <p className="big-brothers-notice success" role="status">{reviewMessage}</p> : <form className="receipt-review-form" onSubmit={submitReview}><label>Rating<select value={reviewRating} onChange={event=>setReviewRating(event.target.value)} required><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Could be better</option><option value="1">1 — Poor</option></select></label><label>Comment (optional)<textarea value={reviewComment} onChange={event=>setReviewComment(event.target.value)} maxLength={1000} rows={3} placeholder="What went well, or what could be improved?"/></label><label className="receipt-review-consent"><input type="checkbox" checked={reviewPublicConsent} onChange={event=>setReviewPublicConsent(event.target.checked)}/> I give permission for this review to be considered for public display after moderation. My phone number and receipt link will never be displayed.</label><button type="submit" className="big-brothers-button primary" disabled={reviewBusy}>{reviewBusy?"Sending review…":"Send feedback"}</button>{reviewMessage&&<p className="big-brothers-notice pending" role="status">{reviewMessage}</p>}</form>}</section>
     <section className="receipt-next-booking"><h2>Plan your next wash</h2><p>Based on today’s visit, here are two suggested dates—about three and four weeks from when you opened this receipt. Choose a time on the booking form; staff will confirm real availability.</p><div className="receipt-next-booking-options">{suggestedDates.map((date,index)=><Link key={date} className="big-brothers-button secondary" href={"/?journey=book&preferredDate="+date+"#request"}>{index===0?"In about 3 weeks":"In about 4 weeks"} · {new Date(date+"T12:00:00").toLocaleDateString("en-BW",{day:"numeric",month:"short"})} ↗</Link>)}</div><Link className="receipt-next-step" href="/?journey=book#request">Choose another date ↗</Link></section>
   </section></main>;
 }
