@@ -7,7 +7,7 @@ import { onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, hasFirebaseWebConfig } from "@/lib/firebase/client";
 import { enableVulaPushNotifications } from "@/lib/firebase/big-brothers-notifications";
-import { saveReminderPreferences, subscribeLoyaltyAccount, subscribeReminderPreferences, subscribeServices, subscribeSettings, type VulaService } from "@/lib/firebase/big-brothers-data";
+import { saveAnnouncementPreferences, saveReminderPreferences, subscribeLoyaltyAccount, subscribeReminderPreferences, subscribeServices, subscribeSettings, type VulaService } from "@/lib/firebase/big-brothers-data";
 import "./big-brothers.css";
 import RacingWarmup from "./games/racing-warmup";
 import LocationWeather from "@/components/LocationWeather";
@@ -36,6 +36,8 @@ export default function Home() {
   const [connectionError, setConnectionError] = useState("");
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [remindersEnabled, setRemindersEnabled] = useState(false);
+  const [announcementsEnabled, setAnnouncementsEnabled] = useState(false);
+  const [announcementNotice, setAnnouncementNotice] = useState("");
   const [reminderNotice, setReminderNotice] = useState("");
   const [pushNotice, setPushNotice] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
@@ -79,7 +81,7 @@ export default function Home() {
     const fail = () => {};
     const stops = [
       subscribeLoyaltyAccount(userId, value => setLoyaltyPoints(Number(value?.pointsBalance ?? 0)), fail),
-      subscribeReminderPreferences(userId, value => setRemindersEnabled(Boolean(value?.enabled)), fail),
+      subscribeReminderPreferences(userId, value => { setRemindersEnabled(Boolean(value?.enabled)); setAnnouncementsEnabled(Boolean(value?.announcementsEnabled)); }, fail),
     ];
     return () => stops.forEach(stop => stop());
   }, [userId]);
@@ -94,6 +96,20 @@ export default function Home() {
     if (!userId || !navigator.onLine) { setPushNotice("Connect and submit an online request first."); return; }
     try { await enableVulaPushNotifications(userId); await saveReminderPreferences(userId, true); setRemindersEnabled(true); setPushNotice("Push reminders are enabled on this device for confirmed bookings."); }
     catch (error) { setPushNotice(error instanceof Error ? error.message : "Push reminders could not be enabled."); }
+  }
+  async function enableAnnouncementPush() {
+    if (!userId || !navigator.onLine) { setAnnouncementNotice("Submit an online request on your own device before enabling announcement alerts."); return; }
+    try {
+      await enableVulaPushNotifications(userId);
+      await saveAnnouncementPreferences(userId, true);
+      setAnnouncementsEnabled(true);
+      setAnnouncementNotice("You're opted in. Big Brothers can send published offers to this device; you can switch this off any time.");
+    } catch (error) { setAnnouncementNotice(error instanceof Error ? error.message : "Announcement alerts could not be enabled."); }
+  }
+  async function saveAnnouncementChoice() {
+    if (!userId || !navigator.onLine) { setAnnouncementNotice("Connect and submit a request first to save this preference."); return; }
+    try { await saveAnnouncementPreferences(userId, announcementsEnabled); setAnnouncementNotice(announcementsEnabled ? "Announcement preference saved. To receive push alerts on this device, enable notification permission." : "You have opted out of announcement alerts."); }
+    catch (error) { setAnnouncementNotice(error instanceof Error ? error.message : "Preference could not be saved."); }
   }
 
   async function shareInvite() {
@@ -257,6 +273,7 @@ export default function Home() {
         <article className="account-card loyalty-card"><span className="service-category">LOYALTY BALANCE</span><strong className="loyalty-points">{loyaltyPoints}</strong><span>points</span><p>Points are maintained by Big Brothers staff. Automatic points and discounts are not active until the business confirms the rules.</p><a className="text-link" href="/account">View my account details ↗</a></article>
         <article className="account-card account-weather-card"><div className="account-card-heading"><span className="service-category">G-WEST WEATHER</span><p>Current conditions are a guide, not a promise about service availability.</p></div><div className="account-weather"><LocationWeather showLocationGuide={false}/></div></article>
         <article className="account-card account-reminders-card"><span className="service-category">STAY IN THE LOOP</span><h3>Booking reminders</h3><p>Choose an in-app reminder preference or enable push alerts on this device. Push needs browser permission and the configured Firebase Web Push key.</p><label className="reminder-toggle"><input type="checkbox" checked={remindersEnabled} onChange={e=>setRemindersEnabled(e.target.checked)}/> In-app booking reminders</label><button type="button" className="big-brothers-button secondary" onClick={()=>void saveReminderChoice()} disabled={!userId || !online}>Save preference</button><button type="button" className="big-brothers-button primary" onClick={()=>void enablePush()} disabled={!userId || !online}>Enable push reminders</button><p className="reminder-disclaimer">Only upcoming confirmed bookings are eligible for configured push reminders. Permission or a saved preference alone does not confirm delivery.</p>{reminderNotice&&<p className="big-brothers-notice pending">{reminderNotice}</p>}{pushNotice&&<p className="big-brothers-notice pending">{pushNotice}</p>}</article>
+        <article className="account-card account-announcements-card"><span className="service-category">NEWS & SPECIAL OFFERS</span><h3>{String(settings.announcementTitle||"Big Brothers updates")}</h3><p>{String(settings.announcementMessage||"Opt in if you would like to hear about special wash offers and news published by the team.")}</p><label className="reminder-toggle"><input type="checkbox" checked={announcementsEnabled} onChange={e=>setAnnouncementsEnabled(e.target.checked)}/> I’d like news and special-offer alerts</label><button type="button" className="big-brothers-button secondary" disabled={!userId||!online} onClick={()=>void saveAnnouncementChoice()}>Save preference</button><button type="button" className="big-brothers-button primary" disabled={!userId||!online} onClick={()=>void enableAnnouncementPush()}>Enable offer notifications</button>{announcementNotice&&<p role="status" className="big-brothers-notice pending">{announcementNotice}</p>}</article>
       </div>
     </section>
     <section className="big-brothers-section racing-section" id="big-brothers-racing" aria-label="Big Brothers Racing"><div className="racing-section-intro"><p className="big-brothers-eyebrow">WHILE YOUR WASH IS GETTING READY</p><h2>Big Brothers Racing.</h2><p>Take a quick solo race, chase your personal best, and invite family or friends to try the track.</p><p className="racing-reward-note"><strong>High-score discounts are coming soon.</strong> Game scores do not earn or redeem discounts yet.</p></div><RacingWarmup embedded /></section>
