@@ -120,6 +120,13 @@ This section records the product owner's latest explicit direction and takes pre
 - Promotional/news notifications are opt-in. Game discounts remain inactive until an admin-configured offer and server-side eligibility/redemption policy are implemented.
 - Keep this intake concise: name, WhatsApp, vehicle type and service are core; registration and notes are optional; price suggestions, tips and extras are progressively disclosed and never coercive.
 
+### Optional media promotions, offline rotation, and customer announcements — 2026-10-28
+- Big Brothers Racing rotates the three existing '/videos/Left.mp4', '/videos/Right.mp4', and '/videos/Bays.mp4' clips at the ready screen and after a disabling crash. Never show the same clip twice consecutively on the same device; keep the last choice in device-local storage. Keep the player controls available and the promotional card non-blocking to the race controls.
+- The three clips total approximately 104 MB. Do not download them silently. Customers can explicitly save all three to the existing 'big-brothers-media-v2' cache for offline use; show progress and a clear storage/download failure. Rotation still works offline from local storage. Offline playback of the clips requires that the customer previously saved them successfully; otherwise show the branded fallback.
+- Admin announcements are published through the authenticated server endpoint. Push notifications may only be sent to devices whose customer explicitly opted in and registered an FCM token. A saved preference without notification permission/token does not mean delivery. Report sent/failed counts; do not claim a notification was delivered to every subscriber.
+- Booking confirmation must use the authenticated server transaction and check the configured capacity for the exact requested slot. Start with four site bays/attendants and four mobile jobs per slot as editable settings. If no opening hours/slot has been configured, do not infer that a customer request is available or confirmed. The UI's preferred time is a request until staff confirmation.
+- End-of-day receipt workflow records the final agreed wash charge, optional agreed tip as a separate line, and staff-selected payment status. A customer-provided price is a suggestion, never the transaction amount. The optional email action opens a prefilled email draft; it does not send email automatically.
+
 ### Account, repeat wash, reminders and weather
 - Never use the label **“Your Wash Space”**. Use **“My Big Brothers Car Wash Account”** / “My account” consistently.
 - Make `/account` directly reachable from the header and the account area. It is the place for customer profile, saved vehicles, receipts, booking/request history and account security.
