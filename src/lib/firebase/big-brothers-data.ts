@@ -10,6 +10,7 @@ export type VulaQueueEntry = { id: string; customerId: string; customerName: str
 export type VulaFleetRequest = { id: string; customerId: string; businessName: string; contactName: string; phone: string; email: string; vehicleCount: number; vehicleTypes: string[]; serviceNeeds: string[]; preferredLocation: string; preferredSchedule: string; notes: string; status: string; createdAt: string; updatedAt: string };
 export type VulaGalleryItem = { id: string; title: string; imageUrl: string; description?: string; active: boolean; createdAt?: string };
 export type VulaReview = { id: string; queueEntryId: string; receiptRef: string; customerName: string; serviceName: string; rating: number; comment: string; publicConsent: boolean; status: "pending" | "approved" | "rejected"; createdAt: string };
+export type VulaGallerySubmission = { id: string; queueEntryId: string; receiptRef: string; customerName: string; title: string; description: string; imageUrl: string; storagePath: string; publicConsent: boolean; status: "pending" | "approved" | "rejected"; createdAt: string };
 
 function subscribeList<T>(path: string, cb: (items: T[]) => void, fail: (error: Error) => void, activeOnly = false): Unsubscribe {
   const source = collection(db, path);
@@ -20,6 +21,7 @@ function subscribeList<T>(path: string, cb: (items: T[]) => void, fail: (error: 
 export const subscribeServices = (cb: (items: VulaService[]) => void, fail: (e: Error) => void) => subscribeList<VulaService>("services", cb, fail, true);
 export const subscribeGallery = (cb: (items: VulaGalleryItem[]) => void, fail: (e: Error) => void) => subscribeList<VulaGalleryItem>("gallery", cb, fail, true);
 export const subscribeReviews = (cb: (items: VulaReview[]) => void, fail: (e: Error) => void) => subscribeList<VulaReview>("reviews", cb, fail);
+export const subscribeGallerySubmissions = (cb: (items: VulaGallerySubmission[]) => void, fail: (e: Error) => void) => subscribeList<VulaGallerySubmission>("gallerySubmissions", cb, fail);
 export const subscribeBookings = (cb: (items: VulaBooking[]) => void, fail: (e: Error) => void) => subscribeList<VulaBooking>("bookings", cb, fail);
 export const subscribeQueue = (cb: (items: VulaQueueEntry[]) => void, fail: (e: Error) => void) => subscribeList<VulaQueueEntry>("queueEntries", cb, fail);
 export const subscribeFleet = (cb: (items: VulaFleetRequest[]) => void, fail: (e: Error) => void) => subscribeList<VulaFleetRequest>("fleetRequests", cb, fail);
@@ -62,7 +64,7 @@ export async function saveGalleryItem(data: { id?: string; title: string; imageU
 export async function saveSettings(data: Record<string, unknown>) {
   await setDoc(doc(db, "businessSettings", "main"), { ...data, updatedAt: new Date().toISOString() }, { merge: true });
 }
-export async function updateOperationalRecord(path: "bookings" | "queueEntries" | "fleetRequests" | "reviews", id: string, patch: Record<string, unknown>) {
+export async function updateOperationalRecord(path: "bookings" | "queueEntries" | "fleetRequests" | "reviews" | "gallerySubmissions", id: string, patch: Record<string, unknown>) {
   await updateDoc(doc(db, path, id), { ...patch, updatedAt: new Date().toISOString() });
 }
 export async function setBookingStatus(id: string, status: string) {
