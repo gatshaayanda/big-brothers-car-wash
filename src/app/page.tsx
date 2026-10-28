@@ -48,6 +48,7 @@ export default function Home() {
   const [reminderNotice, setReminderNotice] = useState("");
   const [pushNotice, setPushNotice] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
   const [inviteNotice, setInviteNotice] = useState("");
   const [publicReviews, setPublicReviews] = useState<Array<{id:string;customer:string;serviceName:string;rating:number;comment:string;createdAt:string}>>([]);
   const [galleryItems, setGalleryItems] = useState<VulaGalleryItem[]>([]);
@@ -71,6 +72,16 @@ export default function Home() {
     setNotice({kind:"pending",text:"Your saved details are filled in. Check the vehicle and service, then send your new booking request."});
     setRepeatPrefill(null);
   }, [tab, repeatPrefill]);
+
+  useEffect(() => {
+    const footer = document.querySelector(".big-brothers-footer");
+    if (!footer || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(entries => {
+      setFooterVisible(entries.some(entry => entry.isIntersecting));
+    }, { threshold: 0.01 });
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -331,7 +342,7 @@ export default function Home() {
     <section className="big-brothers-section racing-section" id="big-brothers-racing" aria-label="Big Brothers Racing"><div className="racing-section-intro"><p className="big-brothers-eyebrow">WHILE YOUR WASH IS GETTING READY</p><h2>Big Brothers Racing.</h2><p>Take a quick solo race, chase your personal best, and invite family or friends to try the track.</p><p className="racing-reward-note"><strong>High-score discounts are coming soon.</strong> Game scores do not earn or redeem discounts yet.</p></div><RacingWarmup embedded /></section>
     <footer className="big-brothers-footer"><a href="#request" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></a><span>G-West, Gaborone · Wash. Care. Go.</span><a href="/account">My account</a><a href="/games">Racing garage</a><a href="/iphone-install">Install on iPhone</a><a href="/admin">Staff sign in</a></footer>
 
-    <aside className="bb-help-widget" aria-label="Customer quick help">
+    <aside className={"bb-help-widget"+(footerVisible?" is-footer-visible":"")} aria-label="Customer quick help">
       {chatOpen && (
         <section className="bb-help-panel" aria-labelledby="bb-help-title">
           <p className="big-brothers-eyebrow">QUICK HELP</p>
