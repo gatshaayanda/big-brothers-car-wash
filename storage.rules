@@ -14,6 +14,17 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
       allow delete: if isAdmin();
     }
+    match /gallery-submissions/{uid}/{fileName} {
+      // Customers may upload a photo for review only into their own isolated folder.
+      // Files are not published by Storage rules; staff moderation is required.
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow update: if false;
+      allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);
+    }
     match /{allPaths=**} { allow read, write: if false; }
   }
 }
