@@ -7,15 +7,17 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     const { app, uid } = await requireBigBrothersStaff(request);
-    const body = await request.json().catch(() => null) as { queueEntryId?: unknown; amount?: unknown; tipAmount?: unknown; paymentStatus?: unknown } | null;
+    const body = await request.json().catch(() => null) as { queueEntryId?: unknown; amount?: unknown; tipAmount?: unknown; paymentStatus?: unknown; paymentMethod?: unknown } | null;
     const queueEntryId = typeof body?.queueEntryId === "string" ? body.queueEntryId.trim() : "";
     const amount = body?.amount;
     const tipAmount = body?.tipAmount === undefined ? 0 : body.tipAmount;
     const paymentStatus = body?.paymentStatus;
+    const paymentMethod = body?.paymentMethod === undefined ? "not-recorded" : body.paymentMethod;
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(queueEntryId)) return NextResponse.json({ error: "Choose a valid queue entry." }, { status: 400 });
     if (typeof amount !== "number" || !Number.isFinite(amount) || amount < 0 || amount > 1000000) return NextResponse.json({ error: "Enter a valid final agreed charge in BWP." }, { status: 400 });
     if (typeof tipAmount !== "number" || !Number.isFinite(tipAmount) || tipAmount < 0 || tipAmount > 1000000) return NextResponse.json({ error: "Enter a valid optional tip amount in BWP." }, { status: 400 });
     if (!["paid", "unpaid", "refunded"].includes(String(paymentStatus))) return NextResponse.json({ error: "Choose a valid payment status." }, { status: 400 });
+    if (!["not-recorded", "cash", "mobile-money", "card", "other"].includes(String(paymentMethod))) return NextResponse.json({ error: "Choose a valid payment method." }, { status: 400 });
 
     const db = getFirestore(app);
     const queueRef = db.doc(`queueEntries/${queueEntryId}`);
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
     const existingData = existing.data() || {};
     const expiry = Date.parse(String(existingData.expiresAt || ""));
     if (existing.exists && existingData.revoked !== true && existingData.token && Number.isFinite(expiry) && expiry > Date.now()) {
-      await receiptRef.set({ amount, tipAmount, paymentStatus: String(paymentStatus), updatedAt: new Date().toISOString() }, { merge: true });
+      await receiptRef.set({ amount, tipAmount, paymentStatus: String(paymentStatus), paymentMethod: String(paymentMethod), updatedAt: new Date().toISOString() }, { merge: true });
       const url = new URL("/receipt/" + String(existingData.token), request.url).toString();
       return NextResponse.json({ url, receiptRef: String(existingData.receiptRef || ""), reused: true }, { headers: { "Cache-Control": "no-store" } });
     }
@@ -55,6 +57,7 @@ export async function POST(request: Request) {
       amount,
       tipAmount,
       paymentStatus: String(paymentStatus),
+      paymentMethod: String(paymentMethod),
       joinedAt: String(job.createdAt || ""),
       completedAt: String(job.updatedAt || createdAt),
       createdAt,
