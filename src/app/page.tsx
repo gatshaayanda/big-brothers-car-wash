@@ -218,7 +218,7 @@ export default function Home() {
         const scheduledDate = new Date(scheduledInput);
         if (!Number.isFinite(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) throw new Error("Choose a future date and time.");
         const closedDays = Array.isArray(settings.closedDays) ? settings.closedDays.map(day => String(day).toLowerCase()) : [];
-        const dayName = scheduledDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+        const dayName = scheduledDate.toLocaleDateString("en-US", { weekday: "long", timeZone: "Africa/Gaborone" }).toLowerCase();
         if (closedDays.includes(dayName)) throw new Error("That day is marked closed by Big Brothers. Choose another date.");
         const scheduledFor = scheduledDate.toISOString();
         collectionName = "bookings";
