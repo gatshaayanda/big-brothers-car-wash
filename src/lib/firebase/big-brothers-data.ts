@@ -6,7 +6,7 @@ import { db } from "@/lib/firebase/client";
 
 export type VulaService = { id: string; name: string; description?: string; category?: string; price?: number; active: boolean; updatedAt?: string };
 export type VulaBooking = { id: string; customerId: string; customerName: string; phone: string; vehicleType: string; vehicleRegistration: string; serviceId: string; serviceName: string; serviceMode: "site" | "mobile"; locationId: string; address: string; scheduledFor: string; notes: string; priceQuote?: number; paymentMethod?: string; paymentStatus?: string; status: string; createdAt: string; updatedAt: string };
-export type VulaQueueEntry = { id: string; customerId: string; customerName: string; phone: string; vehicleType: string; vehicleRegistration: string; serviceId: string; serviceName: string; locationId: string; notes: string; status: string; createdAt: string; updatedAt: string };
+export type VulaQueueEntry = { id: string; customerId: string; customerName: string; phone: string; email?: string; vehicleType: string; vehicleRegistration: string; serviceId: string; serviceName: string; locationId: string; notes: string; customerOfferAmount?: number; tipPreference?: string; addOnInterest?: string; status: string; createdAt: string; updatedAt: string };
 export type VulaFleetRequest = { id: string; customerId: string; businessName: string; contactName: string; phone: string; email: string; vehicleCount: number; vehicleTypes: string[]; serviceNeeds: string[]; preferredLocation: string; preferredSchedule: string; notes: string; status: string; createdAt: string; updatedAt: string };
 export type VulaGalleryItem = { id: string; title: string; imageUrl: string; description?: string; active: boolean; createdAt?: string };
 
