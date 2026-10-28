@@ -40,6 +40,9 @@ export function subscribeReminderPreferences(uid: string, cb: (value: Record<str
 export async function saveReminderPreferences(uid: string, enabled: boolean) {
   await setDoc(doc(db, "reminderPreferences", uid), { enabled, channels: ["in-app"], updatedAt: new Date().toISOString() }, { merge: true });
 }
+export async function saveAnnouncementPreferences(uid: string, enabled: boolean) {
+  await setDoc(doc(db, "reminderPreferences", uid), { announcementsEnabled: enabled, updatedAt: new Date().toISOString() }, { merge: true });
+}
 export async function saveLoyaltyBalance(uid: string, pointsBalance: number, note: string) {
   await setDoc(doc(db, "loyaltyAccounts", uid), { uid, pointsBalance: Math.max(0, Math.floor(pointsBalance)), note, updatedAt: new Date().toISOString() }, { merge: true });
 }
