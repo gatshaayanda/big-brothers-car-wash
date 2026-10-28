@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
@@ -31,6 +31,8 @@ export default function Home() {
   const [serviceId, setServiceId] = useState("");
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
+  const bookingTimeRef = useRef(bookingTime);
+  useEffect(() => { bookingTimeRef.current = bookingTime; }, [bookingTime]);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [availabilityConfigured, setAvailabilityConfigured] = useState<boolean | null>(null);
   const [availabilityMessage, setAvailabilityMessage] = useState("");
@@ -95,12 +97,12 @@ export default function Home() {
         setAvailableSlots(slots);
         setAvailabilityConfigured(Boolean(data.configured));
         setAvailabilityMessage(String(data.message || ""));
-        if (bookingTime && !slots.includes(bookingTime) && data.configured) setBookingTime("");
+        if (bookingTimeRef.current && !slots.includes(bookingTimeRef.current) && data.configured) setBookingTime("");
       })
       .catch(error => { if (!cancelled) { setAvailableSlots([]); setAvailabilityConfigured(false); setAvailabilityMessage(error instanceof Error ? error.message : "Availability could not be checked."); } })
       .finally(() => { if (!cancelled) setAvailabilityLoading(false); });
     return () => { cancelled = true; };
-  }, [tab, bookingDate, bookingTime, mode, online]);
+  }, [tab, bookingDate, mode, online]);
 
 
   useEffect(() => {
