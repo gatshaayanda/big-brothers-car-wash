@@ -7,7 +7,7 @@ import { onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, hasFirebaseWebConfig } from "@/lib/firebase/client";
 import { enableVulaPushNotifications } from "@/lib/firebase/big-brothers-notifications";
-import { saveAnnouncementPreferences, saveReminderPreferences, subscribeLoyaltyAccount, subscribeReminderPreferences, subscribeServices, subscribeSettings, type VulaService } from "@/lib/firebase/big-brothers-data";
+import { saveAnnouncementPreferences, saveReminderPreferences, subscribeGallery, subscribeLoyaltyAccount, subscribeReminderPreferences, subscribeServices, subscribeSettings, type VulaGalleryItem, type VulaService } from "@/lib/firebase/big-brothers-data";
 import "./big-brothers.css";
 import RacingWarmup from "./games/racing-warmup";
 import LocationWeather from "@/components/LocationWeather";
@@ -50,6 +50,7 @@ export default function Home() {
   const [chatOpen, setChatOpen] = useState(false);
   const [inviteNotice, setInviteNotice] = useState("");
   const [publicReviews, setPublicReviews] = useState<Array<{id:string;customer:string;serviceName:string;rating:number;comment:string;createdAt:string}>>([]);
+  const [galleryItems, setGalleryItems] = useState<VulaGalleryItem[]>([]);
   const mobileCoverage = Array.isArray(settings.mobileCoverage) ? settings.mobileCoverage as string[] : [];
   const businessName = typeof settings.businessName === "string" && settings.businessName.trim() ? settings.businessName : "Big Brothers Car Wash";
   const locationName = typeof settings.locationName === "string" && settings.locationName.trim() ? settings.locationName : "G-West";
@@ -82,7 +83,7 @@ export default function Home() {
     const onOnline = () => { setOnline(true); void syncOfflineRequests(); };
     const onOffline = () => { setOnline(false); setNotice({ kind: "pending", text: "Offline: requests can be saved on this device, but the team cannot see them until they sync." }); };
     const stopAuth = onAuthStateChanged(auth, user => { setUserId(user?.uid ?? ""); });
-    const stops = [subscribeServices(setServices, error => setConnectionError(error.message)), subscribeSettings(value => setSettings(value ?? {}), () => {})];
+    const stops = [subscribeServices(setServices, error => setConnectionError(error.message)), subscribeGallery(setGalleryItems, () => {}), subscribeSettings(value => setSettings(value ?? {}), () => {})];
     window.addEventListener("online", onOnline); window.addEventListener("offline", onOffline);
     if (navigator.onLine) void syncOfflineRequests();
     return () => { stopAuth(); stops.forEach(stop => stop()); window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
@@ -322,6 +323,7 @@ export default function Home() {
         <article className="account-card account-announcements-card"><span className="service-category">NEWS & SPECIAL OFFERS</span><h3>{String(settings.announcementTitle||"Big Brothers updates")}</h3><p>{String(settings.announcementMessage||"Opt in if you would like to hear about special wash offers and news published by the team.")}</p><label className="reminder-toggle"><input type="checkbox" checked={announcementsEnabled} onChange={e=>setAnnouncementsEnabled(e.target.checked)}/> I’d like news and special-offer alerts</label><button type="button" className="big-brothers-button secondary" disabled={!userId||!online} onClick={()=>void saveAnnouncementChoice()}>Save preference</button><button type="button" className="big-brothers-button primary" disabled={!userId||!online} onClick={()=>void enableAnnouncementPush()}>Enable offer notifications</button>{announcementNotice&&<p role="status" className="big-brothers-notice pending">{announcementNotice}</p>}</article>
       </div>
       <article className="account-card public-review-feed"><span className="service-category">CUSTOMER FEEDBACK</span><h3>Wash experiences</h3>{publicReviews.length>0?<><p>{(publicReviews.reduce((sum,review)=>sum+review.rating,0)/publicReviews.length).toFixed(1)} / 5 average · {publicReviews.length} published {publicReviews.length===1?"review":"reviews"}</p><div className="public-review-list">{publicReviews.map(review=><div key={review.id} className="public-review-item"><strong>{review.customer} · {"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</strong><small>{review.serviceName}</small>{review.comment&&<p>{review.comment}</p>}</div>)}</div></>:<p>Customer feedback will appear here after a customer chooses public sharing and the team approves the review.</p>}</article>
+      <article className="account-card public-wash-feed"><span className="service-category">FRESH FROM THE WASH</span><h3>Big Brothers wash feed</h3><p>Recent vehicles and work published by the team.</p>{galleryItems.length>0?<div className="public-wash-gallery">{galleryItems.map(item=><figure key={item.id}><img src={item.imageUrl} alt={item.title} loading="lazy"/><figcaption><strong>{item.title}</strong>{item.description&&<span>{item.description}</span>}</figcaption></figure>)}</div>:<p>Wash photos will appear here when the team publishes approved images.</p>}</article>
     </section>
     <section className="big-brothers-section racing-section" id="big-brothers-racing" aria-label="Big Brothers Racing"><div className="racing-section-intro"><p className="big-brothers-eyebrow">WHILE YOUR WASH IS GETTING READY</p><h2>Big Brothers Racing.</h2><p>Take a quick solo race, chase your personal best, and invite family or friends to try the track.</p><p className="racing-reward-note"><strong>High-score discounts are coming soon.</strong> Game scores do not earn or redeem discounts yet.</p></div><RacingWarmup embedded /></section>
     <footer className="big-brothers-footer"><a href="#request" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></a><span>G-West, Gaborone · Wash. Care. Go.</span><a href="/account">My account</a><a href="/games">Racing garage</a><a href="/iphone-install">Install on iPhone</a><a href="/admin">Staff sign in</a></footer>
