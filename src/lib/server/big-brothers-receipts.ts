@@ -56,10 +56,12 @@ export type PublicReceipt = {
   locationName: string;
   customerName: string;
   phone: string;
+  email: string;
   vehicleType: string;
   vehicleRegistration: string;
   serviceName: string;
   amount: number;
+  tipAmount: number;
   paymentStatus: string;
   joinedAt: string;
   completedAt: string;
@@ -75,10 +77,12 @@ export function publicReceipt(receipt: Record<string, unknown>): PublicReceipt {
     locationName: "G-West, Botswana",
     customerName: String(receipt.customerName || ""),
     phone: String(receipt.phone || ""),
+    email: String(receipt.email || ""),
     vehicleType: String(receipt.vehicleType || ""),
     vehicleRegistration: String(receipt.vehicleRegistration || ""),
     serviceName: String(receipt.serviceName || "Car wash service"),
     amount: Number(receipt.amount || 0),
+    tipAmount: Number(receipt.tipAmount || 0),
     paymentStatus: String(receipt.paymentStatus || "unpaid"),
     joinedAt: String(receipt.joinedAt || ""),
     completedAt: String(receipt.completedAt || ""),
@@ -110,6 +114,8 @@ export function createReceiptPdf(receipt: PublicReceipt) {
     { text: "", size: 8, color: "0 0 0" },
     { text: "FINAL AGREED CHARGE", size: 10, color: "0.25 0.32 0.27" },
     { text: "BWP " + receipt.amount.toFixed(2), size: 22, color: "0.08 0.13 0.11" },
+    { text: "Voluntary tip: BWP " + receipt.tipAmount.toFixed(2), size: 11, color: "0.08 0.13 0.11" },
+    { text: "Total recorded: BWP " + (receipt.amount + receipt.tipAmount).toFixed(2), size: 13, color: "0.08 0.13 0.11" },
     { text: "Payment status: " + receipt.paymentStatus.toUpperCase(), size: 11, color: "0.08 0.13 0.11" },
     { text: "", size: 10, color: "0 0 0" },
     { text: "This receipt records the details and payment status entered by staff.", size: 9, color: "0.32 0.38 0.34" },
