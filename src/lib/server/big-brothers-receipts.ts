@@ -63,6 +63,7 @@ export type PublicReceipt = {
   amount: number;
   tipAmount: number;
   paymentStatus: string;
+  paymentMethod: string;
   joinedAt: string;
   completedAt: string;
   createdAt: string;
@@ -84,6 +85,7 @@ export function publicReceipt(receipt: Record<string, unknown>): PublicReceipt {
     amount: Number(receipt.amount || 0),
     tipAmount: Number(receipt.tipAmount || 0),
     paymentStatus: String(receipt.paymentStatus || "unpaid"),
+    paymentMethod: String(receipt.paymentMethod || "not-recorded"),
     joinedAt: String(receipt.joinedAt || ""),
     completedAt: String(receipt.completedAt || ""),
     createdAt: String(receipt.createdAt || ""),
@@ -116,6 +118,7 @@ export function createReceiptPdf(receipt: PublicReceipt) {
     { text: "BWP " + receipt.amount.toFixed(2), size: 22, color: "0.08 0.13 0.11" },
     { text: "Voluntary tip: BWP " + receipt.tipAmount.toFixed(2), size: 11, color: "0.08 0.13 0.11" },
     { text: "Total recorded: BWP " + (receipt.amount + receipt.tipAmount).toFixed(2), size: 13, color: "0.08 0.13 0.11" },
+    { text: "Payment method: " + receipt.paymentMethod.toUpperCase().replaceAll("-", " "), size: 10, color: "0.08 0.13 0.11" },
     { text: "Payment status: " + receipt.paymentStatus.toUpperCase(), size: 11, color: "0.08 0.13 0.11" },
     { text: "", size: 10, color: "0 0 0" },
     { text: "This receipt records the details and payment status entered by staff.", size: 9, color: "0.32 0.38 0.34" },
