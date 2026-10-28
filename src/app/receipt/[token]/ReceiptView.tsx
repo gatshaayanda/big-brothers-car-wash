@@ -127,7 +127,6 @@ export default function ReceiptView({ token }: { token: string }) {
       <div><span>Customer</span><strong>{receipt.customerName}</strong></div>
       <div><span>Phone</span><strong>{receipt.phone}</strong></div>
       <div><span>Vehicle</span><strong>{receipt.vehicleType}</strong></div>
-      <div><span>Registration</span><strong>{receipt.vehicleRegistration || "Not supplied"}</strong></div>
       <div><span>Service</span><strong>{receipt.serviceName}</strong></div>
       <div><span>Completed</span><strong>{receipt.completedAt ? new Date(receipt.completedAt).toLocaleString("en-BW") : "Not recorded"}</strong></div>
     </div>
