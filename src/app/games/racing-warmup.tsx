@@ -46,6 +46,8 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
   const [businessName, setBusinessName] = useState("Big Brothers Car Wash");
   const [promoMedia, setPromoMedia] = useState("/videos/Left.mp4");
   const [promoUnavailable, setPromoUnavailable] = useState(false);
+  const [promoCaching, setPromoCaching] = useState(false);
+  const [promoCacheMessage, setPromoCacheMessage] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   phaseRef.current = phase;
 
@@ -73,6 +75,28 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
     setPromoUnavailable(false);
     try { localStorage.setItem("big-brothers-racing:last-promo:v1", next); } catch {}
   }, [phase]);
+  async function savePromoMediaForOffline() {
+    if (promoCaching) return;
+    if (!navigator.onLine) { setPromoCacheMessage("Connect to the internet to save the three clips first."); return; }
+    if (!("caches" in window)) { setPromoCacheMessage("Offline media storage is not supported in this browser."); return; }
+    setPromoCaching(true);
+    setPromoCacheMessage("Preparing offline media…");
+    const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
+    let saved = 0;
+    try {
+      const cache = await caches.open("big-brothers-media-v2");
+      for (const asset of assets) {
+        const response = await fetch(asset, { cache: "no-store" });
+        if (!response.ok) throw new Error("Could not download " + asset.split("/").pop());
+        await cache.put(new URL(asset, window.location.origin).toString(), response.clone());
+        saved += 1;
+        setPromoCacheMessage("Saved " + saved + " of 3 clips for offline use.");
+      }
+      setPromoCacheMessage("All 3 clips are saved on this device for offline use.");
+    } catch (error) {
+      setPromoCacheMessage(saved + " of 3 clips saved. " + (error instanceof Error ? error.message : "Storage or download failed.") + " Connect again to retry.");
+    } finally { setPromoCaching(false); }
+  }
   useEffect(() => { if (!embedded) document.title = "Big Brothers Racing · Circuit practice"; }, [businessName, embedded]);
 
   const reset = useCallback((start: boolean) => {
@@ -432,7 +456,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
           <p>{phase === "ready" ? "Follow the green line. Brake at the boards, turn in on cue, clip the apex and unwind onto the exit." : phase === "countdown" ? "Get set. Smooth steering beats sudden corrections." : phase === "paused" ? "Take a breath. Resume when you're ready." : "Session complete. Take another lap and beat your time."}</p>
         </div>
       </div>
-      {(phase === "ready" || phase === "crashed") && <aside className="bb-racing-promo" aria-label="Big Brothers Car Wash promotion"><div className="bb-racing-promo-media">{!promoUnavailable ? <video key={promoMedia} src={promoMedia} controls playsInline muted preload="metadata" onError={() => setPromoUnavailable(true)} aria-label="Big Brothers Car Wash media"/> : <div className="bb-racing-promo-fallback"><span className="big-brothers-mark">BB</span><strong>BIG BROTHERS CAR WASH</strong><span>Wash. Care. Go.</span></div>}</div><div className="bb-racing-promo-copy"><span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH</span><strong>{phase === "crashed" ? "Need another lap?" : "While you're here, meet your wash team."}</strong><p>{phase === "crashed" ? "Take a breath, then try again. Your next run starts when you choose." : "Queue for your wash, keep your receipt, and come back for another race."}</p>{phase === "crashed" && <button type="button" className="big-brothers-button primary" onClick={startRace}>Try Again ↻</button>}</div></aside>}
+      {(phase === "ready" || phase === "crashed") && <aside className="bb-racing-promo" aria-label="Big Brothers Car Wash promotion"><div className="bb-racing-promo-media">{!promoUnavailable ? <video key={promoMedia} src={promoMedia} controls playsInline muted preload="metadata" onError={() => setPromoUnavailable(true)} aria-label="Big Brothers Car Wash media"/> : <div className="bb-racing-promo-fallback"><span className="big-brothers-mark">BB</span><strong>BIG BROTHERS CAR WASH</strong><span>Wash. Care. Go.</span></div>}</div><div className="bb-racing-promo-copy"><span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH</span><strong>{phase === "crashed" ? "Need another lap?" : "While you're here, meet your wash team."}</strong><p>{phase === "crashed" ? "Take a breath, then try again. Your next run starts when you choose." : "Queue for your wash, keep your receipt, and come back for another race."}</p>{phase === "crashed" && <button type="button" className="big-brothers-button primary" onClick={startRace}>Try Again ↻</button>}<button type="button" className="big-brothers-button secondary" disabled={promoCaching} onClick={() => void savePromoMediaForOffline()}>{promoCaching ? "Saving clips…" : "Save 3 clips for offline · ~104 MB"}</button>{promoCacheMessage && <p role="status" aria-live="polite">{promoCacheMessage}</p>}</div></aside>}
       <div className="warmup-nos"><div><strong>NOS</strong><span>{Math.round(nos)}%</span></div><div className="nos-track"><span style={{ width: nos + "%" }} /></div></div>
       <div className="warmup-controls warmup-circuit-controls">
         <div className="warmup-steering" aria-label="Analog steering">
