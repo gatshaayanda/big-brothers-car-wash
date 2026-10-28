@@ -200,10 +200,11 @@ service cloud.firestore {
       allow read: if owns(uid) || isAdmin();
       allow create, update: if owns(uid)
         && request.resource.data.keys().hasOnly([
-          'enabled', 'channels', 'updatedAt'
+          'enabled', 'channels', 'announcementsEnabled', 'updatedAt'
         ])
-        && request.resource.data.enabled is bool
-        && request.resource.data.channels is list
+        && (!request.resource.data.keys().hasAny(['enabled']) || request.resource.data.enabled is bool)
+        && (!request.resource.data.keys().hasAny(['channels']) || request.resource.data.channels is list)
+        && (!request.resource.data.keys().hasAny(['announcementsEnabled']) || request.resource.data.announcementsEnabled is bool)
         && validText(request.resource.data.updatedAt, 40);
       allow delete: if owns(uid) || isAdmin();
     }
