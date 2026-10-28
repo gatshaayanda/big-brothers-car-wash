@@ -233,7 +233,6 @@ export default function Home() {
         collectionName = "bookings";
         data = { ...common, serviceId: serviceId || "general-request", serviceName: activeServices.find(s => s.id === serviceId)?.name || "General car wash request", serviceMode: mode, locationId: mode === "site" ? locationName : "coverage-review", address, scheduledFor, paymentMethod: String(form.get("paymentMethod") || "pay-on-site"), paymentStatus: "unpaid", status: "requested" };
       } else if (tab === "queue") {
-                if (serviceId === "customer-offer" && (customerOfferAmount === null || !Number.isFinite(customerOfferAmount) || customerOfferAmount < 0 || customerOfferAmount > 1000000)) throw new Error("Enter the amount you would like the team to consider, or choose a listed service.");
         collectionName = "queueEntries";
         const selectedOffer = activeServices.find(s => s.id === serviceId && typeof s.price === "number" && s.price >= 0);
         if (serviceId !== "customer-offer" && !selectedOffer) throw new Error("Choose one of the currently priced wash offers.");
