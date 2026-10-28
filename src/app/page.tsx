@@ -49,6 +49,7 @@ export default function Home() {
   const [pushNotice, setPushNotice] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [inviteNotice, setInviteNotice] = useState("");
+  const [publicReviews, setPublicReviews] = useState<Array<{id:string;customer:string;serviceName:string;rating:number;comment:string;createdAt:string}>>([]);
   const mobileCoverage = Array.isArray(settings.mobileCoverage) ? settings.mobileCoverage as string[] : [];
   const businessName = typeof settings.businessName === "string" && settings.businessName.trim() ? settings.businessName : "Big Brothers Car Wash";
   const locationName = typeof settings.locationName === "string" && settings.locationName.trim() ? settings.locationName : "G-West";
@@ -69,6 +70,12 @@ export default function Home() {
     setNotice({kind:"pending",text:"Your saved details are filled in. Check the vehicle and service, then send your new booking request."});
     setRepeatPrefill(null);
   }, [tab, repeatPrefill]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/reviews", { cache: "no-store" }).then(response=>response.json()).then(data=>{if(!cancelled&&Array.isArray(data.reviews))setPublicReviews(data.reviews)}).catch(()=>{});
+    return ()=>{cancelled=true};
+  }, []);
 
   useEffect(() => {
     setOnline(navigator.onLine);
@@ -314,6 +321,7 @@ export default function Home() {
         <article className="account-card account-reminders-card"><span className="service-category">STAY IN THE LOOP</span><h3>Booking reminders</h3><p>Choose an in-app reminder preference or enable push alerts on this device. Push needs browser permission and the configured Firebase Web Push key.</p><label className="reminder-toggle"><input type="checkbox" checked={remindersEnabled} onChange={e=>setRemindersEnabled(e.target.checked)}/> In-app booking reminders</label><button type="button" className="big-brothers-button secondary" onClick={()=>void saveReminderChoice()} disabled={!userId || !online}>Save preference</button><button type="button" className="big-brothers-button primary" onClick={()=>void enablePush()} disabled={!userId || !online}>Enable push reminders</button><p className="reminder-disclaimer">Only upcoming confirmed bookings are eligible for configured push reminders. Permission or a saved preference alone does not confirm delivery.</p>{reminderNotice&&<p className="big-brothers-notice pending">{reminderNotice}</p>}{pushNotice&&<p className="big-brothers-notice pending">{pushNotice}</p>}</article>
         <article className="account-card account-announcements-card"><span className="service-category">NEWS & SPECIAL OFFERS</span><h3>{String(settings.announcementTitle||"Big Brothers updates")}</h3><p>{String(settings.announcementMessage||"Opt in if you would like to hear about special wash offers and news published by the team.")}</p><label className="reminder-toggle"><input type="checkbox" checked={announcementsEnabled} onChange={e=>setAnnouncementsEnabled(e.target.checked)}/> I’d like news and special-offer alerts</label><button type="button" className="big-brothers-button secondary" disabled={!userId||!online} onClick={()=>void saveAnnouncementChoice()}>Save preference</button><button type="button" className="big-brothers-button primary" disabled={!userId||!online} onClick={()=>void enableAnnouncementPush()}>Enable offer notifications</button>{announcementNotice&&<p role="status" className="big-brothers-notice pending">{announcementNotice}</p>}</article>
       </div>
+      <article className="account-card public-review-feed"><span className="service-category">CUSTOMER FEEDBACK</span><h3>Wash experiences</h3>{publicReviews.length>0?<><p>{(publicReviews.reduce((sum,review)=>sum+review.rating,0)/publicReviews.length).toFixed(1)} / 5 average · {publicReviews.length} published {publicReviews.length===1?"review":"reviews"}</p><div className="public-review-list">{publicReviews.map(review=><div key={review.id} className="public-review-item"><strong>{review.customer} · {"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</strong><small>{review.serviceName}</small>{review.comment&&<p>{review.comment}</p>}</div>)}</div></>:<p>Customer feedback will appear here after a customer chooses public sharing and the team approves the review.</p>}</article>
     </section>
     <section className="big-brothers-section racing-section" id="big-brothers-racing" aria-label="Big Brothers Racing"><div className="racing-section-intro"><p className="big-brothers-eyebrow">WHILE YOUR WASH IS GETTING READY</p><h2>Big Brothers Racing.</h2><p>Take a quick solo race, chase your personal best, and invite family or friends to try the track.</p><p className="racing-reward-note"><strong>High-score discounts are coming soon.</strong> Game scores do not earn or redeem discounts yet.</p></div><RacingWarmup embedded /></section>
     <footer className="big-brothers-footer"><a href="#request" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></a><span>G-West, Gaborone · Wash. Care. Go.</span><a href="/account">My account</a><a href="/games">Racing garage</a><a href="/iphone-install">Install on iPhone</a><a href="/admin">Staff sign in</a></footer>
