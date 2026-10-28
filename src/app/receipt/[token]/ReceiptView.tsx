@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getIdToken, GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase/client";
+import { getIdToken, GoogleAuthProvider, linkWithPopup, signInAnonymously, signInWithPopup, signOut } from "firebase/auth";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { auth, storage } from "@/lib/firebase/client";
 
 type Receipt = {
   receiptRef: string;
@@ -39,6 +40,13 @@ export default function ReceiptView({ token }: { token: string }) {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [reviewBusy, setReviewBusy] = useState(false);
   const [reviewMessage, setReviewMessage] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoTitle, setPhotoTitle] = useState("");
+  const [photoDescription, setPhotoDescription] = useState("");
+  const [photoConsent, setPhotoConsent] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoSubmitted, setPhotoSubmitted] = useState(false);
+  const [photoMessage, setPhotoMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +66,41 @@ export default function ReceiptView({ token }: { token: string }) {
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [token]);
+
+  async function submitPhoto(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (photoBusy || photoSubmitted) return;
+    if (!photoFile || !photoFile.type.startsWith("image/") || photoFile.size > 8 * 1024 * 1024) {
+      setPhotoMessage("Choose an image under 8 MB.");
+      return;
+    }
+    if (!photoConsent) {
+      setPhotoMessage("Confirm that Big Brothers may consider this photo for public display.");
+      return;
+    }
+    setPhotoBusy(true);
+    setPhotoMessage("Uploading photo securely…");
+    try {
+      const user = auth.currentUser || (await signInAnonymously(auth)).user;
+      const extension = (photoFile.name.split(".").pop() || "jpg").replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "jpg";
+      const storagePath = "gallery-submissions/" + user.uid + "/" + Date.now() + "-" + crypto.randomUUID() + "." + extension;
+      const uploaded = await uploadBytes(ref(storage, storagePath), photoFile, { contentType: photoFile.type });
+      const imageUrl = await getDownloadURL(uploaded.ref);
+      const response = await fetch("/api/receipts/" + encodeURIComponent(token) + "/photo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl, storagePath, title: photoTitle.trim(), description: photoDescription.trim(), publicConsent: photoConsent }),
+      });
+      const data = await response.json().catch(() => ({})) as { submitted?: boolean; error?: string; message?: string };
+      if (!response.ok || !data.submitted) throw new Error(data.error || "Photo submission could not be saved.");
+      setPhotoSubmitted(true);
+      setPhotoMessage(data.message || "Photo submitted for review.");
+    } catch (reason) {
+      setPhotoMessage(reason instanceof Error ? reason.message : "Photo upload failed. Check your connection and try again.");
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
 
   async function submitReview(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -139,6 +182,7 @@ export default function ReceiptView({ token }: { token: string }) {
     {receipt.claimed && <p className="receipt-claim-note">This receipt has already been claimed. Sign in with the account that claimed it to view the job history.</p>}
     {claimMessage && <p className="big-brothers-notice pending" role="status">{claimMessage}</p>}
     <section className="receipt-next-booking receipt-review"><h2>How was your wash?</h2><p>Your feedback is optional and helps Big Brothers improve. Public display is separate and requires your permission; the team reviews it before anything appears publicly.</p>{reviewSubmitted ? <p className="big-brothers-notice success" role="status">{reviewMessage}</p> : <form className="receipt-review-form" onSubmit={submitReview}><label>Rating<select value={reviewRating} onChange={event=>setReviewRating(event.target.value)} required><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Could be better</option><option value="1">1 — Poor</option></select></label><label>Comment (optional)<textarea value={reviewComment} onChange={event=>setReviewComment(event.target.value)} maxLength={1000} rows={3} placeholder="What went well, or what could be improved?"/></label><label className="receipt-review-consent"><input type="checkbox" checked={reviewPublicConsent} onChange={event=>setReviewPublicConsent(event.target.checked)}/> I give permission for this review to be considered for public display after moderation. My phone number and receipt link will never be displayed.</label><button type="submit" className="big-brothers-button primary" disabled={reviewBusy}>{reviewBusy?"Sending review…":"Send feedback"}</button>{reviewMessage&&<p className="big-brothers-notice pending" role="status">{reviewMessage}</p>}</form>}</section>
+    <section className="receipt-next-booking receipt-photo-submission"><h2>Share your freshly washed car</h2><p>Want to show off the result? You can send one photo for staff moderation. It stays out of the public feed unless the team approves it.</p>{photoSubmitted?<p className="big-brothers-notice success" role="status">{photoMessage}</p>:<form className="receipt-review-form" onSubmit={submitPhoto}><label>Photo title<input value={photoTitle} onChange={event=>setPhotoTitle(event.target.value)} required maxLength={120} placeholder="e.g. My freshly washed SUV"/></label><label>Short caption (optional)<textarea value={photoDescription} onChange={event=>setPhotoDescription(event.target.value)} maxLength={500} rows={2} placeholder="Anything you'd like to share"/></label><label>Choose photo<input type="file" accept="image/*" required onChange={event=>setPhotoFile(event.target.files?.[0]||null)}/><small>Images only, maximum 8 MB.</small></label><label className="receipt-review-consent"><input type="checkbox" checked={photoConsent} onChange={event=>setPhotoConsent(event.target.checked)}/> I confirm I have permission to share this image and agree it may be considered for public display after moderation.</label><button type="submit" className="big-brothers-button primary" disabled={photoBusy}>{photoBusy?"Uploading…":"Submit photo for review"}</button>{photoMessage&&<p className="big-brothers-notice pending" role="status">{photoMessage}</p>}</form>}</section>
     <section className="receipt-next-booking"><h2>Plan your next wash</h2><p>Two simple follow-up windows, about 2 and 3 weeks after this wash. Choose a time from the admin-configured slots; the team confirms availability. Weather forecasts this far ahead are not reliable, so check the current G-West weather guide nearer the day.</p><div className="receipt-next-booking-options">{suggestedDates.map((date,index)=><Link key={date} className="big-brothers-button secondary" href={"/?journey=book&preferredDate="+date+"#request"}>{index===0?"In about 2 weeks":"In about 3 weeks"} · {new Date(date+"T12:00:00").toLocaleDateString("en-BW",{day:"numeric",month:"short"})} ↗</Link>)}</div><Link className="receipt-next-step" href="/?journey=book#request">Choose another date ↗</Link></section>
   </section></main>;
 }
