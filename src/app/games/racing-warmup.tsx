@@ -65,7 +65,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
     return stop;
   }, []);
   useEffect(() => {
-    if (phase !== "ready" && phase !== "crashed") return;
+    if ((phase !== "ready" && phase !== "crashed") || (embedded && !expanded)) return;
     const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
     let previous = "";
     try { previous = localStorage.getItem("big-brothers-racing:last-promo:v1") || ""; } catch {}
@@ -74,7 +74,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
     setPromoMedia(next);
     setPromoUnavailable(false);
     try { localStorage.setItem("big-brothers-racing:last-promo:v1", next); } catch {}
-  }, [phase]);
+  }, [phase, expanded, embedded]);
   async function savePromoMediaForOffline() {
     if (promoCaching) return;
     if (!navigator.onLine) { setPromoCacheMessage("Connect to the internet to save the three clips first."); return; }
