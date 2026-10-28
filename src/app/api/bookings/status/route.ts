@@ -30,11 +30,9 @@ export async function POST(request: Request) {
         const capacity = Number.isFinite(configured) && configured > 0 ? Math.min(100, Math.floor(configured)) : 4;
         const scheduledFor = String(booking.scheduledFor || "");
         if (!scheduledFor) throw new Error("BOOKING_SLOT_MISSING");
-        const slotQuery = db.collection("bookings")
-          .where("scheduledFor", "==", scheduledFor)
-          .where("serviceMode", "==", String(booking.serviceMode || "site"));
+        const slotQuery = db.collection("bookings").where("scheduledFor", "==", scheduledFor);
         const slotSnapshot = await transaction.get(slotQuery);
-        const confirmedCount = slotSnapshot.docs.filter(doc => doc.id !== bookingId && doc.data().status === "confirmed").length;
+        const confirmedCount = slotSnapshot.docs.filter(doc => doc.id !== bookingId && doc.data().serviceMode === String(booking.serviceMode || "site") && doc.data().status === "confirmed").length;
         if (confirmedCount >= capacity) throw new Error("BOOKING_CAPACITY_REACHED:" + capacity);
       }
       transaction.update(bookingRef, { status, updatedAt: new Date().toISOString() });
