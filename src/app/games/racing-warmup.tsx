@@ -44,6 +44,8 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
   const [boostActive, setBoostActive] = useState(false);
   const [toast, setToast] = useState<{ text: string; kind: "success" | "error" | "info" } | null>(null);
   const [businessName, setBusinessName] = useState("Big Brothers Car Wash");
+  const [promoMedia, setPromoMedia] = useState("/videos/Left.mp4");
+  const [promoUnavailable, setPromoUnavailable] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   phaseRef.current = phase;
 
@@ -60,6 +62,17 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
     }, () => {});
     return stop;
   }, []);
+  useEffect(() => {
+    if (phase !== "ready" && phase !== "crashed") return;
+    const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
+    let previous = "";
+    try { previous = localStorage.getItem("big-brothers-racing:last-promo:v1") || ""; } catch {}
+    const choices = assets.filter(asset => asset !== previous);
+    const next = choices[Math.floor(Math.random() * choices.length)] || assets[0];
+    setPromoMedia(next);
+    setPromoUnavailable(false);
+    try { localStorage.setItem("big-brothers-racing:last-promo:v1", next); } catch {}
+  }, [phase]);
   useEffect(() => { if (!embedded) document.title = "Big Brothers Racing · Circuit practice"; }, [businessName, embedded]);
 
   const reset = useCallback((start: boolean) => {
@@ -419,6 +432,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
           <p>{phase === "ready" ? "Follow the green line. Brake at the boards, turn in on cue, clip the apex and unwind onto the exit." : phase === "countdown" ? "Get set. Smooth steering beats sudden corrections." : phase === "paused" ? "Take a breath. Resume when you're ready." : "Session complete. Take another lap and beat your time."}</p>
         </div>
       </div>
+      {(phase === "ready" || phase === "crashed") && <aside className="bb-racing-promo" aria-label="Big Brothers Car Wash promotion"><div className="bb-racing-promo-media">{!promoUnavailable ? <video key={promoMedia} src={promoMedia} controls playsInline muted preload="metadata" onError={() => setPromoUnavailable(true)} aria-label="Big Brothers Car Wash media"/> : <div className="bb-racing-promo-fallback"><span className="big-brothers-mark">BB</span><strong>BIG BROTHERS CAR WASH</strong><span>Wash. Care. Go.</span></div>}</div><div className="bb-racing-promo-copy"><span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH</span><strong>{phase === "crashed" ? "Need another lap?" : "While you're here, meet your wash team."}</strong><p>{phase === "crashed" ? "Take a breath, then try again. Your next run starts when you choose." : "Queue for your wash, keep your receipt, and come back for another race."}</p>{phase === "crashed" && <button type="button" className="big-brothers-button primary" onClick={startRace}>Try Again ↻</button>}</div></aside>}
       <div className="warmup-nos"><div><strong>NOS</strong><span>{Math.round(nos)}%</span></div><div className="nos-track"><span style={{ width: nos + "%" }} /></div></div>
       <div className="warmup-controls warmup-circuit-controls">
         <div className="warmup-steering" aria-label="Analog steering">
@@ -441,7 +455,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
           <button type="button" className="accelerate-button" aria-label="Accelerate" disabled={phase !== "running"} onPointerDown={e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); hold("accelerate", true); }} onPointerUp={() => hold("accelerate", false)} onPointerCancel={() => hold("accelerate", false)} onLostPointerCapture={() => hold("accelerate", false)}>GAS ↑</button>
           <button type="button" className="nos-button" aria-label="Toggle NOS burst" aria-pressed={boostActive} disabled={phase !== "running" || nos <= 0} onClick={toggleBoost}>{boostActive ? "NOS ON ⚡" : "TAP NOS ⚡"}</button>
         </div>
-        <div className="warmup-actions">{phase === "ready" ? <button type="button" className="big-brothers-button primary" onClick={startRace}>Start driving ↗</button> : phase === "countdown" ? <button type="button" className="big-brothers-button primary" disabled>Ready {countdown || 1}…</button> : phase === "running" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Pause Ⅱ</button> : phase === "paused" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Resume ▶</button> : <button type="button" className="big-brothers-button primary" onClick={startRace}>Drive again ↻</button>}<button type="button" className="big-brothers-button secondary" onClick={() => reset(false)}>Restart ↻</button></div>
+        <div className="warmup-actions">{phase === "ready" ? <button type="button" className="big-brothers-button primary" onClick={startRace}>Start driving ↗</button> : phase === "countdown" ? <button type="button" className="big-brothers-button primary" disabled>Ready {countdown || 1}…</button> : phase === "running" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Pause Ⅱ</button> : phase === "paused" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Resume ▶</button> : <button type="button" className="big-brothers-button primary" onClick={startRace}>Try Again ↻</button>}<button type="button" className="big-brothers-button secondary" onClick={() => reset(false)}>Restart ↻</button></div>
       </div>
       <p className="warmup-help">Phone: move the circular thumbstick with your left thumb; BRAKE is left and GAS is right under your right thumb. Tap NOS once for a burst, tap again to stop. Desktop: ← / → or A / D steer, ↑ / W gas, ↓ / S brake, Space / Shift NOS, P pause. Practice is free. Any real wash discount or prize must be explicitly published and confirmed by the Big Brothers team; lap times alone do not promise money off.</p>
     </section>
