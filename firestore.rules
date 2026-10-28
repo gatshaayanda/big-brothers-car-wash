@@ -82,7 +82,8 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
           'customerId', 'customerName', 'phone', 'vehicleType',
           'vehicleRegistration', 'serviceId', 'serviceName',
-          'locationId', 'notes', 'status', 'createdAt', 'updatedAt'
+          'locationId', 'notes', 'customerOfferAmount', 'tipPreference', 'addOnInterest',
+          'status', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.customerId == uid
         && validText(request.resource.data.customerName, 120)
@@ -93,6 +94,14 @@ service cloud.firestore {
         && validText(request.resource.data.serviceName, 120)
         && validText(request.resource.data.locationId, 120)
         && validText(request.resource.data.notes, 1000)
+        && (!request.resource.data.keys().hasAny(['customerOfferAmount'])
+            || (request.resource.data.customerOfferAmount is number
+                && request.resource.data.customerOfferAmount >= 0
+                && request.resource.data.customerOfferAmount <= 1000000))
+        && (!request.resource.data.keys().hasAny(['tipPreference'])
+            || request.resource.data.tipPreference in ['no-preference', 'ask-me', 'coins', 'tip-if-happy'])
+        && (!request.resource.data.keys().hasAny(['addOnInterest'])
+            || request.resource.data.addOnInterest in ['no-thanks', 'coke', 'other'])
         && request.resource.data.status == 'waiting'
         && validText(request.resource.data.createdAt, 40)
         && validText(request.resource.data.updatedAt, 40);
