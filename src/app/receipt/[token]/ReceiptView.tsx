@@ -32,6 +32,7 @@ export default function ReceiptView({ token }: { token: string }) {
   const [error, setError] = useState("");
   const [claiming, setClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState("");
+  const [suggestedDates, setSuggestedDates] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,7 +40,11 @@ export default function ReceiptView({ token }: { token: string }) {
       .then(async response => {
         const data = await response.json().catch(() => ({})) as { receipt?: Receipt; error?: string };
         if (!response.ok || !data.receipt) throw new Error(data.error || "This receipt link is unavailable.");
-        if (!cancelled) setReceipt(data.receipt);
+        if (!cancelled) {
+          setReceipt(data.receipt);
+          const formatDate = (date: Date) => { const year = date.getFullYear(); const month = String(date.getMonth()+1).padStart(2,"0"); const day = String(date.getDate()).padStart(2,"0"); return year+"-"+month+"-"+day; };
+          setSuggestedDates([21,28].map(days => { const date = new Date(); date.setDate(date.getDate()+days); return formatDate(date); }));
+        }
       })
       .catch(reason => { if (!cancelled) setError(reason instanceof Error ? reason.message : "This receipt link is unavailable."); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -104,6 +109,6 @@ export default function ReceiptView({ token }: { token: string }) {
     <button className="big-brothers-button secondary" type="button" onClick={() => void claimJob()} disabled={claiming}>{claiming ? "Securing your account…" : "Claim this job with Google"}</button>
     {receipt.claimed && <p className="receipt-claim-note">This receipt has already been claimed. Sign in with the account that claimed it to view the job history.</p>}
     {claimMessage && <p className="big-brothers-notice pending" role="status">{claimMessage}</p>}
-    <Link className="receipt-next-step" href="/?journey=book#request">Request another wash ↗</Link>
+    <section className="receipt-next-booking"><h2>Plan your next wash</h2><p>Based on today’s visit, here are two suggested dates—about three and four weeks from when you opened this receipt. Choose a time on the booking form; staff will confirm real availability.</p><div className="receipt-next-booking-options">{suggestedDates.map((date,index)=><Link key={date} className="big-brothers-button secondary" href={"/?journey=book&preferredDate="+date+"#request"}>{index===0?"In about 3 weeks":"In about 4 weeks"} · {new Date(date+"T12:00:00").toLocaleDateString("en-BW",{day:"numeric",month:"short"})} ↗</Link>)}</div><Link className="receipt-next-step" href="/?journey=book#request">Choose another date ↗</Link></section>
   </section></main>;
 }
