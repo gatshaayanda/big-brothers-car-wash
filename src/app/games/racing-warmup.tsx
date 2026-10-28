@@ -45,6 +45,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
   const [toast, setToast] = useState<{ text: string; kind: "success" | "error" | "info" } | null>(null);
   const [businessName, setBusinessName] = useState("Big Brothers Car Wash");
   const [promoMedia, setPromoMedia] = useState("/videos/Left.mp4");
+  const promoLastRef = useRef("");
   const [promoUnavailable, setPromoUnavailable] = useState(false);
   const [promoCaching, setPromoCaching] = useState(false);
   const [promoCacheMessage, setPromoCacheMessage] = useState("");
@@ -67,10 +68,11 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
   useEffect(() => {
     if ((phase !== "ready" && phase !== "crashed") || (embedded && !expanded)) return;
     const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
-    let previous = "";
-    try { previous = localStorage.getItem("big-brothers-racing:last-promo:v1") || ""; } catch {}
+    let previous = promoLastRef.current;
+    try { previous = localStorage.getItem("big-brothers-racing:last-promo:v1") || previous; } catch {}
     const choices = assets.filter(asset => asset !== previous);
     const next = choices[Math.floor(Math.random() * choices.length)] || assets[0];
+    promoLastRef.current = next;
     setPromoMedia(next);
     setPromoUnavailable(false);
     try { localStorage.setItem("big-brothers-racing:last-promo:v1", next); } catch {}
@@ -92,7 +94,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
         saved += 1;
         setPromoCacheMessage("Saved " + saved + " of 3 clips for offline use.");
       }
-      setPromoCacheMessage("All 3 clips are saved on this device for offline use.");
+      setPromoCacheMessage(navigator.serviceWorker?.controller ? "All 3 clips are saved on this device for offline use." : "All 3 clips are saved. Reload the app once while online before testing offline playback.");
     } catch (error) {
       setPromoCacheMessage(saved + " of 3 clips saved. " + (error instanceof Error ? error.message : "Storage or download failed.") + " Connect again to retry.");
     } finally { setPromoCaching(false); }
