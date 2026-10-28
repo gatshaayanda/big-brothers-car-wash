@@ -31,6 +31,10 @@ export default function Home() {
   const [serviceId, setServiceId] = useState("");
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [availabilityConfigured, setAvailabilityConfigured] = useState<boolean | null>(null);
+  const [availabilityMessage, setAvailabilityMessage] = useState("");
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [tab, setTab] = useState<"book" | "queue" | "fleet">("queue");
   const [repeatPrefill, setRepeatPrefill] = useState<{customerName?:string;phone?:string;vehicleType?:string;vehicleRegistration?:string}|null>(null);
   const [connectionError, setConnectionError] = useState("");
