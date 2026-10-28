@@ -82,7 +82,7 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
           'customerId', 'customerName', 'phone', 'vehicleType',
           'vehicleRegistration', 'serviceId', 'serviceName',
-          'locationId', 'notes', 'customerOfferAmount', 'tipPreference', 'addOnInterest',
+          'locationId', 'notes', 'email', 'customerOfferAmount', 'tipPreference', 'addOnInterest',
           'status', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.customerId == uid
@@ -94,6 +94,7 @@ service cloud.firestore {
         && validText(request.resource.data.serviceName, 120)
         && validText(request.resource.data.locationId, 120)
         && validText(request.resource.data.notes, 1000)
+        && (!request.resource.data.keys().hasAny(['email']) || validText(request.resource.data.email, 254))
         && (!request.resource.data.keys().hasAny(['customerOfferAmount'])
             || (request.resource.data.customerOfferAmount is number
                 && request.resource.data.customerOfferAmount >= 0
