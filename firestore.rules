@@ -159,6 +159,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    match /gallerySubmissions/{submissionId} {
+      allow read: if isAdmin();
+      // Customer submissions are written only by the receipt-token-validated server route.
+      allow create, update, delete: if isAdmin();
+    }
+
     match /reviews/{reviewId} {
       allow read: if isAdmin()
         || (resource.data.status == 'approved' && resource.data.publicConsent == true);
