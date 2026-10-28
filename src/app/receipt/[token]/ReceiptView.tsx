@@ -11,10 +11,12 @@ type Receipt = {
   locationName: string;
   customerName: string;
   phone: string;
+  email: string;
   vehicleType: string;
   vehicleRegistration: string;
   serviceName: string;
   amount: number;
+  tipAmount: number;
   paymentStatus: string;
   joinedAt: string;
   completedAt: string;
@@ -95,7 +97,7 @@ export default function ReceiptView({ token }: { token: string }) {
       <div><span>Service</span><strong>{receipt.serviceName}</strong></div>
       <div><span>Completed</span><strong>{receipt.completedAt ? new Date(receipt.completedAt).toLocaleString("en-BW") : "Not recorded"}</strong></div>
     </div>
-    <div className="receipt-total"><span>Final agreed charge</span><strong>BWP {receipt.amount.toFixed(2)}</strong><small>Payment status: {receipt.paymentStatus}</small></div>
+    <div className="receipt-total"><span>Final agreed wash charge</span><strong>BWP {receipt.amount.toFixed(2)}</strong><small>Voluntary tip: BWP {receipt.tipAmount.toFixed(2)}</small><small>Total recorded: BWP {(receipt.amount+receipt.tipAmount).toFixed(2)}</small><small>Payment status: {receipt.paymentStatus}</small></div>
     <p className="receipt-disclaimer">This receipt reflects the final charge and payment status recorded by staff. It is proof of payment only when the status says “paid”. This secure link expires {new Date(receipt.expiresAt).toLocaleDateString("en-BW")}.</p>
     <a className="big-brothers-button primary" href={"/api/receipts/" + encodeURIComponent(token) + "/pdf"}>Download PDF receipt ↗</a>
     <button className="big-brothers-button secondary" type="button" onClick={() => void claimJob()} disabled={claiming}>{claiming ? "Securing your account…" : "Claim this job with Google"}</button>
