@@ -6,7 +6,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getIdToken } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { storage } from "@/lib/firebase/client";
-import { saveGalleryItem, saveLoyaltyBalance, saveService, saveSettings, setBookingStatus, subscribeBookings, subscribeFleet, subscribeGallery, subscribeQueue, subscribeServices, subscribeSettings, updateOperationalRecord, type VulaBooking, type VulaFleetRequest, type VulaGalleryItem, type VulaQueueEntry, type VulaService } from "@/lib/firebase/big-brothers-data";
+import { saveGalleryItem, saveLoyaltyBalance, saveService, saveSettings, subscribeBookings, subscribeFleet, subscribeGallery, subscribeQueue, subscribeServices, subscribeSettings, updateOperationalRecord, type VulaBooking, type VulaFleetRequest, type VulaGalleryItem, type VulaQueueEntry, type VulaService } from "@/lib/firebase/big-brothers-data";
 import "@/app/big-brothers.css";
 
 export default function VulaDashboard() {
@@ -20,18 +20,15 @@ export default function VulaDashboard() {
   const [racingData,setRacingData]=useState<{profiles:Array<{racers:Array<{id:string;alias:string;division:number;updatedAt?:string}>}>;results:Array<Record<string,unknown>>;issues:Array<Record<string,unknown>>}|null>(null);
   useEffect(()=>{const fail=(e:Error)=>setMessage("Live data unavailable: "+e.message);const stops=[subscribeBookings(setBookings,fail),subscribeQueue(setQueue,fail),subscribeFleet(setFleet,fail),subscribeServices(setServices,fail),subscribeGallery(setGallery,fail),subscribeSettings(s=>setSettingsState(s??{}),fail)];return()=>stops.forEach(stop=>stop())},[]);
   async function changeBookingStatus(item: VulaBooking, status: string) {
-    if (status === "confirmed") {
-      const key = item.serviceMode === "mobile" ? "mobileCapacityPerSlot" : "siteCapacityPerSlot";
-      const capacity = Number(settings[key] ?? 4);
-      if (capacity > 0) {
-        const confirmedInSlot = bookings.filter(other => other.id !== item.id && other.status === "confirmed" && other.serviceMode === item.serviceMode && other.scheduledFor === item.scheduledFor).length;
-        if (confirmedInSlot >= capacity) {
-          setMessage("Capacity limit reached for this exact slot. Choose another time or increase the configured capacity after checking operations.");
-          return;
-        }
-      }
-    }
-    await action(() => setBookingStatus(item.id, status));
+    const user=auth.currentUser;
+    if(!user){setMessage("Staff session expired. Sign in again before changing booking status.");return}
+    setBusy(true);setMessage("");
+    try {
+      const response=await fetch("/api/bookings/status",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+await getIdToken(user)},body:JSON.stringify({bookingId:item.id,status})});
+      const result=await response.json().catch(()=>({})) as {error?:string;updated?:boolean};
+      if(!response.ok||!result.updated)throw new Error(result.error||"Booking status could not be saved.");
+      setMessage(status==="confirmed"?"Booking confirmed. Slot capacity was checked on the server.":"Booking status updated.");
+    } catch(error) {setMessage(error instanceof Error?error.message:"Booking status could not be saved.")} finally {setBusy(false)}
   }
   async function action(fn:()=>Promise<unknown>){setBusy(true);setMessage("");try{await fn();setMessage("Saved to the live Big Brothers workspace.")}catch(e){setMessage(e instanceof Error?e.message:"Change could not be saved.")}finally{setBusy(false)}}
   async function createReceipt(item: VulaQueueEntry){const user=auth.currentUser;if(!user){setMessage("Staff session expired. Sign in again before creating a receipt.");return}const raw=receiptAmounts[item.id]??"";const amount=Number(raw);if(raw.trim()===""||!Number.isFinite(amount)||amount<0){setMessage("Enter the final agreed charge in BWP before creating the receipt.");return}setBusy(true);setMessage("");try{const response=await fetch("/api/receipts",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+await getIdToken(user)},body:JSON.stringify({queueEntryId:item.id,amount,tipAmount:Number(receiptTips[item.id]||0),paymentStatus:receiptPayments[item.id]||"unpaid"})});const data=await response.json().catch(()=>({})) as {url?:string;receiptRef?:string;error?:string};if(!response.ok||!data.url)throw new Error(data.error||"Receipt link could not be created.");setReceiptLinks(current=>({...current,[item.id]:data.url!}));setMessage("Receipt "+(data.receiptRef||"")+" is ready to share.");}catch(error){setMessage(error instanceof Error?error.message:"Receipt link could not be created.");}finally{setBusy(false)}}
