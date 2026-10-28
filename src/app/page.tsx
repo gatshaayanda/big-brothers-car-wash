@@ -79,6 +79,29 @@ export default function Home() {
   }, []);
 
   useEffect(() => { const params = new URLSearchParams(window.location.search); if (params.get("journey") === "book") { setTab("book"); setBookingDate(params.get("preferredDate") || ""); setBookingTime(params.get("preferredTime") || ""); } }, []);
+  useEffect(() => {
+    if (tab !== "book" || !bookingDate) { setAvailableSlots([]); setAvailabilityConfigured(null); setAvailabilityMessage(""); return; }
+    if (!online) { setAvailableSlots([]); setAvailabilityConfigured(null); setAvailabilityMessage("Offline: live availability cannot be checked. Any saved request remains unconfirmed until staff review."); return; }
+    let cancelled = false;
+    setAvailabilityLoading(true);
+    setAvailabilityConfigured(null);
+    setAvailabilityMessage("Checking available times…");
+    fetch("/api/bookings/availability?date=" + encodeURIComponent(bookingDate) + "&mode=" + (mode === "mobile" ? "mobile" : "site"), { cache: "no-store" })
+      .then(async response => {
+        const data = await response.json().catch(() => ({})) as { configured?: boolean; slots?: string[]; message?: string };
+        if (!response.ok) throw new Error(data.message || "Availability could not be checked.");
+        if (cancelled) return;
+        const slots = Array.isArray(data.slots) ? data.slots : [];
+        setAvailableSlots(slots);
+        setAvailabilityConfigured(Boolean(data.configured));
+        setAvailabilityMessage(String(data.message || ""));
+        if (bookingTime && !slots.includes(bookingTime) && data.configured) setBookingTime("");
+      })
+      .catch(error => { if (!cancelled) { setAvailableSlots([]); setAvailabilityConfigured(false); setAvailabilityMessage(error instanceof Error ? error.message : "Availability could not be checked."); } })
+      .finally(() => { if (!cancelled) setAvailabilityLoading(false); });
+    return () => { cancelled = true; };
+  }, [tab, bookingDate, mode, online]);
+
 
   useEffect(() => {
     if (!userId) { setLoyaltyPoints(0); setRemindersEnabled(false); return; }
