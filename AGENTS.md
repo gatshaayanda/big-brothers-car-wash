@@ -152,6 +152,15 @@ This section records the product owner's latest explicit direction and takes pre
 - The owner wants to explore future wash discounts informed by high-score statistics. Current copy must say discounts are **coming soon** and scores do **not** currently earn or redeem a discount. Never create a redeemable reward, imply a leaderboard is verified, or award points automatically until the business configures policy and a server-authoritative eligibility/redemption flow.
 - Do not present customer loyalty points as automatically earned. Until confirmed rules exist, explain that staff maintain balances under the business's approved policy.
 
+### Walk-in price negotiation and staff access
+- If the admin-published service list fails to load, do not imply that the customer must abandon the queue or wait for the list to recover. Keep the customer-proposed-price path available: customer enters a positive proposed BWP amount, then the attendant and customer explicitly agree the final charge in person before work begins. The submitted amount is a proposal only, not a confirmed price or payment.
+- When the live service list is available, show active services with their published prices and keep the customer-proposed amount as an alternative. Never let an unpriced/inactive service be submitted as if it had a known price.
+- Registration is optional for a walk-in; use the customer name, WhatsApp contact and vehicle description to get the job moving. Optional email supports receipt delivery but must not block queue intake.
+- Tip and refreshment preferences are optional signals only. No tip or Coke/extra may be added to the bill unless the customer explicitly agrees.
+- The fixed Quick Help widget must not obscure the footer's Staff sign in link. Hide it while the footer is visible; do not remove the staff route or move the staff action behind the help panel.
+- Receipt creation remains staff-only and only after a queue item is marked completed. The final agreed wash charge, voluntary tip, payment method and payment status must be recorded separately and clearly; a proposal must never be shown as a completed transaction.
+- Preserve the PWA installation/service-worker implementation. Do not change src/app/pwa-register.tsx or public/sw.js for these UI adjustments.
+
 ### Visual and interaction rules
 - The homepage must remain focused on queue → account → racing. Use progressive disclosure and keep the main intake obvious; do not restore secondary sections merely because content/assets exist.
 - Supplied media may be used as a restrained aesthetic enhancement when it supports the customer task. The existing muted, looping, inline wash-bay hero video is explicitly approved for autoplay; provide a graceful fallback if it fails. The separate left/right/inside location-guide clips remain opt-in with native controls and must not autoplay. Never let media obscure the queue form or delay access to it.
