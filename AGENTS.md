@@ -111,6 +111,15 @@ This section records the product owner's latest explicit direction and takes pre
 - On a shared staff phone, do not expose the previous customer's profile, receipt, loyalty details or account history to the next customer. The accepted-queue handoff can offer “Race while you wait”; retain a clear “Finish & hand back phone” action. Do not force Google sign-in on the attendant's phone.
 - Receipt links must use the existing secure receipt route and verified completion/payment data. A receipt/account link is not sent or claimed as delivered until staff actually share it. Opening the link should guide the customer into the secure account/receipt claim flow; never treat a typed WhatsApp number as verified account ownership.
 
+### Walk-in intake, agreed charge, and optional extras — 2026-10-28
+- Vehicle registration is optional and must never block joining the queue. Staff may use it as a secondary vehicle identifier, but the customer can leave it blank.
+- The walk-in service selector uses admin-published services and includes a clearly labelled customer-offered amount option. A customer-entered amount is a suggestion only; it is not a confirmed price, transaction, or payment.
+- Capture optional tip interest (ask me, possible coins, or tip if happy) and optional Coke/extra interest as preferences only. Never add a tip or product to a bill unless the customer explicitly agrees. Staff record the final agreed charge and actual payment state after service.
+- At end of day, staff should be able to review completed jobs, enter the final agreed amount and payment status, and create/reuse the existing secure receipt link. WhatsApp sharing is a staff-initiated share/copy action; never claim that a message was automatically sent. Receipt/PDF must contain only verified service, amount and payment details.
+- Future booking suggestions should be optional and based on real admin-configured opening hours and capacity. Default physical capacity is four bays/attendants, but treat that as a configurable starting value—not proof that four slots are available at a particular time. Enforce availability and double-booking on the server before confirming bookings.
+- Promotional/news notifications are opt-in. Game discounts remain inactive until an admin-configured offer and server-side eligibility/redemption policy are implemented.
+- Keep this intake concise: name, WhatsApp, vehicle type and service are core; registration and notes are optional; price suggestions, tips and extras are progressively disclosed and never coercive.
+
 ### Account, repeat wash, reminders and weather
 - Never use the label **“Your Wash Space”**. Use **“My Big Brothers Car Wash Account”** / “My account” consistently.
 - Make `/account` directly reachable from the header and the account area. It is the place for customer profile, saved vehicles, receipts, booking/request history and account security.
