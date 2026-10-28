@@ -111,7 +111,6 @@ export function createReceiptPdf(receipt: PublicReceipt) {
     { text: "Phone: " + receipt.phone, size: 11, color: "0.08 0.13 0.11" },
     { text: "VEHICLE & SERVICE", size: 10, color: "0.25 0.32 0.27" },
     { text: "Vehicle: " + receipt.vehicleType, size: 11, color: "0.08 0.13 0.11" },
-    { text: "Registration: " + (receipt.vehicleRegistration || "Not supplied"), size: 11, color: "0.08 0.13 0.11" },
     { text: "Service: " + receipt.serviceName, size: 11, color: "0.08 0.13 0.11" },
     { text: "", size: 8, color: "0 0 0" },
     { text: "FINAL AGREED CHARGE", size: 10, color: "0.25 0.32 0.27" },
