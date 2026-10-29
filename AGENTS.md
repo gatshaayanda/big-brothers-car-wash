@@ -116,7 +116,7 @@ This section records the product owner's latest explicit direction and takes pre
 
 ### Walk-in intake and receipt handoff — 2026-10-29
 - Keep the walk-in customer form focused on name, WhatsApp number, optional email, optional vehicle description, service/price selection, optional customer-proposed amount, and optional notes. Vehicle registration is not required.
-- Do not show tip or Coke/optional-extra prompts in the walk-in intake. Staff may record an actually agreed tip when preparing the final receipt, but never preselect, presume, or add one.
+- Do not show tip or Coke/optional-extra prompts in the customer walk-in intake or booking journey. Staff may record an actually agreed tip when preparing the final receipt, but never preselect, presume, or add one.
 - After the server confirms a queue submission, show a WhatsApp handoff action targeted to the WhatsApp number the customer entered. The customer must press the action and press Send in WhatsApp; never claim a message was sent automatically. This shares the app/account link, not a receipt that does not exist yet.
 - Once staff mark the wash completed and create/reuse the secure receipt link, provide a staff-initiated WhatsApp action targeted to the queue phone number. The message contains the secure receipt URL; WhatsApp must still be explicitly sent by staff. Optional email sharing remains separate.
 - Keep the customer page free of a decorative “Online · Ready to help” status strip. Show truthful connectivity/server acceptance feedback at submission instead.
