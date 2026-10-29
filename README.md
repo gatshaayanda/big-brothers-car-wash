@@ -53,3 +53,7 @@ Offline queue drafts remain local until server sync succeeds. Do not describe lo
 ## Source of truth
 
 Follow [AGENTS.md](./AGENTS.md) before implementation. Preserve working behavior and inspect the actual repository before making changes. Never force-push or rewrite history to resolve a source mismatch.
+
+## Release checkpoint
+
+After a fresh push to `main`, verify GitHub Actions and the Vercel deployment independently. A new commit requests another build attempt; it does not prove that the build or production deployment succeeded.
