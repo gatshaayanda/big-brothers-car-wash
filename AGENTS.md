@@ -114,6 +114,14 @@ This section records the product owner's latest explicit direction and takes pre
 - On a shared staff phone, do not expose the previous customer's profile, receipt, loyalty details or account history to the next customer. The accepted-queue handoff can offer “Race while you wait”; retain a clear “Finish & hand back phone” action. Do not force Google sign-in on the attendant's phone.
 - Receipt links must use the existing secure receipt route and verified completion/payment data. A receipt/account link is not sent or claimed as delivered until staff actually share it. Opening the link should guide the customer into the secure account/receipt claim flow; never treat a typed WhatsApp number as verified account ownership.
 
+### Walk-in intake and receipt handoff — 2026-10-29
+- Keep the walk-in customer form focused on name, WhatsApp number, optional email, optional vehicle description, service/price selection, optional customer-proposed amount, and optional notes. Vehicle registration is not required.
+- Do not show tip or Coke/optional-extra prompts in the walk-in intake. Staff may record an actually agreed tip when preparing the final receipt, but never preselect, presume, or add one.
+- After the server confirms a queue submission, show a WhatsApp handoff action targeted to the WhatsApp number the customer entered. The customer must press the action and press Send in WhatsApp; never claim a message was sent automatically. This shares the app/account link, not a receipt that does not exist yet.
+- Once staff mark the wash completed and create/reuse the secure receipt link, provide a staff-initiated WhatsApp action targeted to the queue phone number. The message contains the secure receipt URL; WhatsApp must still be explicitly sent by staff. Optional email sharing remains separate.
+- Keep the customer page free of a decorative “Online · Ready to help” status strip. Show truthful connectivity/server acceptance feedback at submission instead.
+- Public branding must read “Big Brothers Car Wash”; do not display malformed legacy business-name variants such as “Big Brothers' Car A Wash! 😎”.
+
 ### Walk-in intake, agreed charge, and optional extras — 2026-10-28
 - Vehicle registration is optional and must never block joining the queue. Staff may use it as a secondary vehicle identifier, but the customer can leave it blank.
 - The walk-in service selector uses admin-published services and includes a clearly labelled customer-offered amount option. A customer-entered amount is a suggestion only; it is not a confirmed price, transaction, or payment.
