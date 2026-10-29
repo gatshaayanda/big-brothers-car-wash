@@ -16,6 +16,21 @@ type Notice = { kind: "success" | "error" | "pending"; text: string };
 const pendingKey = "big-brothers-car-wash:offline-requests:v1";
 const stamp = () => new Date().toISOString();
 const money = (price?: number) => typeof price === "number" ? "P" + price.toLocaleString("en-BW", { maximumFractionDigits: 2 }) : "Price confirmed by the team";
+function normalizeWhatsAppDigits(value: string) {
+  const trimmed = value.trim();
+  let digits = trimmed.replace(/\D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  else if (!trimmed.startsWith("+") && !digits.startsWith("267")) {
+    if (digits.startsWith("0")) digits = "267" + digits.slice(1);
+    else if (digits.length === 8) digits = "267" + digits;
+  }
+  return digits;
+}
+function buildWhatsAppSelfLink(phone: string, appUrl: string) {
+  const digits = normalizeWhatsAppDigits(phone);
+  const message = "Here is the Big Brothers Car Wash app link for your account, receipts and next wash booking: " + appUrl;
+  return "https://wa.me/" + digits + "?text=" + encodeURIComponent(message);
+}
 
 export default function Home() {
   const [services, setServices] = useState<VulaService[]>([]);
@@ -26,7 +41,10 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [queueHandoff, setQueueHandoff] = useState<"synced" | "offline" | null>(null);
   const [queueReference, setQueueReference] = useState("");
+  const [queueWhatsAppPhone, setQueueWhatsAppPhone] = useState("");
+  const [queueAppUrl, setQueueAppUrl] = useState("");
   const [handoffError, setHandoffError] = useState("");
+  const [handoffMessage, setHandoffMessage] = useState("");
   const [mode, setMode] = useState<"site" | "mobile">("site");
   const [serviceId, setServiceId] = useState("");
   const [bookingDate, setBookingDate] = useState("");
@@ -201,7 +219,7 @@ export default function Home() {
       }
       localStorage.setItem(pendingKey, JSON.stringify(remaining));
       setNotice(remaining.length ? { kind: "pending", text: remaining.length + " saved request(s) still have not synced." } : { kind: "success", text: "Saved requests have synced to Big Brothers' system. Bookings still need staff confirmation." });
-      if (queueDraft && !remaining.some(draft => draft.id === queueDraft.id)) { setQueueReference(queueDraft.id || ""); setQueueHandoff("synced"); }
+      if (queueDraft && !remaining.some(draft => draft.id === queueDraft.id)) { setQueueReference(queueDraft.id || ""); setQueueWhatsAppPhone(String(queueDraft.data.phone || "")); setQueueAppUrl(window.location.origin); setQueueHandoff("synced"); }
     } catch { setNotice({ kind: "pending", text: "Sync is not complete. Your saved requests remain on this device." }); }
   }
 
@@ -217,6 +235,7 @@ export default function Home() {
     const customerOfferAmount = customerOfferRaw ? Number(customerOfferRaw) : null;
     const now = stamp();
     if (!customerName || !phone) { setNotice({ kind: "error", text: "Enter your name and WhatsApp number." }); return; }
+    if (tab === "queue" && !/^\d{8,15}$/.test(normalizeWhatsAppDigits(phone))) { setNotice({ kind: "error", text: "Enter a valid WhatsApp number with its country code (Botswana numbers can use +267 or the local 8-digit number)." }); return; }
     if (tab === "queue" && !serviceId) { setNotice({ kind: "error", text: "Choose a listed wash service or select “I’d like to propose my own price” to enter an amount for the attendant to consider." }); return; }
     setBusy(true); setNotice(null);
     try {
@@ -248,7 +267,7 @@ export default function Home() {
       if (!navigator.onLine || !hasFirebaseWebConfig) {
         const saved = JSON.parse(localStorage.getItem(pendingKey) || "[]") as Array<unknown>;
         const localId = crypto.randomUUID(); saved.push({ id: localId, collection: collectionName, data }); localStorage.setItem(pendingKey, JSON.stringify(saved)); formElement.reset();
-        if (tab === "queue") { setQueueReference(localId); setQueueHandoff("offline"); }
+        if (tab === "queue") { setQueueReference(localId); setQueueWhatsAppPhone(phone); setQueueAppUrl(window.location.origin); setQueueHandoff("offline"); }
         setNotice({ kind: "pending", text: "Saved on this device only. It is not visible to the team or a confirmed booking until it syncs." }); return;
       }
       const user = await ensureUser();
@@ -259,7 +278,7 @@ export default function Home() {
       setNotice({ kind: "pending", text: "Sending securely to Big Brothers' system…" });
       await writePromise;
       formElement.reset();
-      if (tab === "queue") { setQueueReference(requestRef.id);  setQueueHandoff("synced"); }
+      if (tab === "queue") { setQueueReference(requestRef.id); setQueueWhatsAppPhone(phone); setQueueAppUrl(window.location.origin); setQueueHandoff("synced"); }
       setNotice({ kind: "success", text: tab === "queue" ? "You’re on the shared queue. Staff can send your secure receipt and account link to this WhatsApp number after the wash is completed." : "Your booking request reached Big Brothers. The team will check availability and confirm it with you." });
     } catch (error) {
       setNotice({ kind: "error", text: error instanceof Error ? error.message : "We couldn't send this request. Please try again when connected." });
@@ -272,6 +291,9 @@ export default function Home() {
       await signOut(auth);
       setQueueHandoff(null);
       setQueueReference("");
+      setQueueWhatsAppPhone("");
+      setQueueAppUrl("");
+      setHandoffMessage("");
       setNotice(null);
       setReminderNotice("");
       setPushNotice("");
@@ -283,6 +305,12 @@ export default function Home() {
     } catch {
       setHandoffError("This session could not be cleared. Keep this screen open and try again before handing the phone to another customer.");
     }
+  }
+
+  async function copyQueueAppLink() {
+    setHandoffError("");
+    try { await navigator.clipboard.writeText(queueAppUrl); setHandoffMessage("App link copied. Open WhatsApp and send it to the number you entered."); }
+    catch { setHandoffError("Automatic copying is unavailable. Copy the app address shown below and paste it into WhatsApp."); }
   }
 
   function discardOfflineQueueDraft() {
@@ -299,17 +327,17 @@ export default function Home() {
     return <main className="vula queue-handoff-page"><section className="queue-handoff-card" aria-labelledby="queue-handoff-title">
       <span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH · WALK-IN</span>
       <h1 id="queue-handoff-title">{queueHandoff === "synced" ? "You're in the queue." : "Your request is saved here."}</h1>
-      {queueHandoff === "synced" ? <><p>Your entry has reached the shared staff queue. Staff will send your secure receipt and account link to the WhatsApp number you entered after the wash is completed. On that link, you can secure your account, book again, choose optional notifications, and share your freshly washed car.</p><p className="queue-reference">Queue reference <strong>{queueReference || "Recorded"}</strong></p><a className="big-brothers-button secondary" href="/games">Race while you wait ↗</a><button type="button" className="big-brothers-button primary" onClick={() => void finishQueueHandoff()}>Finish & hand back phone</button></> : <><p>This request is not yet in the shared queue. Keep this screen open until the phone reconnects and the server confirms the upload.</p><p className="queue-reference">Saved draft <strong>{queueReference || "On this device"}</strong></p><button type="button" className="big-brothers-button secondary" disabled={!online} onClick={() => void syncOfflineRequests()}>Retry sync</button><button type="button" className="big-brothers-button secondary" onClick={discardOfflineQueueDraft}>Discard saved request & clear session</button></>}
+      {queueHandoff === "synced" ? <><p>Your entry has reached the shared staff queue. First, send the app link to the WhatsApp number you entered so you can open Big Brothers on your own phone later. Staff can share your secure completed-wash receipt and account link after the wash.</p><a className="big-brothers-button primary whatsapp-self-send" href={buildWhatsAppSelfLink(queueWhatsAppPhone, queueAppUrl)} target="_blank" rel="noreferrer">Send app link to my WhatsApp ↗</a><p className="field-hint">WhatsApp opens with the message ready. Check the recipient, then press <strong>Send</strong> in WhatsApp. The app does not send the message automatically.</p><p className="queue-reference">App link <a href={queueAppUrl}>{queueAppUrl}</a></p><button type="button" className="big-brothers-button secondary" onClick={() => void copyQueueAppLink()}>Copy app link</button>{handoffMessage && <p role="status" className="big-brothers-notice success">{handoffMessage}</p>}<p className="queue-reference">Queue reference <strong>{queueReference || "Recorded"}</strong></p><a className="big-brothers-button secondary" href="/games">Race while you wait ↗</a><button type="button" className="big-brothers-button secondary" onClick={() => void finishQueueHandoff()}>Finish & hand back phone</button></> : <><p>This request is not yet in the shared queue. Keep this screen open until the phone reconnects and the server confirms the upload.</p><p className="queue-reference">Saved draft <strong>{queueReference || "On this device"}</strong></p><button type="button" className="big-brothers-button secondary" disabled={!online} onClick={() => void syncOfflineRequests()}>Retry sync</button><button type="button" className="big-brothers-button secondary" onClick={discardOfflineQueueDraft}>Discard saved request & clear session</button></>}
       {handoffError && <p role="alert" className="big-brothers-notice error">{handoffError}</p>}
     </section></main>;
   }
 
   return <main className="vula">
     <header className="big-brothers-nav"><a href="#request" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></a><nav><a href="/account" aria-label="My Big Brothers Car Wash Account">My BB CW Account</a><a href="#big-brothers-racing">Racing</a></nav><a className="big-brothers-cta" href="#request" onClick={() => setTab("queue")}>Join the queue ↗</a></header>
-    <section className="big-brothers-section request-section" id="request"><div className="section-title"><p className="big-brothers-eyebrow">WALK-IN INTAKE</p><h2>{tab === "book" ? "Plan your next wash." : <>Join the<br/><em>walk-in queue.</em></>}</h2><p>{tab === "book" ? "Request a preferred date and time. The team will confirm availability with you." : "The attendant lends you this phone to join the queue. Staff will send your secure receipt and account link to your WhatsApp after the wash is completed."}</p><p className="big-brothers-notice pending">Already washed with us? Open <a href="/account">My BB CW Account</a> in the header to access your receipts and request your next wash — you do not need to join the walk-in queue again.</p></div><div className="request-panel">{tab === "book" && <div className="request-tabs"><strong>FUTURE WASH REQUEST</strong><button type="button" onClick={() => setTab("queue")}>Back to walk-in queue</button></div>}<form onSubmit={submitRequest} className="big-brothers-form"><div className="form-intro"><strong>{tab === "book" ? "Request your next wash" : "Customer details"}</strong><span>{tab === "book" ? "Choose a preferred date and time; the team will confirm availability." : "Your name and WhatsApp go to the shared staff queue. Car description and notes are optional."}</span></div>
+    <section className="big-brothers-section request-section" id="request"><div className="section-title"><p className="big-brothers-eyebrow">WALK-IN INTAKE</p><h2>{tab === "book" ? "Plan your next wash." : <>Join the<br/><em>walk-in queue.</em></>}</h2><p>{tab === "book" ? "Request a preferred date and time. The team will confirm availability with you." : "After you join the queue, send the app link to the WhatsApp number you entered. Staff can also share your secure receipt and account link after the wash is completed."}</p><p className="big-brothers-notice pending">Already washed with us? Open <a href="/account">My BB CW Account</a> in the header to access your receipts and request your next wash — you do not need to join the walk-in queue again.</p></div><div className="request-panel">{tab === "book" && <div className="request-tabs"><strong>FUTURE WASH REQUEST</strong><button type="button" onClick={() => setTab("queue")}>Back to walk-in queue</button></div>}<form onSubmit={submitRequest} className="big-brothers-form"><div className="form-intro"><strong>{tab === "book" ? "Request your next wash" : "Customer details"}</strong><span>{tab === "book" ? "Choose a preferred date and time; the team will confirm availability." : "Your name and WhatsApp go to the shared staff queue. Car description and notes are optional."}</span></div>
       {tab==="book"&&<><div className="mode-switch"><button type="button" className={mode==="site"?"selected":""} onClick={()=>setMode("site")}>At the wash</button><button type="button" className={mode==="mobile"?"selected":""} onClick={()=>setMode("mobile")}>Mobile service</button></div>{mode==="mobile"&&<p className="coverage-note">{mobileCoverage.length?"Coverage will be checked against: "+mobileCoverage.join(", "):"Mobile coverage is not yet published. This is a request for review, not a confirmed mobile booking."}</p>}</>}
       {tab==="fleet"&&<label>Business / fleet name<input name="businessName" required maxLength={160} placeholder="Business name"/></label>}
-      <div className="form-grid"><label>Your name<input name="customerName" required maxLength={120} autoComplete="name" placeholder="Full name"/></label><label>WhatsApp number<input name="phone" inputMode="tel" required maxLength={40} autoComplete="tel" placeholder="+267 …"/></label><p className="field-hint full-field">Staff can use this number to share your completed-wash receipt and secure account link on WhatsApp. This form does not send an automatic message.</p>{tab==="queue"&&<label>Email (optional)<input name="email" type="email" maxLength={254} autoComplete="email" placeholder="For your receipt link"/></label>}<label>Describe your car (optional)<input name="vehicleType" maxLength={80} placeholder="e.g. silver SUV, blue hatchback"/></label>
+      <div className="form-grid"><label>Your name<input name="customerName" required maxLength={120} autoComplete="name" placeholder="Full name"/></label><label>WhatsApp number<input name="phone" inputMode="tel" required maxLength={40} autoComplete="tel" placeholder="+267 …"/></label><p className="field-hint full-field">After a successful queue submission, you’ll be prompted to send the app link to this WhatsApp number. Staff can also share your completed-wash receipt and secure account link after the wash.</p>{tab==="queue"&&<label>Email (optional)<input name="email" type="email" maxLength={254} autoComplete="email" placeholder="For your receipt link"/></label>}<label>Describe your car (optional)<input name="vehicleType" maxLength={80} placeholder="e.g. silver SUV, blue hatchback"/></label>
       {tab==="book"&&<><label>Service<select value={serviceId} onChange={e=>setServiceId(e.target.value)}><option value="">General car wash request</option>{activeServices.filter(s=>typeof s.price==="number"&&s.price>=0).map(s=><option key={s.id} value={s.id}>{s.name} · {money(s.price)}</option>)}</select></label><label>Preferred date<input type="date" name="preferredDate" min={new Date().toISOString().slice(0,10)} value={bookingDate} onChange={e=>setBookingDate(e.target.value)} required/></label><label>Preferred time{availabilityConfigured===true?<select name="preferredTime" value={bookingTime} onChange={e=>setBookingTime(e.target.value)} required disabled={availabilityLoading||availableSlots.length===0}><option value="">{availabilityLoading?"Checking times…":availableSlots.length?"Choose an available time":"No times available"}</option>{availableSlots.map(time=><option key={time} value={time}>{time}</option>)}</select>:<input type="time" name="preferredTime" min={typeof settings.openingTime==="string"&&settings.openingTime?settings.openingTime:undefined} max={typeof settings.closingTime==="string"&&settings.closingTime?settings.closingTime:undefined} step={1800} value={bookingTime} onChange={e=>setBookingTime(e.target.value)} required/>}<small>{availabilityMessage||"Choose a preferred time; staff will confirm availability."}</small></label><input type="hidden" name="scheduledFor" value={bookingDate && bookingTime ? `${bookingDate}T${bookingTime}` : ""}/><label>Area / address<input name="address" maxLength={500} required={mode==="mobile"} placeholder={mode==="mobile"?"Area, street or landmark":"Optional site note"}/></label><label>Payment preference<select name="paymentMethod" defaultValue="pay-on-site"><option value="pay-on-site">Pay at the wash / on completion</option><option value="online-payment-request">Request online payment instructions</option></select></label></>}
       {tab==="queue"&&<><label>Service &amp; price<select value={serviceId} onChange={e=>setServiceId(e.target.value)} required><option value="">Choose a service or propose an amount</option>{activeServices.filter(s=>typeof s.price==="number"&&s.price>=0).map(s=><option key={s.id} value={s.id}>{s.name} · {money(s.price)}</option>)}<option value="customer-offer">I’d like to propose my own price</option></select></label>{serviceId==="customer-offer"&&<label>Your proposed amount (BWP)<input name="customerOfferAmount" type="number" min="0" max="1000000" step="0.01" required placeholder="e.g. 80"/><small>This is a proposal only. The attendant and you agree the final price before payment.</small></label>}</>}
       {tab==="fleet"&&<><label>Number of vehicles<input name="vehicleCount" type="number" min="1" max="10000" defaultValue="2" required/></label><label>Email (optional)<input name="email" type="email" maxLength={254} placeholder="you@company.com"/></label><label>Service needs<input name="fleetNeeds" maxLength={200} placeholder="e.g. regular cleaning"/></label><label>Preferred schedule<input name="preferredSchedule" maxLength={200} placeholder="Days / frequency"/></label><label>Preferred location<input name="preferredLocation" maxLength={200} defaultValue={locationName}/></label></>}
