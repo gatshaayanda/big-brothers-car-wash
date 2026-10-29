@@ -37,7 +37,8 @@ export default function VulaDashboard() {
   function emailReceipt(email:string,url:string){const subject=encodeURIComponent("Your Big Brothers Car Wash receipt");const body=encodeURIComponent("Thank you for visiting Big Brothers Car Wash. Your secure receipt and PDF download are available here: "+url+"\n\nYou can download the branded PDF from the receipt page.");window.location.href="mailto:"+encodeURIComponent(email)+"?subject="+subject+"&body="+body;}
   async function loadRacing(){const user=auth.currentUser;if(!user){setMessage("Staff session expired. Sign in again to inspect racing activity.");return}setBusy(true);setMessage("");try{const response=await fetch("/api/racing?admin=1",{headers:{Authorization:"Bearer "+await getIdToken(user)}});const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(typeof payload.error==="string"?payload.error:"Racing activity could not be loaded.");setRacingData(payload as NonNullable<typeof racingData>);setMessage("Loaded server-stored racing records. Local-only results are not included.")}catch(error){setMessage(error instanceof Error?error.message:"Racing activity could not be loaded.")}finally{setBusy(false)}}
 
-  async function saveBusinessSettings(form: HTMLFormElement) {
+  // Build invariant: keep the business-settings submit handler delegated to saveBusinessSettings so nested form logic stays readable and JSX parsing remains unambiguous.
+async function saveBusinessSettings(form: HTMLFormElement) {
     const fields = new FormData(form);
     await saveSettings({
       businessName: String(fields.get("businessName")),
