@@ -1,93 +1,55 @@
-# Iteration 13 — Service Studio prototype
+# Big Brothers Car Wash
 
-**Start every new implementation chat at [START-HERE.md](./START-HERE.md).** It mandates the reading order, implementation/verification workflow, account-adaptation contract and deployment handoff. Then use [AGENTS.md](./AGENTS.md) for rules, [FOUNDATION-BLUEPRINT.md](./FOUNDATION-BLUEPRINT.md) for architecture and invariants, and [CLONING.md](./CLONING.md) for cloning/adaptation. Do not make the product owner repeat these instructions.
+Customer-first, mobile-first car-wash PWA for Big Brothers Car Wash in G-West, Gaborone, Botswana. This repository contains the actual Big Brothers application; it is not the generic Iteration 13 Service Studio demo.
 
-The Sparkle Legacy chat-widget reference and evidence-led proposal live in [CHAT-WIDGET-RESEARCH.md](./CHAT-WIDGET-RESEARCH.md). These files explain what to preserve, where to edit, what is demo-only, and what needs deliberate project-specific replacement.
+## Customer journey
 
-The approved foundation baseline and recovery policy are documented in [GOLDEN-BASELINE.md](./GOLDEN-BASELINE.md). A reusable, mobile-first PWA foundation candidate. The homepage demonstrates a complete service-order journey using browser-local demo data. Firebase configuration, rules and data were intentionally left unchanged.
-## Customer demo
+1. **Join the walk-in queue.** The customer enters their name and WhatsApp number, optionally describes their car, selects an active admin-published priced service or proposes a price, and can add notes. A proposed price is not the final agreed charge.
+2. **Send the app link to WhatsApp.** Only after the server confirms the queue entry, the handoff screen offers **Send app link to my WhatsApp**. It opens a prefilled WhatsApp message addressed to the number entered. The person must check the recipient and press **Send** themselves. A copy-link fallback is available. Offline drafts are clearly identified and do not show the successful queue handoff until synchronization succeeds.
+3. **Wait and race.** The handoff screen links to Big Brothers Racing. On the homepage, the customer account is above the racing section, and the racing section sits immediately above the footer.
+4. **Wash completed and receipt issued.** Staff update the queue status to completed, record the actual final charge, optional agreed tip and actual payment state/method, then create a secure receipt link. The receipt can be opened, copied/shared, or prepared for WhatsApp/email. The receipt page provides a branded PDF download and optional secure account-claim and future-booking actions.
+5. **Return.** Customers can open My BB CW Account for their own account/receipts and request a future wash. Booking requests remain pending until staff confirm them. Reminder and announcement notifications are opt-in.
 
-1. Open the homepage and browse the four example services:
-   - Website — P100
-   - App — P200
-   - Monthly support — P50
-   - Phaser games — P500
-2. Select **Request this service**, enter a name and email, choose a requested timeline date (today or later), and optionally describe the project.
-3. Submit the request. It should take you to **My account**, where the request, requested date, starting price and status are shown.
-4. Return to Services to submit another request or filter account requests by the same email.
+## Staff workflow
 
-The date is a requested timeline, not a confirmed delivery promise. No payment is taken.
+Open **Staff sign in** from the footer. Authorized staff can manage bookings and walk-in queue statuses, review customer details, record final charges/payment status for completed queue jobs, create/reuse receipt links, prepare WhatsApp/email receipt messages, manage services/settings, and review racing activity. Staff access must remain protected by the existing authorization checks and 24-hour session policy.
 
-## Local admin demo
+Receipt links are time-limited, unguessable links scoped to a single receipt. A receipt link is not proof of account ownership. Account claim must use the receipt's verified claim flow; never merge records based only on a typed phone number.
 
-Use **Admin demo** at the bottom of the page. From the admin view you can:
+## Development
 
-- Add, edit, hide/show and delete services.
-- Change prices, descriptions, image/video URLs and media type.
-- Publish or clear a storefront announcement.
-- Review incoming requests and change their status.
-- See summary counts for requests, statuses, services, customer emails and demo visits.
-- Reset the local sample data for another walkthrough.
-
-This is a prototype control surface, not a secure admin boundary. Do not enter real customer data.
-
-## Persistence and offline QA
-
-- Orders, service edits, announcements and statuses are stored in this browser's `localStorage`; customer and admin views share the same local data on the same browser profile.
-- Data is not shared with other devices, sent to a business, or synchronized to Firebase.
-- Visit the homepage while online first so the service worker can cache the app shell. Then switch the device/browser offline and reload the homepage. Confirm the app shell opens, submit a sample request, and use the bottom **Admin demo** entry to change its status. Return to **My account** and confirm the status is reflected.
-- External preview images/videos may need a connection; if an asset is unavailable, the service card should fall back to its local visual placeholder. Offline success means local demo state persists on this device, not that external media is downloaded.
-- If local storage is blocked or full, the app should show a notice; do not interpret a local save notice as server synchronization.
-
-## Installation — protected behavior
-
-The existing installation mechanics are intentionally preserved:
-
-- The browser's retained `beforeinstallprompt` event is invoked from the user's explicit branded install action when available.
-- When a native prompt is unavailable, platform-specific guidance is shown instead of a dead button or fake native prompt.
-- Embedded browsers receive a blocking open-in-browser handoff.
-- `/iphone-install` explains Safari Share → Add to Home Screen and includes the walkthrough link.
-- Service-worker caches use an Iteration 13 namespace and provide an update/refresh action.
-
-The duplicate header install CTA has been removed; the persistent branded install action remains the single install entry point. Do not alter install mechanics when changing icon artwork.
-
-## Interaction feedback
-
-Action buttons provide visible press/focus feedback. Successful local changes and validation/storage failures use a dismissible, screen-reader-announced toast. A success message is shown only after the browser accepts the localStorage write; it does not imply server synchronization.
-
-## Development and verification
+Requirements: Node.js 20+ and npm.
 
 ```sh
 npm install
-npx tsc --noEmit
 npm run verify:identity
 npm run lint
+npx tsc --noEmit
 npm run build
 ```
 
-The GitHub Actions workflow in `.github/workflows/verify.yml` runs `npm ci`, identity verification, lint and build checks on pushes to `main` and pull requests. A green CI run is evidence of code checks; it does not by itself prove a Vercel deployment or device/offline behavior succeeded.
+Configure local values using `.env.example`. Public Firebase web configuration is intended to reuse the existing Vula Firebase project and its data, as documented in that example. Server-only credentials and operations secrets must remain in environment variables and must never be committed. Do not make Firestore or Storage public to bypass permission errors.
 
-After changing icons, inspect both `public/manifest.webmanifest` and `src/app/manifest.ts`, verify all referenced assets and the manifest actually served by the built app, and test Chrome/Android plus physical iPhone Safari. Firebase configuration and rules are outside this prototype's scope.
+The build prepares the racing assets and runs identity verification. Build/test success does not prove that production environment variables, Firebase rules, live WhatsApp handoff, push delivery or Vercel deployment are configured correctly.
 
+## Protected PWA installation and offline behavior
 
-## Guided customer and admin flow
+Installation is protected infrastructure. Preserve the approved Africhiko installation behavior and the current project-specific branding: capture the real `beforeinstallprompt` event early, retain it, and invoke the native prompt only from the user's explicit branded install-button click when available. Keep the dismissible branded card, responsive placement, close/reopen behavior, embedded-browser handoff, iPhone Safari Share → Add to Home Screen guidance, service-worker registration, update/refresh behavior, offline fallback and cache isolation intact. Do not replace the native prompt with a fake prompt, duplicate banner, alert or dead button. Do not modify install or service-worker files for unrelated queue, receipt, account or game work.
 
-The floating **Need a hand?** guide is optional and scripted. Customers can choose a service, continue into the existing request form or open My account. In Admin demo, it links directly to service management, announcements, incoming requests and the storefront. It does not send chat messages to a server or use an AI model. Its small invitation can be dismissed for the current tab session.
+Offline queue drafts remain local until server sync succeeds. Do not describe local data as shared or tell a customer they are in the staff queue until Firestore confirms the write.
 
-Before cloning/adapting the guide, read [CHAT-WIDGET-RESEARCH.md](./CHAT-WIDGET-RESEARCH.md) and [FOUNDATION-BLUEPRINT.md](./FOUNDATION-BLUEPRINT.md). Keep the main customer journey obvious when the guide is closed.
+## QA checklist
 
+- On a narrow phone screen, submit a valid queue entry and confirm the shared staff queue receives it once.
+- Confirm invalid WhatsApp numbers are rejected before submission.
+- Confirm the post-submit handoff opens WhatsApp with the correct entered number and app URL, and that the customer must press Send. Test the copy-link fallback too.
+- Disconnect the network before submitting: verify the entry is labelled device-local and the successful WhatsApp handoff only appears after confirmed sync.
+- In staff operations, move a test entry through waiting → in service → completed; record the actual charge/payment state; create and open the receipt; prepare the WhatsApp message; verify the PDF download and receipt expiry/revocation behavior.
+- Confirm receipt account-claim is optional and verifies ownership, and that a customer cannot access another customer's account/history.
+- Verify account-before-game order and that Big Brothers Racing remains immediately above the homepage footer. Test racing controls and progression separately; this work must not alter game mechanics.
+- Test booking availability and pending/confirmed states, notification opt-in, guest/session clearing on the shared staff phone, PWA install/update/offline behavior, and responsive layouts.
+- Run identity verification, lint, TypeScript and production build. Test the deployed app and real WhatsApp/device behavior separately. A GitHub push or successful build does not prove deployment success.
 
-## Customer account workspace
+## Source of truth
 
-**My account** now demonstrates more than an empty request list:
-- Filter and review request history, requested timeline, starting price and current status.
-- Open a conversation attached to a specific request, send a message and share an image, video or PDF attachment while online.
-- See admin/studio replies in the same thread in the Admin demo on this same browser.
-- Use a project-preparation checklist and save a project note for later in this browser. Account sections use consistent Service Studio styling; optional extras are chosen for the actual product context rather than copied from another client.
-- Continue reading saved local state and sending text messages offline after the app shell has been cached. File uploads require internet and are not queued.
-
-**Important limitation:** this remains a local prototype. Requests, messages, replies, statuses, project checklist progress and notes use this browser's storage. They are not sent to a real admin, emailed, or synchronized to another device. UploadThing files are uploaded remotely while online (images up to 4 MB, PDFs up to 4 MB, videos up to 16 MB), but their message metadata is saved in this browser's local thread. Do not use real customer data.
-
-### Reusing the account in another project
-
-Read the customer account adaptation contract in `AGENTS.md` and the account section in `CLONING.md`. Keep the useful capabilities, but replace the theme/game, wording, account extras, status language, file policy and actions with those that fit the actual project. Inspect its authentication, persistence, admin workflow and security rules. A production account requires verified per-customer data access and staff authorization; the demo's localStorage thread is not a real support inbox.
+Follow [AGENTS.md](./AGENTS.md) before implementation. Preserve working behavior and inspect the actual repository before making changes. Never force-push or rewrite history to resolve a source mismatch.
