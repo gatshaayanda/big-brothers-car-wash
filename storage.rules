@@ -15,12 +15,15 @@ service firebase.storage {
       allow delete: if isAdmin();
     }
     match /gallery-submissions/{uid}/{fileName} {
-      // Customers may upload a photo for review only into their own isolated folder.
+      // Customers may upload an image or short video for review only into their own isolated folder.
       // Files are not published by Storage rules; staff moderation is required.
       allow create: if signedIn()
         && request.auth.uid == uid
-        && request.resource.size < 8 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
+        && request.resource.size < 20 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/(mp4|webm|quicktime)')
+        );
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
       allow update: if false;
       allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);
