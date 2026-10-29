@@ -44,7 +44,6 @@ export default function Home() {
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [announcementsEnabled, setAnnouncementsEnabled] = useState(false);
-  const [tipReminderPreference, setTipReminderPreference] = useState("no-thanks");
   const [announcementNotice, setAnnouncementNotice] = useState("");
   const [reminderNotice, setReminderNotice] = useState("");
   const [pushNotice, setPushNotice] = useState("");
@@ -120,11 +119,11 @@ export default function Home() {
 
 
   useEffect(() => {
-    if (!userId) { setLoyaltyPoints(0); setRemindersEnabled(false); setAnnouncementsEnabled(false); setTipReminderPreference("no-thanks"); return; }
+    if (!userId) { setLoyaltyPoints(0); setRemindersEnabled(false); setAnnouncementsEnabled(false); return; }
     const fail = () => {};
     const stops = [
       subscribeLoyaltyAccount(userId, value => setLoyaltyPoints(Number(value?.pointsBalance ?? 0)), fail),
-      subscribeReminderPreferences(userId, value => { setRemindersEnabled(Boolean(value?.enabled)); setAnnouncementsEnabled(Boolean(value?.announcementsEnabled)); setTipReminderPreference(String(value?.tipReminderPreference || "no-thanks")); }, fail),
+      subscribeReminderPreferences(userId, value => { setRemindersEnabled(Boolean(value?.enabled)); setAnnouncementsEnabled(Boolean(value?.announcementsEnabled)); }, fail),
     ];
     return () => stops.forEach(stop => stop());
   }, [userId]);
@@ -198,7 +197,7 @@ export default function Home() {
       const remaining: typeof drafts = [];
       const queueDraft = drafts.find(draft => draft.collection === "queueEntries");
       for (const draft of drafts) {
-        try { const id = draft.id || crypto.randomUUID(); await saveCustomerRecord(user.uid, String(draft.data.customerName || draft.data.contactName || ""), String(draft.data.phone || ""), String(draft.data.email || user.email || "")); if (draft.collection === "queueEntries" && typeof draft.data.tipPreference === "string") await setDoc(doc(db, "reminderPreferences", user.uid), { tipReminderPreference: draft.data.tipPreference, updatedAt: stamp() }, { merge: true }); await setDoc(doc(db, draft.collection, id), { ...draft.data, customerId: user.uid, updatedAt: stamp() }); }
+        try { const id = draft.id || crypto.randomUUID(); await saveCustomerRecord(user.uid, String(draft.data.customerName || draft.data.contactName || ""), String(draft.data.phone || ""), String(draft.data.email || user.email || "")); await setDoc(doc(db, draft.collection, id), { ...draft.data, customerId: user.uid, updatedAt: stamp() }); }
         catch { remaining.push(draft); }
       }
       localStorage.setItem(pendingKey, JSON.stringify(remaining));
@@ -281,7 +280,6 @@ export default function Home() {
       setLoyaltyPoints(0);
       setRemindersEnabled(false);
       setAnnouncementsEnabled(false);
-      setTipReminderPreference("no-thanks");
       setServiceId("");
       setTab("queue");
     } catch {
@@ -310,7 +308,7 @@ export default function Home() {
 
   return <main className="vula">
     <header className="big-brothers-nav"><a href="#request" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></a><nav><a href="/account" aria-label="My Big Brothers Car Wash Account">My BB CW Account</a><a href="#big-brothers-racing">Racing</a></nav><a className="big-brothers-cta" href="#request" onClick={() => setTab("queue")}>Join the queue ↗</a></header>
-    <section className="big-brothers-section request-section" id="request"><div className="section-title"><p className="big-brothers-eyebrow">WALK-IN INTAKE</p><h2>{tab === "book" ? "Plan your next wash." : <>Join the<br/><em>walk-in queue.</em></>}</h2><p>{tab === "book" ? "Request a preferred date and time. The team will confirm availability with you." : "The attendant lends you this phone to submit your details. Share the app link to yourself if you want to continue on your own phone, then return this phone to the attendant."}</p><p className="big-brothers-notice pending">Already washed with us? Open <a href="/account">My BB CW Account</a> in the header to access your receipts and request your next wash — you do not need to join the walk-in queue again.</p></div><div className="request-panel">{tab === "book" && <div className="request-tabs"><strong>FUTURE WASH REQUEST</strong><button type="button" onClick={() => setTab("queue")}>Back to walk-in queue</button></div>}<form onSubmit={submitRequest} className="big-brothers-form"><div className="form-intro"><strong>{tab === "book" ? "Request your next wash" : "Customer details"}</strong><span>{tab === "book" ? "Choose a preferred date and time; the team will confirm availability." : "Your name and WhatsApp go to the shared staff queue. Car description and notes are optional."}</span></div>{tab==="book"&&tipReminderPreference==="next-time"&&<p className="field-hint full-field">You asked us to remind you about a possible tip on your next visit. This is only a reminder; no tip is owed or added automatically.</p>}
+    <section className="big-brothers-section request-section" id="request"><div className="section-title"><p className="big-brothers-eyebrow">WALK-IN INTAKE</p><h2>{tab === "book" ? "Plan your next wash." : <>Join the<br/><em>walk-in queue.</em></>}</h2><p>{tab === "book" ? "Request a preferred date and time. The team will confirm availability with you." : "The attendant lends you this phone to submit your details. Share the app link to yourself if you want to continue on your own phone, then return this phone to the attendant."}</p><p className="big-brothers-notice pending">Already washed with us? Open <a href="/account">My BB CW Account</a> in the header to access your receipts and request your next wash — you do not need to join the walk-in queue again.</p></div><div className="request-panel">{tab === "book" && <div className="request-tabs"><strong>FUTURE WASH REQUEST</strong><button type="button" onClick={() => setTab("queue")}>Back to walk-in queue</button></div>}<form onSubmit={submitRequest} className="big-brothers-form"><div className="form-intro"><strong>{tab === "book" ? "Request your next wash" : "Customer details"}</strong><span>{tab === "book" ? "Choose a preferred date and time; the team will confirm availability." : "Your name and WhatsApp go to the shared staff queue. Car description and notes are optional."}</span></div>
       {tab==="book"&&<><div className="mode-switch"><button type="button" className={mode==="site"?"selected":""} onClick={()=>setMode("site")}>At the wash</button><button type="button" className={mode==="mobile"?"selected":""} onClick={()=>setMode("mobile")}>Mobile service</button></div>{mode==="mobile"&&<p className="coverage-note">{mobileCoverage.length?"Coverage will be checked against: "+mobileCoverage.join(", "):"Mobile coverage is not yet published. This is a request for review, not a confirmed mobile booking."}</p>}</>}
       {tab==="fleet"&&<label>Business / fleet name<input name="businessName" required maxLength={160} placeholder="Business name"/></label>}
       <div className="form-grid"><label>Your name<input name="customerName" required maxLength={120} autoComplete="name" placeholder="Full name"/></label><label>WhatsApp number<input name="phone" inputMode="tel" required maxLength={40} autoComplete="tel" placeholder="+267 …"/></label><p className="field-hint full-field">Staff can use this number to share your completed-wash receipt and secure account link on WhatsApp. This form does not send an automatic message.</p>{tab==="queue"&&<label>Email (optional)<input name="email" type="email" maxLength={254} autoComplete="email" placeholder="For your receipt link"/></label>}<label>Describe your car (optional)<input name="vehicleType" maxLength={80} placeholder="e.g. silver SUV, blue hatchback"/></label>
