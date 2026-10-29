@@ -61,7 +61,8 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
   useEffect(() => {
     const stop = subscribeSettings(settings => {
       const name = settings?.businessName;
-      if (typeof name === "string" && name.trim()) setBusinessName(name.trim());
+      if (typeof name === "string" && name.trim() && !/car\s+a\s+wash|😎/i.test(name.trim())) setBusinessName(name.trim());
+      else setBusinessName("Big Brothers Car Wash");
     }, () => {});
     return stop;
   }, []);
