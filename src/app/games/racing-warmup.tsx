@@ -204,6 +204,16 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
         const brakeTurnSlide = clamp((gripUse - 0.88) / 0.55, 0, 1)
           * clamp((race.speed - 68) / 105, 0, 1)
           * clamp((Math.abs(steering) - 0.22) / 0.5, 0, 1);
+        // The driver should be able to influence the car's balance: trail-braking
+        // into a corner can loosen the rear, while steady throttle can sustain a
+        // controllable power slide. These effects only appear at speed and near
+        // the tyre-grip limit; they must not make low-speed turns feel slippery.
+        const powerSlide = race.throttle
+          * clamp((race.speed - 58) / 105, 0, 1)
+          * clamp((Math.abs(steering) - 0.18) / 0.62, 0, 1)
+          * clamp((gripUse - 0.48) / 0.75, 0, 1);
+        const counterSteering = Math.abs(race.heading) > 0.035
+          && Math.sign(steering) === -Math.sign(race.heading);
         const excessSteering = (1 - cornerGripRatio) * clamp(updatedLateralDemand, 0, 1);
         const corneringLoss = excessSteering * (3 + race.speed * 0.018);
         if (excessSteering > 0) race.speed = Math.max(0, race.speed - corneringLoss * dt);
@@ -225,8 +235,16 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
         const lateralVelocity = race.velocityX * lateralX + race.velocityZ * lateralZ;
         // Signed longitudinal velocity preserves natural counter-steering while reversing.
         // At negative velocity, steering rotates the nose in the opposite direction as expected.
-        const targetYawRate = Math.tan(steerAngle) * longitudinalVelocity / 2.65;
-        const gripLimit = 9.2 * clamp(1.08 - race.brakePressure * 0.35 - race.wheelLock * 0.5, 0.42, 1.08);
+        const baseYawRate = Math.tan(steerAngle) * longitudinalVelocity / 2.65;
+        // Braking while turning can rotate the rear; throttle can keep that slide
+        // alive. Counter-steering adds a gentle self-correction toward the travel
+        // direction, so the player can catch the car instead of being spun at once.
+        const slideYawRate = Math.sign(baseYawRate || -steering)
+          * (brakeTurnSlide * 0.72 + powerSlide * 0.52);
+        const selfAlignYawRate = clamp(race.heading * (counterSteering ? 1.35 : 0.48), -1.25, 1.25);
+        const targetYawRate = baseYawRate + slideYawRate + selfAlignYawRate;
+        const gripLimit = 9.2 * clamp(1.08 - race.brakePressure * 0.35 - race.wheelLock * 0.5
+          - brakeTurnSlide * 0.12 - powerSlide * 0.08, 0.36, 1.08);
         const demandedLateralAccel = targetYawRate * Math.max(0, longitudinalVelocity);
         const gripRatio = Math.min(1, gripLimit / Math.max(0.001, Math.abs(demandedLateralAccel)));
         race.worldYaw += targetYawRate * gripRatio * dt;
@@ -240,7 +258,8 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
         const dragAccel = longitudinalVelocity * (0.32 + Math.abs(longitudinalVelocity) * 0.012);
         let nextLongitudinal = longitudinalVelocity + (driveAccel - brakeAccel - dragAccel) * dt;
         nextLongitudinal = clamp(nextLongitudinal, -7, 15.9);
-        const lateralSlipAccel = clamp(-lateralVelocity * (gripRatio < 0.98 ? 1.2 : 5.5), -gripLimit, gripLimit);
+        const lateralSlipDamping = gripRatio < 0.98 ? 0.72 : counterSteering ? 6.4 : 4.8;
+        const lateralSlipAccel = clamp(-lateralVelocity * lateralSlipDamping, -gripLimit, gripLimit);
         const nextLateral = lateralVelocity + lateralSlipAccel * dt;
         race.velocityX = updatedForwardX * nextLongitudinal + updatedLateralX * nextLateral;
         race.velocityZ = updatedForwardZ * nextLongitudinal + updatedLateralZ * nextLateral;
@@ -252,7 +271,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
         race.lateral = clamp(nextLateral, -18, 18);
         race.lateralVelocity = nextLateral;
         race.lateralG += ((targetYawRate * gripRatio) - race.lateralG) * (1 - Math.exp(-dt * 5));
-        race.drift = clamp(race.heading * clamp(Math.abs(nextLateral) / 7, 0, 1) * 0.25, -0.22, 0.22);
+        race.drift = clamp(race.heading * clamp(Math.abs(nextLateral) / 5.5, 0, 1) * 0.34, -0.32, 0.32);
 
         // Circuit projection is used only for lap timing, track limits, and collision queries.
         let nearestT = wrap(race.trackT, 1);
