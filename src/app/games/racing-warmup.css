@@ -393,15 +393,3 @@
 .warmup-family-note{max-width:760px;margin:12px 0 0;padding:12px 15px;border-left:3px solid #c91f2b;background:#fff4f4;border-radius:0 8px 8px 0;color:#493033;font-size:13px;line-height:1.65}
 
 
-.bb-racing-promo{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:center;margin:14px 0;padding:14px;border:1px solid #dce3d7;border-radius:12px;background:#fff;color:#172820}
-.bb-racing-promo-media{min-width:0;overflow:hidden;border-radius:9px;background:#172820;aspect-ratio:16/9}
-.bb-racing-promo-media video{display:block;width:100%;height:100%;object-fit:cover}
-.bb-racing-promo-fallback{height:100%;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#172820,#3c4d3b);color:#fff;text-align:center}
-.bb-racing-promo-fallback .big-brothers-mark{color:#172820}
-.bb-racing-promo-fallback strong{font-size:12px;letter-spacing:.12em}
-.bb-racing-promo-fallback>span:last-child{font-size:11px;color:#d8e1d2}
-.bb-racing-promo-copy .big-brothers-eyebrow{margin-bottom:8px}
-.bb-racing-promo-copy>strong{display:block;font:700 clamp(18px,3vw,25px)/1.1 "Space Grotesk",system-ui,sans-serif;letter-spacing:-.04em}
-.bb-racing-promo-copy p{font-size:12px;line-height:1.55;color:#5f6c61}
-.bb-racing-promo-copy .big-brothers-button{margin-top:4px}
-@media(max-width:640px){.bb-racing-promo{grid-template-columns:1fr;gap:10px;padding:11px}.bb-racing-promo-media{aspect-ratio:16/9}.bb-racing-promo-copy p{margin:7px 0}}

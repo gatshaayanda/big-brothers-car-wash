@@ -251,6 +251,30 @@ export default function Racing3DScene({ raceRef, controlsRef, phaseRef }: Props)
     // more visual room around it for steering on narrow mobile screens.
     car.scale.setScalar(0.82);
     scene.add(car);
+
+    // Drift feedback is tied to real chassis-vs-velocity slip, never camera motion.
+    const skidMaterial = new THREE.LineBasicMaterial({ color: "#171b1b", transparent: true, opacity: 0.62, depthWrite: false });
+    const skidCapacity = 420;
+    const skidBuffers = [-1, 1].map(() => {
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(skidCapacity * 6);
+      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
+      geometry.setDrawRange(0, 0);
+      const line = new THREE.LineSegments(geometry, skidMaterial);
+      line.frustumCulled = false;
+      scene.add(line);
+      return { geometry, positions, count: 0, previous: null as THREE.Vector3 | null };
+    });
+    const smokeMaterial = new THREE.MeshBasicMaterial({ color: "#d9dedb", transparent: true, opacity: 0.24, depthWrite: false });
+    const smokePool = Array.from({ length: 26 }, () => {
+      const puff = new THREE.Mesh(new THREE.SphereGeometry(0.18, 7, 6), smokeMaterial.clone());
+      puff.visible = false;
+      scene.add(puff);
+      return { mesh: puff, velocity: new THREE.Vector3(), life: 0, maxLife: 1 };
+    });
+    let smokeCursor = 0;
+    let lastEffectAt = 0;
+    let effectClock = 0;
     const groundShadow = new THREE.Mesh(
       new THREE.CircleGeometry(1, 32),
       new THREE.MeshBasicMaterial({ color: 0x101914, transparent: true, opacity: 0.28, depthWrite: false }),
@@ -263,42 +287,9 @@ export default function Racing3DScene({ raceRef, controlsRef, phaseRef }: Props)
     const skyGlow = new THREE.Mesh(new THREE.SphereGeometry(320, 16, 10), new THREE.MeshBasicMaterial({ color: "#b9d4df", side: THREE.BackSide }));
     scene.add(skyGlow);
 
-    // Physical barrier boundary: this is the car-centre limit offset inward from
-    // the visible rail by half the car width. Swept collision prevents tunnelling
-    // across a rail between rendered/physics frames, including at tight hairpins.
-    const barrierSamples = 960;
-    const barrierLimit = 7.42;
-    const barrierLines: { ax: number; az: number; bx: number; bz: number }[] = [];
-    for (let i = 0; i < barrierSamples; i++) {
-      const t0 = i / barrierSamples;
-      const t1 = (i + 1) / barrierSamples;
-      const p0 = track.getPointAt(t0);
-      const p1 = track.getPointAt(t1);
-      const tangent0 = track.getTangentAt(t0).normalize();
-      const tangent1 = track.getTangentAt(t1).normalize();
-      const side0x = -tangent0.z, side0z = tangent0.x;
-      const side1x = -tangent1.z, side1z = tangent1.x;
-      for (const sign of [-1, 1]) {
-        barrierLines.push({
-          ax: p0.x + side0x * sign * barrierLimit,
-          az: p0.z + side0z * sign * barrierLimit,
-          bx: p1.x + side1x * sign * barrierLimit,
-          bz: p1.z + side1z * sign * barrierLimit,
-        });
-      }
-    }
-    const segmentHit = (px: number, pz: number, qx: number, qz: number, ax: number, az: number, bx: number, bz: number) => {
-      const rx = qx - px, rz = qz - pz;
-      const sx = bx - ax, sz = bz - az;
-      const denominator = rx * sz - rz * sx;
-      if (Math.abs(denominator) < 1e-8) return null;
-      const apx = ax - px, apz = az - pz;
-      const t = (apx * sz - apz * sx) / denominator;
-      const u = (apx * rz - apz * rx) / denominator;
-      return t >= 0 && t <= 1 && u >= 0 && u <= 1 ? { t, x: px + rx * t, z: pz + rz * t } : null;
-    };
-    let previousCarX = raceRef.current.worldX;
-    let previousCarZ = raceRef.current.worldZ;
+    // Track-edge collision is resolved once in the authoritative driving
+    // simulation. Avoid a second render-loop wall solver that can disagree with
+    // the track projection at segment joins and tight corner endpoints.
     const clock = new THREE.Clock();
     let raf = 0;
     const resize = () => {
@@ -309,52 +300,73 @@ export default function Racing3DScene({ raceRef, controlsRef, phaseRef }: Props)
       const race = raceRef.current;
       const controls = controlsRef.current;
       const currentPhase = phaseRef.current;
-      // Treat the same continuous offset curves as physical walls. Test the whole
-      // previous-to-current movement segment so the car cannot step through a wall.
-      if (currentPhase === "running") {
-        let earliestHit: { t: number; x: number; z: number; ax: number; az: number; bx: number; bz: number } | null = null;
-        for (const wall of barrierLines) {
-          const hit = segmentHit(previousCarX, previousCarZ, race.worldX, race.worldZ, wall.ax, wall.az, wall.bx, wall.bz);
-          if (hit && (!earliestHit || hit.t < earliestHit.t)) earliestHit = { ...hit, ...wall };
-        }
-        if (earliestHit) {
-          const wallX = earliestHit.bx - earliestHit.ax;
-          const wallZ = earliestHit.bz - earliestHit.az;
-          const wallLength = Math.hypot(wallX, wallZ) || 1;
-          let normalX = -wallZ / wallLength;
-          let normalZ = wallX / wallLength;
-          if ((previousCarX - earliestHit.ax) * normalX + (previousCarZ - earliestHit.az) * normalZ < 0) {
-            normalX = -normalX; normalZ = -normalZ;
-          }
-          race.worldX = earliestHit.x + normalX * 0.08;
-          race.worldZ = earliestHit.z + normalZ * 0.08;
-          const outwardSpeed = race.velocityX * normalX + race.velocityZ * normalZ;
-          if (outwardSpeed < 0) {
-            race.velocityX -= normalX * outwardSpeed * 1.08;
-            race.velocityZ -= normalZ * outwardSpeed * 1.08;
-            race.speed *= 0.78;
-          }
-        }
-      }
-      previousCarX = race.worldX;
-      previousCarZ = race.worldZ;
       // Render the independent world-space vehicle state; track geometry is not a movement rail.
       const carWorld = new THREE.Vector3(race.worldX, .015, race.worldZ);
+      // Keep the chase camera aligned to the car's nose. The sideways travel
+      // remains visible around the chassis instead of rotating the whole view.
       const forward = new THREE.Vector3(-Math.sin(race.worldYaw), 0, -Math.cos(race.worldYaw)).normalize();
       car.position.copy(carWorld);
       car.rotation.y = race.worldYaw;
       // Subtle suspension response: braking transfers load forward and cornering
       // rolls the body. These are visual cues driven by the physics state.
-      car.rotation.x = clamp(-race.longitudinalLoad * 0.12, -0.035, 0.015);
-      car.rotation.z = clamp(-race.lateralG * 0.035 - race.drift * 0.12, -0.055, 0.055);
+      car.rotation.x = clamp(-race.longitudinalLoad * 0.22, -0.075, 0.025);
+      // Exaggerated but speed/load-driven body roll makes weight transfer and rear slip
+      // readable on a phone-sized screen instead of hiding it in tiny suspension motion.
+      car.rotation.z = clamp(-race.lateralG * 0.055 - race.drift * 0.24, -0.16, 0.16);
       groundShadow.position.x = carWorld.x;
       groundShadow.position.z = carWorld.z;
       groundShadow.rotation.z = -car.rotation.y;
       const cameraTarget = new THREE.Vector3(carWorld.x + forward.x * 10, 1.25, carWorld.z + forward.z * 10);
       const cameraPosition = new THREE.Vector3(carWorld.x - forward.x * 8.4, 4.7, carWorld.z - forward.z * 8.4);
       const frameDelta = Math.min(clock.getDelta(), .05);
-      camera.position.lerp(cameraPosition, 1 - Math.exp(-frameDelta * 5.5));
+      camera.position.lerp(cameraPosition, 1 - Math.exp(-frameDelta * 4.2));
       camera.lookAt(cameraTarget);
+      // Rear tyres leave short, fading-in-place rubber traces while the car is
+      // genuinely sliding. Bounded buffers prevent unbounded geometry growth.
+      const slip = Math.abs(race.drift);
+      const driftIntensity = clamp((slip - 0.13) / 0.55, 0, 1) * clamp((race.speed - 28) / 55, 0, 1);
+      effectClock += frameDelta;
+      const rearTyres = [-1, 1].map(side => {
+        const local = new THREE.Vector3(side * 0.94, 0.035, 0.8 * 0.82);
+        return local.applyAxisAngle(new THREE.Vector3(0, 1, 0), race.worldYaw).add(carWorld);
+      });
+      if (currentPhase === "running" && driftIntensity > 0.04 && effectClock - lastEffectAt > 0.035) {
+        lastEffectAt = effectClock;
+        rearTyres.forEach((point, index) => {
+          const buffer = skidBuffers[index];
+          if (buffer.previous) {
+            if (buffer.count >= skidCapacity) {
+              buffer.positions.copyWithin(0, 6);
+              buffer.count = skidCapacity - 1;
+            }
+            const offset = buffer.count * 6;
+            buffer.positions[offset] = buffer.previous.x; buffer.positions[offset + 1] = 0.052; buffer.positions[offset + 2] = buffer.previous.z;
+            buffer.positions[offset + 3] = point.x; buffer.positions[offset + 4] = 0.052; buffer.positions[offset + 5] = point.z;
+            buffer.count += 1;
+            buffer.geometry.attributes.position.needsUpdate = true;
+            buffer.geometry.setDrawRange(0, buffer.count * 2);
+          }
+          buffer.previous = point.clone();
+          const puff = smokePool[smokeCursor++ % smokePool.length];
+          puff.mesh.position.set(point.x, 0.18, point.z);
+          puff.mesh.scale.setScalar(0.55 + driftIntensity * 0.75);
+          puff.mesh.visible = true;
+          puff.life = 0.55 + driftIntensity * 0.45;
+          puff.maxLife = puff.life;
+          puff.velocity.set((Math.random() - 0.5) * 0.7 + race.velocityX * -0.025, 0.65 + driftIntensity * 0.55, (Math.random() - 0.5) * 0.7 + race.velocityZ * -0.025);
+          (puff.mesh.material as THREE.MeshBasicMaterial).opacity = 0.12 + driftIntensity * 0.2;
+        });
+      } else if (driftIntensity < 0.04) {
+        skidBuffers.forEach(buffer => { buffer.previous = null; });
+      }
+      smokePool.forEach(puff => {
+        if (!puff.mesh.visible) return;
+        puff.life -= frameDelta;
+        if (puff.life <= 0) { puff.mesh.visible = false; return; }
+        puff.mesh.position.addScaledVector(puff.velocity, frameDelta);
+        puff.mesh.scale.multiplyScalar(1 + frameDelta * 1.5);
+        (puff.mesh.material as THREE.MeshBasicMaterial).opacity = (0.12 + driftIntensity * 0.2) * (puff.life / puff.maxLife);
+      });
       const flame = car.userData.flame as THREE.Object3D | undefined;
       if (flame) {
         flame.visible = controls.boost && race.nos > 0 && !controls.brake && currentPhase === "running";
@@ -362,7 +374,7 @@ export default function Racing3DScene({ raceRef, controlsRef, phaseRef }: Props)
         flame.scale.setScalar(pulse);
       }
       if (currentPhase === "running") {
-        camera.fov = 63 + Math.min(8, race.speed / 28) + (controls.boost && race.nos > 0 && !controls.brake ? 5 : 0);
+        camera.fov = 63 + Math.min(12, race.speed / 19) + (controls.boost && race.nos > 0 && !controls.brake ? 7 : 0);
       } else camera.fov = 63;
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);

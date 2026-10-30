@@ -226,7 +226,7 @@ This section records the product owner's latest explicit direction and takes pre
 - Make the optional car-description prompt personal using the entered customer name when available.
 - Landing page focuses on walk-in intake, Daily Drive, utility and light engagement. Account, reminder and announcement management belong on the account page, not as a duplicated landing-page section.
 - Racing promotion may invite customers to race with their laaities (kids, nephews or younger family) while waiting. Explain that special wash promotions, racing challenges and future-wash discount opportunities are being prepared. Never claim rewards are already earned/redeemable until implemented and verified.
-- Do not embed the racing warm-up/media-download experience on the landing page. Keep the separate games experience available; game-engine work is handled separately.
+- Owner override (2026-10-30): embed the actual latest Vula golden 3D racing game inline on both the landing page and customer account. Promotional copy or a link to /games is not a substitute. Preserve its controls, physics, track boundary protection and assets; placement/integration is allowed.
 - For Firebase permission denied, inspect the exact client payload and published rules in the configured Vula Firebase project. GitHub pushes do not deploy Firestore rules; never widen access to bypass a schema mismatch.
 
 
@@ -235,3 +235,10 @@ This section records the product owner's latest explicit direction and takes pre
 - The WhatsApp message should feel warm and locally familiar, invite the customer to keep the Big Brothers app link on their own phone, and explain that staff will share the secure receipt link after checking the wash. The public app URL does not itself claim or connect a queue record to an account.
 - Receipt-first account journey is a later QA phase: staff reviews the completed wash record and issues the branded receipt; the customer receives their own secure branded receipt, then gets a frictionless welcome to the wider account features. Staff's operational receipt/view remains distinct from the customer's receipt. Do not redesign or claim this flow is complete as part of landing-page copy work.
 - Racing is optional, not the assumed interest of every customer. Invite customers who enjoy games to play, or to pass the challenge to a laaitie/young person they know. Future performance-based wash discount competitions may give qualifying players a chance to win; until official rules and redemption are implemented, say no discount is earned merely by playing and do not imply an active prize.
+
+
+## Owner correction — customer racing and engagement, 2026-10-30
+- The real latest Vula golden 3D racing game must be rendered inline on the landing page and in the customer account. Promotional copy linking elsewhere is not a substitute. The current Vula golden source includes full-frame swept track-boundary protection; keep its controls, physics and track behaviour intact.
+- The wash-video offline-download/cache feature is not wanted and must not return. Approved wash clips may be used as a brief muted account-loading transition, with immediate fallback, reduced-motion support and no added wait for authentication.
+- Customer account engagement includes the weather-led week-2/week-3 visit suggestions and calendar, opt-in push notifications/reminders, customer receipts/history, secure account linking, reviews/photos with consent/moderation, future wash requests and the embedded racing experience. Do not invent rewards, active discounts, weather-triggered marketing or booking confirmations.
+- Walk-in tickets/receipts must not depend on staff/admin manually advancing job statuses. Do not add a manual status lifecycle. Never fabricate final charge or payment details; those must come from a verified transaction record or customer-confirmed transaction step.
