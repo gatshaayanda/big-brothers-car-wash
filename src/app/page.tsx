@@ -29,7 +29,7 @@ function normalizeWhatsAppDigits(value: string) {
 function buildWhatsAppSelfLink(phone: string, appUrl: string, customerName: string) {
   const digits = normalizeWhatsAppDigits(phone);
   const firstName = customerName.trim().split(/\s+/)[0] || "there";
-  const message = "Hi " + firstName + "! Here is the official Big Brothers Car Wash link shared with you at the wash. Open it on your own phone to find your account, receipts, next-wash bookings, available offers and Big Brothers Racing: " + appUrl;
+  const message = "Hi " + firstName + "! Here is the official Big Brothers Car Wash app link shared with you at the wash. Open it on your own phone. After your wash, use the secure receipt and account link shared by staff to connect your wash record, view receipts and book your next wash. You can also check available offers and play Big Brothers Racing: " + appUrl;
   return "https://wa.me/" + digits + "?text=" + encodeURIComponent(message);
 }
 
