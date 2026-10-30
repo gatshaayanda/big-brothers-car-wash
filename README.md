@@ -46,7 +46,6 @@ The three Big Brothers wash/location clips (approximately 104 MB total) can be s
 - Confirm invalid WhatsApp numbers are rejected before submission.
 - Confirm the post-submit handoff opens WhatsApp with the correct entered number and app URL, and that the customer must press Send. Test the copy-link fallback too.
 - Disconnect the network before submitting: verify the entry is labelled device-local and the successful WhatsApp handoff only appears after confirmed sync.
-- While online, save all three wash clips from Big Brothers Racing; verify download progress and the saved confirmation, then disconnect and test playback, seeking and rotation across the clips. If media was not saved, verify the homepage shows its branded fallback rather than a broken video.
 - In staff operations, move a test entry through waiting → in service → completed; record the actual charge/payment state; create and open the receipt; prepare the WhatsApp message; verify the PDF download and receipt expiry/revocation behavior.
 - Confirm receipt account-claim is optional and verifies ownership, and that a customer cannot access another customer's account/history.
 - Verify account-before-game order and that Big Brothers Racing remains immediately above the homepage footer. Test racing controls and progression separately; this work must not alter game mechanics.
