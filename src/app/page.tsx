@@ -209,7 +209,7 @@ export default function Home() {
   }
   async function syncOfflineRequests() {
     if (!navigator.onLine || !hasFirebaseWebConfig) return;
-    let drafts: Array<{ id?: string; collection: string; data: Record<string, unknown> }> = [];
+    let drafts: Array<{ id?: string; collection: string; data: Record<string, unknown>; enteredBy?: "customer" | "staff" }> = [];
     try { drafts = JSON.parse(localStorage.getItem(pendingKey) || "[]") as typeof drafts; } catch {}
     if (!drafts.length) return;
     try {
@@ -222,7 +222,7 @@ export default function Home() {
       }
       localStorage.setItem(pendingKey, JSON.stringify(remaining));
       setNotice(remaining.length ? { kind: "pending", text: remaining.length + " saved request(s) still have not synced." } : { kind: "success", text: "Saved requests have synced to Big Brothers' system. Bookings still need staff confirmation." });
-      if (queueDraft && !remaining.some(draft => draft.id === queueDraft.id)) { setQueueReference(queueDraft.id || ""); setQueueCustomerName(String(queueDraft.data.customerName || "")); setQueueWhatsAppPhone(String(queueDraft.data.phone || "")); setQueueAppUrl(window.location.origin); setQueueHandoff("synced"); }
+      if (queueDraft && !remaining.some(draft => draft.id === queueDraft.id)) { setQueueReference(queueDraft.id || ""); setQueueCustomerName(String(queueDraft.data.customerName || "")); setQueueWhatsAppPhone(String(queueDraft.data.phone || "")); setQueueEnteredBy(queueDraft.enteredBy === "staff" ? "staff" : "customer"); setQueueAppUrl(window.location.origin); setQueueHandoff("synced"); }
     } catch { setNotice({ kind: "pending", text: "Sync is not complete. Your saved requests remain on this device." }); }
   }
 
@@ -271,7 +271,7 @@ export default function Home() {
       }
       if (!navigator.onLine || !hasFirebaseWebConfig) {
         const saved = JSON.parse(localStorage.getItem(pendingKey) || "[]") as Array<unknown>;
-        const localId = crypto.randomUUID(); saved.push({ id: localId, collection: collectionName, data }); localStorage.setItem(pendingKey, JSON.stringify(saved)); formElement.reset();
+        const localId = crypto.randomUUID(); saved.push({ id: localId, collection: collectionName, data, ...(tab === "queue" ? { enteredBy } : {}) }); localStorage.setItem(pendingKey, JSON.stringify(saved)); formElement.reset();
         if (tab === "queue") { setQueueReference(localId); setQueueCustomerName(customerName); setQueueWhatsAppPhone(phone); setQueueEnteredBy(enteredBy); setQueueAppUrl(window.location.origin); setQueueHandoff("offline"); }
         setNotice({ kind: "pending", text: "Saved on this device only. It is not visible to the team or a confirmed booking until it syncs." }); return;
       }
