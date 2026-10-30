@@ -83,6 +83,7 @@ service cloud.firestore {
           'customerId', 'customerName', 'phone', 'vehicleType',
           'vehicleRegistration', 'serviceId', 'serviceName', 'servicePrice',
           'locationId', 'notes', 'email', 'customerOfferAmount', 'tipPreference', 'addOnInterest',
+          'enteredBy', 'tipAmount', 'washPriceStatus', 'agreedWashPrice',
           'status', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.customerId == uid
@@ -105,6 +106,18 @@ service cloud.firestore {
                 && request.resource.data.customerOfferAmount <= 1000000))
         && (!request.resource.data.keys().hasAny(['tipPreference'])
             || request.resource.data.tipPreference in ['no-thanks', 'coins', 'if-happy', 'next-time', 'ask-me', 'tip-if-happy', 'no-preference'])
+        && (!request.resource.data.keys().hasAny(['enteredBy'])
+            || request.resource.data.enteredBy in ['customer', 'staff'])
+        && (!request.resource.data.keys().hasAny(['tipAmount'])
+            || (request.resource.data.tipAmount is number
+                && request.resource.data.tipAmount >= 0
+                && request.resource.data.tipAmount <= 1000000))
+        && (!request.resource.data.keys().hasAny(['agreedWashPrice'])
+            || (request.resource.data.agreedWashPrice is number
+                && request.resource.data.agreedWashPrice > 0
+                && request.resource.data.agreedWashPrice <= 1000000))
+        && (!request.resource.data.keys().hasAny(['washPriceStatus'])
+            || request.resource.data.washPriceStatus in ['listed-service', 'pending-agreement', 'agreed-face-to-face'])
         && (!request.resource.data.keys().hasAny(['addOnInterest'])
             || request.resource.data.addOnInterest in ['no-thanks', 'coke', 'other'])
         && request.resource.data.status == 'waiting'
