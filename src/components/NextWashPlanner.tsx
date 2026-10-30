@@ -24,6 +24,7 @@ export default function NextWashPlanner() {
  const openingMinutes = opening ? Number(opening.slice(0,2))*60+Number(opening.slice(3,5)) : 8*60;
  const closingMinutes = closing ? Number(closing.slice(0,2))*60+Number(closing.slice(3,5)) : 18*60;
  const hoursConfigured = Boolean(opening && closing);
+ const closedDays = Array.isArray(settings.closedDays) ? settings.closedDays.filter((day): day is string => typeof day === "string").map(day => day.toLowerCase()) : [];
 
  useEffect(()=>subscribeSettings(value=>setSettings(value||{}),()=>setToast("Business hours could not be loaded. Your request will need staff confirmation.")),[]);
  useEffect(()=>{
