@@ -33,6 +33,7 @@ function buildWhatsAppSelfLink(phone: string, appUrl: string) {
 export default function Home() {
   const [services, setServices] = useState<VulaService[]>([]);
   const [settings, setSettings] = useState<Record<string, unknown>>({});
+  const [heroMediaUnavailable, setHeroMediaUnavailable] = useState(false);
   const [online, setOnline] = useState(true);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [busy, setBusy] = useState(false);
@@ -325,7 +326,7 @@ export default function Home() {
         <div className="bb-daily-hero-actions"><a className="big-brothers-button primary" href="#request" onClick={() => setTab("queue")}>🚗 Join the walk-in queue</a><a className="bb-daily-account-link" href="/account">Already washed with us? My account ↗</a></div>
       </div>
       <div className="bb-daily-hero-media">
-        <video autoPlay muted loop playsInline preload="none" aria-label="Big Brothers Car Wash wash-bay footage" src="/videos/Bays.mp4" />
+        {!heroMediaUnavailable ? <video autoPlay muted loop playsInline preload="none" aria-label="Big Brothers Car Wash wash-bay footage" src="/videos/Bays.mp4" onError={() => setHeroMediaUnavailable(true)} /> : <div className="bb-daily-hero-media-fallback" role="status"><span className="big-brothers-mark">BB</span><span>Wash. Care. Go.</span><small>Wash-bay footage is not saved on this device yet. Save the clips from Big Brothers Racing while online to enjoy them offline.</small><a href="/games">Open Big Brothers Racing ↗</a></div>}
         <div><span>BIG BROTHERS CAR WASH</span><strong>Your ride is in good hands.</strong></div>
       </div>
       <div className="bb-daily-weather"><LocationWeather showLocationGuide={false}/></div>
