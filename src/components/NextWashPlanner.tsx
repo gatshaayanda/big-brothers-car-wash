@@ -13,7 +13,7 @@ export default function NextWashPlanner() {
  const [settings,setSettings] = useState<Record<string,unknown>>({});
  const [forecast,setForecast] = useState<Record<string,number>>({});
  const [forecastReady,setForecastReady] = useState(false);
- const [month,setMonth] = useState(()=>{const d=new Date();d.setMonth(d.getMonth()+1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")});
+ const [month,setMonth] = useState(()=>{const d=new Date();d.setDate(d.getDate()+8);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")});
  const [selected,setSelected] = useState("");
  const [time,setTime] = useState("11:00");
  const [toast,setToast] = useState("");
@@ -56,7 +56,7 @@ export default function NextWashPlanner() {
  const monthLabel=new Intl.DateTimeFormat("en-BW",{month:"long",year:"numeric"}).format(first);
  const shiftMonth=(delta:number)=>{const d=new Date(monthParts[0],monthParts[1]-1+delta,1);setMonth(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"))};
  const timeSlots=useMemo(()=>{const slots:string[]=[];const from=Math.max(0,Math.min(23,startHour));const to=Math.max(from,Math.min(23,endHour));for(let h=from;h<=to;h++)for(const m of [0,30])if(!(h===to&&m>Number((closing||"18:00").slice(3,5))))slots.push(String(h).padStart(2,"0")+":"+String(m).padStart(2,"0"));return slots},[startHour,endHour,closing]);
- const choose=(date:string,selectedTime="11:00")=>{setSelected(date);setTime(selectedTime);setToast("Selected "+displayDate(date)+". Choose your preferred time, then send the request to the Brothers.");};
+ const choose=(date:string,selectedTime=(timeSlots.includes("11:00")?"11:00":timeSlots[0]||"11:00"))=>{setSelected(date);setTime(selectedTime);setToast("Selected "+displayDate(date)+". Choose your preferred time, then send the request to the Brothers.");};
  const continueToRequest=()=>{if(!selected){setToast("Choose a suggested day or a date in the calendar first.");return}window.location.assign("/?journey=book&preferredDate="+encodeURIComponent(selected)+"&preferredTime="+encodeURIComponent(time)+"#request")};
  useEffect(()=>{
   if(!selected)return;
@@ -79,7 +79,7 @@ export default function NextWashPlanner() {
    <div className="bb-calendar-days">{Array.from({length:offset},(_,i)=><span key={"blank"+i}/>)}{Array.from({length:daysInMonth},(_,i)=>{const day=new Date(monthParts[0],monthParts[1]-1,i+1);const key=dateKey(day);const closed=closedDays.includes(day.toLocaleDateString("en-US",{weekday:"long"}).toLowerCase());const past=key<minDate;return <button type="button" key={key} disabled={past||closed} className={(selected===key?"selected ":"")+(closed?"closed":"")} aria-pressed={selected===key} title={closed?"Closed":undefined} onClick={()=>choose(key)}>{i+1}</button>})}</div>
    <p className="bb-calendar-note">{hoursConfigured?"Published opening hours: "+opening+"–"+closing+".":"Operating hours are not published in the customer settings yet; time preferences remain subject to confirmation."} {closedDays.length?"Closed days are excluded.":"Ask the Brothers to confirm any exceptional closure."}</p>
   </div>
-  {selected&&<div className="bb-selected-wash"><div><span>YOUR PREFERRED VISIT</span><strong>{displayDate(selected)}</strong><small>{availabilityLoading?"Checking time options…":slots.length?"Live preferred times returned by Big Brothers":"Preferred time · subject to confirmation"}</small></div><label>Preferred time<select value={time} onChange={e=>setTime(e.target.value)}>{(slots.length?slots:timeSlots).map(slot=><option key={slot} value={slot}>{slot}</option>)}</select></label><button type="button" className="big-brothers-button primary" onClick={continueToRequest}>Continue with this day ↗</button></div>}
+  {selected&&<div className="bb-selected-wash"><div><span>YOUR PREFERRED VISIT</span><strong>{displayDate(selected)}</strong><small>{availabilityLoading?"Checking time options…":slots.length?"Preferred times checked against current availability":"Preferred time · subject to confirmation"}</small></div><label>Preferred time<select value={time} onChange={e=>setTime(e.target.value)}>{(slots.length?slots:timeSlots).map(slot=><option key={slot} value={slot}>{slot}</option>)}</select></label><button type="button" className="big-brothers-button primary" onClick={continueToRequest}>Continue with this day ↗</button></div>}
   {toast&&<p className="bb-planner-toast" role="status" aria-live="polite">{toast}</p>}
   <div className="bb-mobile-wash-inquiry"><div><strong>Rather have us come to you?</strong><p>Ask about a mobile wash at your home, office or another location. The Brothers will check coverage and confirm separately.</p></div><a className="big-brothers-button secondary" href="/?journey=book&mode=mobile#request">Enquire about a mobile wash ↗</a></div>
  </section>;
