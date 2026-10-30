@@ -3,10 +3,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
+import { signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, hasFirebaseWebConfig } from "@/lib/firebase/client";
-import { enableVulaPushNotifications } from "@/lib/firebase/big-brothers-notifications";
 import { subscribeServices, subscribeSettings, type VulaService } from "@/lib/firebase/big-brothers-data";
 import "./big-brothers.css";
 import LocationWeather from "@/components/LocationWeather";
@@ -36,7 +35,6 @@ export default function Home() {
   const [services, setServices] = useState<VulaService[]>([]);
   const [settings, setSettings] = useState<Record<string, unknown>>({});
   const [online, setOnline] = useState(true);
-  const [userId, setUserId] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);
   const [busy, setBusy] = useState(false);
   const [queueHandoff, setQueueHandoff] = useState<"synced" | "offline" | null>(null);
@@ -105,11 +103,10 @@ export default function Home() {
     setOnline(navigator.onLine);
     const onOnline = () => { setOnline(true); void syncOfflineRequests(); };
     const onOffline = () => { setOnline(false); setNotice({ kind: "pending", text: "Offline: requests can be saved on this device, but the team cannot see them until they sync." }); };
-    const stopAuth = onAuthStateChanged(auth, user => { setUserId(user?.uid ?? ""); });
     const stops = [subscribeServices(setServices, error => setConnectionError(error.message)), subscribeSettings(value => setSettings(value ?? {}), () => {})];
     window.addEventListener("online", onOnline); window.addEventListener("offline", onOffline);
     if (navigator.onLine) void syncOfflineRequests();
-    return () => { stopAuth(); stops.forEach(stop => stop()); window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
+    return () => { stops.forEach(stop => stop()); window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
   }, []);
 
   useEffect(() => { const params = new URLSearchParams(window.location.search); if (params.get("journey") === "book") { setTab("book"); setBookingDate(params.get("preferredDate") || ""); setBookingTime(params.get("preferredTime") || ""); } }, []);
@@ -219,7 +216,7 @@ export default function Home() {
         collectionName = "queueEntries";
         const selectedOffer = activeServices.find(s => s.id === serviceId && typeof s.price === "number" && s.price >= 0);
         if (serviceId !== "customer-offer" && !selectedOffer) throw new Error("Choose one of the currently priced wash offers.");
-        if (serviceId === "customer-offer" && (customerOfferAmount === null || !Number.isFinite(customerOfferAmount) || customerOfferAmount <= 0 || customerOfferAmount > 1000000)) throw new Error("Enter a proposed amount greater than BWP 0 for the attendant to consider.");
+        if (serviceId === "customer-offer" && enteredBy === "customer" && (customerOfferAmount === null || !Number.isFinite(customerOfferAmount) || customerOfferAmount <= 0 || customerOfferAmount > 1000000)) throw new Error("Enter a proposed amount greater than BWP 0 for the attendant to consider.");
         data = { ...common, email: String(form.get("email") ?? "").trim(), serviceId, serviceName: serviceId === "customer-offer" ? (enteredBy === "staff" ? "Staff-agreed custom wash price" : "Customer-proposed price (agree with attendant)") : selectedOffer!.name, ...(selectedOffer ? { servicePrice: selectedOffer.price } : {}), ...(customerOfferAmount !== null && Number.isFinite(customerOfferAmount) && customerOfferAmount > 0 && enteredBy === "customer" ? { customerOfferAmount } : {}), enteredBy, tipAmount, washPriceStatus: serviceId !== "customer-offer" ? "listed-service" : enteredBy === "staff" ? "agreed-face-to-face" : "pending-agreement", ...(enteredBy === "staff" && serviceId === "customer-offer" && agreedWashPrice !== null ? { agreedWashPrice } : {}), locationId: locationName, status: "waiting" };
       } else {
         collectionName = "fleetRequests";
