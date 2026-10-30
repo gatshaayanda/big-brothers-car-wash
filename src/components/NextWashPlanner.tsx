@@ -35,7 +35,6 @@ export default function NextWashPlanner() {
    .finally(()=>{if(!cancelled)setForecastReady(true)});
   return()=>{cancelled=true};
  },[]);
- const today = dateKey(new Date());
  const minDate = useMemo(()=>{const d=new Date();d.setDate(d.getDate()+1);return dateKey(d)},[]);
  const choices = useMemo(()=>{
   const make=(from:number,to:number,week:string):DayChoice|null=>{
@@ -61,7 +60,7 @@ export default function NextWashPlanner() {
   if(!selected)return;
   let cancelled=false;setAvailabilityLoading(true);
   fetch("/api/bookings/availability?date="+encodeURIComponent(selected)+"&mode=site",{cache:"no-store"})
-   .then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||"Times could not be checked");if(!cancelled)setAvailability(prev=>({...prev,[selected]:Array.isArray(d.slots)?d.slots:[]}));})
+   .then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||"Times could not be checked");if(!cancelled){const slots=Array.isArray(d.slots)?d.slots:[];setAvailability(prev=>({...prev,[selected]:slots}));if(slots.length)setTime(current=>slots.includes(current)?current:slots[0]);}})
    .catch(()=>{if(!cancelled)setToast("Live slot checking is unavailable. Your preferred time will be reviewed by staff.")})
    .finally(()=>{if(!cancelled)setAvailabilityLoading(false)});
   return()=>{cancelled=true};
