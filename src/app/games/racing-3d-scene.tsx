@@ -340,20 +340,28 @@ export default function Racing3DScene({ raceRef, controlsRef, phaseRef }: Props)
       previousCarZ = race.worldZ;
       // Render the independent world-space vehicle state; track geometry is not a movement rail.
       const carWorld = new THREE.Vector3(race.worldX, .015, race.worldZ);
-      const forward = new THREE.Vector3(-Math.sin(race.worldYaw), 0, -Math.cos(race.worldYaw)).normalize();
+      const chassisForward = new THREE.Vector3(-Math.sin(race.worldYaw), 0, -Math.cos(race.worldYaw)).normalize();
+      const velocityLength = Math.hypot(race.velocityX, race.velocityZ);
+      // Chase the direction the car is actually travelling, not its nose. During a drift
+      // the camera keeps following momentum while the chassis visibly points across it.
+      const forward = velocityLength > 0.7
+        ? new THREE.Vector3(race.velocityX / velocityLength, 0, race.velocityZ / velocityLength)
+        : chassisForward;
       car.position.copy(carWorld);
       car.rotation.y = race.worldYaw;
       // Subtle suspension response: braking transfers load forward and cornering
       // rolls the body. These are visual cues driven by the physics state.
-      car.rotation.x = clamp(-race.longitudinalLoad * 0.12, -0.035, 0.015);
-      car.rotation.z = clamp(-race.lateralG * 0.035 - race.drift * 0.12, -0.055, 0.055);
+      car.rotation.x = clamp(-race.longitudinalLoad * 0.22, -0.075, 0.025);
+      // Exaggerated but speed/load-driven body roll makes weight transfer and rear slip
+      // readable on a phone-sized screen instead of hiding it in tiny suspension motion.
+      car.rotation.z = clamp(-race.lateralG * 0.055 - race.drift * 0.24, -0.16, 0.16);
       groundShadow.position.x = carWorld.x;
       groundShadow.position.z = carWorld.z;
       groundShadow.rotation.z = -car.rotation.y;
       const cameraTarget = new THREE.Vector3(carWorld.x + forward.x * 10, 1.25, carWorld.z + forward.z * 10);
       const cameraPosition = new THREE.Vector3(carWorld.x - forward.x * 8.4, 4.7, carWorld.z - forward.z * 8.4);
       const frameDelta = Math.min(clock.getDelta(), .05);
-      camera.position.lerp(cameraPosition, 1 - Math.exp(-frameDelta * 5.5));
+      camera.position.lerp(cameraPosition, 1 - Math.exp(-frameDelta * (Math.abs(race.drift) > 0.22 ? 2.8 : 4.2)));
       camera.lookAt(cameraTarget);
       const flame = car.userData.flame as THREE.Object3D | undefined;
       if (flame) {
@@ -362,7 +370,7 @@ export default function Racing3DScene({ raceRef, controlsRef, phaseRef }: Props)
         flame.scale.setScalar(pulse);
       }
       if (currentPhase === "running") {
-        camera.fov = 63 + Math.min(8, race.speed / 28) + (controls.boost && race.nos > 0 && !controls.brake ? 5 : 0);
+        camera.fov = 63 + Math.min(12, race.speed / 19) + (controls.boost && race.nos > 0 && !controls.brake ? 7 : 0);
       } else camera.fov = 63;
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);
