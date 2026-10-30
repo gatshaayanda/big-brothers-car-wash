@@ -38,12 +38,15 @@ Installation is protected infrastructure. Preserve the approved Africhiko instal
 
 Offline queue drafts remain local until server sync succeeds. Do not describe local data as shared or tell a customer they are in the staff queue until Firestore confirms the write.
 
+The three Big Brothers wash/location clips (approximately 104 MB total) can be saved explicitly from the Big Brothers Racing page while online. The save action checks available browser storage where supported, reports download progress, verifies saved cache entries and keeps already-saved clips if a later download fails. Once saved, the clips are served from the isolated `big-brothers-media-v2` cache and the service worker supports byte-range playback for seeking. The homepage hero uses a branded fallback if its wash-bay video is not available offline. Video downloads are optional and never block queue intake.
+
 ## QA checklist
 
 - On a narrow phone screen, submit a valid queue entry and confirm the shared staff queue receives it once.
 - Confirm invalid WhatsApp numbers are rejected before submission.
 - Confirm the post-submit handoff opens WhatsApp with the correct entered number and app URL, and that the customer must press Send. Test the copy-link fallback too.
 - Disconnect the network before submitting: verify the entry is labelled device-local and the successful WhatsApp handoff only appears after confirmed sync.
+- While online, save all three wash clips from Big Brothers Racing; verify download progress and the saved confirmation, then disconnect and test playback, seeking and rotation across the clips. If media was not saved, verify the homepage shows its branded fallback rather than a broken video.
 - In staff operations, move a test entry through waiting → in service → completed; record the actual charge/payment state; create and open the receipt; prepare the WhatsApp message; verify the PDF download and receipt expiry/revocation behavior.
 - Confirm receipt account-claim is optional and verifies ownership, and that a customer cannot access another customer's account/history.
 - Verify account-before-game order and that Big Brothers Racing remains immediately above the homepage footer. Test racing controls and progression separately; this work must not alter game mechanics.
