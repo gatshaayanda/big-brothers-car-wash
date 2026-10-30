@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { subscribeSettings } from "@/lib/firebase/big-brothers-data";
 
 type DayChoice = { date: string; rain: number | null; label: string; week: string };
@@ -68,8 +69,8 @@ export default function NextWashPlanner() {
  },[selected]);
  const slots=availability[selected]||[];
  return <section className="bb-next-wash" aria-labelledby="bb-next-wash-title">
-  <div className="bb-next-wash-heading"><p className="big-brothers-eyebrow">PLAN AHEAD · G-WEST</p><h2 id="bb-next-wash-title">Your next wash</h2><p>No confirmed booking yet. Let's find a good day for your next visit.</p></div>
-  <div className="bb-wash-suggestions"><div className="bb-wash-suggestions-title"><span>🌤️</span><div><strong>Your next good wash windows</strong><small>Two suggested options in different weeks. Weather can change, so we'll refresh the outlook closer to your visit.</small></div></div>
+  <div className="bb-next-wash-heading"><p className="big-brothers-eyebrow">PLAN AHEAD · G-WEST</p><h2 id="bb-next-wash-title">Your next wash</h2><p>No confirmed booking yet. Let&apos;s find a good day for your next visit.</p></div>
+  <div className="bb-wash-suggestions"><div className="bb-wash-suggestions-title"><span>🌤️</span><div><strong>Your next good wash windows</strong><small>Two suggested options in different weeks. Weather can change, so we&apos;ll refresh the outlook closer to your visit.</small></div></div>
    <div className="bb-wash-suggestion-grid">{choices.map(choice=><button type="button" key={choice.week} className={"bb-wash-suggestion"+(selected===choice.date?" selected":"")} onClick={()=>choose(choice.date)}><span>{choice.week}</span><strong>{displayDate(choice.date)}</strong><b>11:00 – 13:00</b><small>{choice.rain===null?"Forecast not available this far ahead":choice.rain+"% rain probability · "+choice.label}</small><i>{selected===choice.date?"Selected ✓":"Choose this day →"}</i></button>)}</div>
    {!forecastReady&&<p className="bb-planner-status">Checking the local weather outlook…</p>}
   </div>
@@ -80,6 +81,6 @@ export default function NextWashPlanner() {
   </div>
   {selected&&<div className="bb-selected-wash"><div><span>YOUR PREFERRED VISIT</span><strong>{displayDate(selected)}</strong><small>{availabilityLoading?"Checking time options…":slots.length?"Preferred times checked against current availability":"Preferred time · subject to confirmation"}</small></div><label>Preferred time<select value={time} onChange={e=>setTime(e.target.value)}>{(slots.length?slots:timeSlots).map(slot=><option key={slot} value={slot}>{slot}</option>)}</select></label><button type="button" className="big-brothers-button primary" onClick={continueToRequest}>Continue with this day ↗</button></div>}
   {toast&&<p className="bb-planner-toast" role="status" aria-live="polite">{toast}</p>}
-  <div className="bb-mobile-wash-inquiry"><div><strong>Rather have us come to you?</strong><p>Ask about a mobile wash at your home, office or another location. The Brothers will check coverage and confirm separately.</p></div><a className="big-brothers-button secondary" href="/?journey=book&mode=mobile#request">Enquire about a mobile wash ↗</a></div>
+  <div className="bb-mobile-wash-inquiry"><div><strong>Rather have us come to you?</strong><p>Ask about a mobile wash at your home, office or another location. The Brothers will check coverage and confirm separately.</p></div><Link className="big-brothers-button secondary" href="/?journey=book&mode=mobile#request">Enquire about a mobile wash ↗</Link></div>
  </section>;
 }
