@@ -1,3 +1,3 @@
-import RacingHub from "./racing-hub";
-export const metadata = { title: "Racing Garage", description: "Big Brothers Racing career mode" };
-export default function GamesPage() { return <RacingHub />; }
+import RacingWarmup from "./racing-warmup";
+export const metadata = { title: "Big Brothers Racing", description: "Big Brothers 3D circuit practice" };
+export default function GamesPage() { return <RacingWarmup />; }
