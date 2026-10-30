@@ -373,3 +373,19 @@
 .bb-returning-customer a{font-weight:800;color:#a71922;text-decoration:underline}
 .account-grid-home{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:760px){.bb-daily-hero{grid-template-columns:1fr;padding:22px 16px 18px;gap:16px}.bb-daily-hero-copy{padding:8px 0 0}.bb-daily-hero-copy h1{font-size:clamp(48px,13vw,66px)}.bb-daily-hero-copy>p:not(.big-brothers-eyebrow){font-size:14px}.bb-daily-hero-actions{margin-top:18px;width:100%}.bb-daily-hero-actions .big-brothers-button{width:100%}.bb-daily-hero-media{min-height:210px;aspect-ratio:16/10}.bb-daily-weather .bb-weather-card{align-items:flex-start;flex-wrap:wrap;padding:15px}.bb-daily-weather .bb-weather-main{flex-basis:100%}.bb-daily-weather .bb-weather-metrics{flex:1}.bb-weather-actions{width:100%;justify-content:space-between}.account-grid-home{grid-template-columns:1fr}}
+
+
+/* Optional Zaka tip — part of customer intake, never a hidden surcharge. */
+.bb-tip-panel{display:grid;gap:13px;padding:17px;border:1px solid #f0d9d7;border-radius:9px;background:linear-gradient(145deg,#fff8f6,#fff)}
+.bb-tip-eyebrow{display:block;margin-bottom:7px;font-size:9px;font-weight:850;letter-spacing:.14em;color:#a71922}
+.bb-tip-panel>div:first-child>strong{display:block;font:600 19px "Space Grotesk",Arial,sans-serif;letter-spacing:-.035em;color:#201b1a}
+.bb-tip-panel>div:first-child>p{margin:6px 0 0;color:#645a56;font-size:12px;line-height:1.6}
+.bb-tip-choices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.bb-tip-choices button{display:grid;justify-items:center;align-content:center;gap:5px;min-height:66px;padding:8px 4px;border:1px solid #e8dfdb;border-radius:8px;background:#fff;color:#352d29;font:inherit;cursor:pointer}
+.bb-tip-choices button span{font-size:19px;line-height:1}
+.bb-tip-choices button strong{font-size:11px}
+.bb-tip-choices button.selected{border-color:#e51f2a;background:#fff0ef;box-shadow:inset 0 0 0 1px #e51f2a;color:#9f171f}
+.bb-tip-choices button:focus-visible{outline:2px solid #e51f2a;outline-offset:2px}
+.bb-custom-tip{display:grid;gap:6px;font-size:12px;font-weight:750}
+.bb-custom-tip input{width:100%}
+@media(max-width:420px){.bb-tip-panel{padding:14px}.bb-tip-choices{gap:5px}.bb-tip-choices button{min-height:60px}.bb-tip-choices button strong{font-size:10px}}
