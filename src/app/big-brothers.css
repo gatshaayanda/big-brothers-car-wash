@@ -333,3 +333,43 @@
 .queue-trust-copy{margin:12px 0 18px!important;padding:12px 14px;border-left:3px solid #e51f2a;background:#fff6f5;border-radius:0 7px 7px 0;color:#5a3937!important}
 .queue-reference strong{overflow-wrap:anywhere}
 @media(max-width:560px){.queue-benefits{grid-template-columns:1fr}.queue-handoff-card{padding:24px 18px}.queue-share-title{font-size:25px}}
+
+
+/* Big Brothers Daily Drive — warm local welcome, weather cue and direct customer path */
+.bb-daily-hero{max-width:1240px;margin:0 auto;padding:36px 28px 28px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px;align-items:stretch}
+.bb-daily-hero-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:12px 0}
+.bb-daily-hero-copy .big-brothers-eyebrow{margin:0 0 16px}
+.bb-daily-hero-copy h1{font:600 clamp(48px,6vw,78px)/.94 "Space Grotesk",Arial,sans-serif;letter-spacing:-.075em;margin:0 0 18px}
+.bb-daily-hero-copy h1 em{font-style:normal;color:var(--brand-red)}
+.bb-daily-hero-copy>p:not(.big-brothers-eyebrow){max-width:43ch;color:#5d5754;font-size:15px;line-height:1.75;margin:0}
+.bb-daily-hero-actions{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-top:24px}
+.bb-daily-hero-actions .big-brothers-button{min-width:230px}
+.bb-daily-account-link{font-size:12px;font-weight:750;color:#a71922;text-decoration:underline!important;text-underline-offset:4px}
+.bb-daily-hero-media{position:relative;min-width:0;min-height:300px;overflow:hidden;background:#211d1b;border-radius:5px;color:#fff}
+.bb-daily-hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.88}
+.bb-daily-hero-media:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#000b);pointer-events:none}
+.bb-daily-hero-media>div{position:absolute;z-index:1;left:22px;right:22px;bottom:20px;display:grid;gap:7px}
+.bb-daily-hero-media span{font-size:9px;letter-spacing:.17em;color:#ffffffc9}
+.bb-daily-hero-media strong{font:600 clamp(21px,2.7vw,30px)/1.05 "Space Grotesk",Arial,sans-serif;letter-spacing:-.04em}
+.bb-daily-weather{grid-column:1/-1;min-width:0}
+.bb-daily-weather .location-weather-section{max-width:none;margin:0;padding:0}
+.bb-daily-weather .bb-weather-card{display:flex;align-items:center;gap:18px;padding:17px 20px;background:#fff8f6;border:1px solid #f0d9d7;border-radius:5px}
+.bb-daily-weather .bb-weather-main{flex:1;min-width:0}
+.bb-daily-weather .big-brothers-eyebrow{margin:0 0 7px}
+.bb-daily-greeting{font:600 18px "Space Grotesk",Arial,sans-serif;letter-spacing:-.035em;margin:0 0 5px}
+.bb-daily-message{font-size:12px;line-height:1.55;color:#554b48;margin:0 0 9px}
+.bb-daily-message span{margin-right:4px}
+.bb-weather-condition-label{font-size:9px;letter-spacing:.12em;color:#8a7772;margin:0 0 4px}
+.bb-daily-weather .bb-weather-reading strong{font-size:25px}
+.bb-daily-weather .bb-weather-reading span{font-size:11px}
+.bb-daily-weather .bb-weather-feels,.bb-daily-weather .bb-weather-main>small{font-size:10px}
+.bb-daily-weather .bb-weather-metrics{gap:17px}
+.bb-daily-weather .bb-weather-metrics small{font-size:9px}
+.bb-daily-weather .bb-weather-metrics strong{font-size:15px}
+.bb-weather-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bb-weather-actions a{font-size:11px;font-weight:800;color:#a71922;white-space:nowrap}
+.bb-daily-weather .bb-weather-refresh{border-radius:4px;padding:9px 11px}
+.bb-returning-customer{margin-top:15px!important;padding:12px 14px;background:#f8f5f3;border-left:3px solid var(--brand-red);font-size:11px!important}
+.bb-returning-customer a{font-weight:800;color:#a71922;text-decoration:underline}
+.account-grid-home{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.bb-daily-hero{grid-template-columns:1fr;padding:22px 16px 18px;gap:16px}.bb-daily-hero-copy{padding:8px 0 0}.bb-daily-hero-copy h1{font-size:clamp(48px,13vw,66px)}.bb-daily-hero-copy>p:not(.big-brothers-eyebrow){font-size:14px}.bb-daily-hero-actions{margin-top:18px;width:100%}.bb-daily-hero-actions .big-brothers-button{width:100%}.bb-daily-hero-media{min-height:210px;aspect-ratio:16/10}.bb-daily-weather .bb-weather-card{align-items:flex-start;flex-wrap:wrap;padding:15px}.bb-daily-weather .bb-weather-main{flex-basis:100%}.bb-daily-weather .bb-weather-metrics{flex:1}.bb-weather-actions{width:100%;justify-content:space-between}.account-grid-home{grid-template-columns:1fr}}
