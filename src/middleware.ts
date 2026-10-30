@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const legacyCustomerRoutes = [
-  "/account", "/book", "/invite", "/order", "/orders", "/products",
+  "/book", "/invite", "/order", "/orders", "/products",
   "/request", "/requests", "/saved", "/patterns",
 ];
 
