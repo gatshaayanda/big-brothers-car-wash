@@ -129,7 +129,16 @@ export default function LocationWeather({ showLocationGuide = true }: { showLoca
     }
   }
 
-  const updated = weather?.time ? new Date(weather.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+  const updated = weather?.time ? new Date(weather.time).toLocaleTimeString("en-BW", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Gaborone" }) : "";
+  const localHour = Number(new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hourCycle: "h23", timeZone: "Africa/Gaborone" }).format(new Date()));
+  const greeting = localHour < 11 ? "Dumela, G-West!" : localHour < 17 ? "Eita, G-West!" : "Good evening, G-West!";
+  const weatherMood = !weather ? { emoji: "🤝", title: "Your Brothers have your back.", detail: "Live conditions are taking a break. You can still request a wash and the team will confirm availability." }
+    : weather.weather_code >= 51 && weather.weather_code <= 82 ? { emoji: "🌧️", title: "A wet one out there.", detail: "Take your time. You can request a wash and check the best timing with the team." }
+    : weather.weather_code >= 95 ? { emoji: "⛈️", title: "Stormy skies in Gaborone.", detail: "Put safety first. Check with the team before making the trip." }
+    : weather.wind_speed_10m >= 25 ? { emoji: "💨", title: "Wind and dust on the move.", detail: "Been on dusty roads? Your ride deserves a little care." }
+    : weather.temperature_2m >= 32 ? { emoji: "☀️", title: "Gaborone is bringing the heat!", detail: "Keep cool out there. When you're ready, bring your ride through." }
+    : weather.weather_code === 0 ? { emoji: "☀️", title: "Looking like a bright day.", detail: "A good time to give your ride some attention. The Brothers are here to help." }
+    : { emoji: "🌤️", title: "Whatever the weather, we've got your ride.", detail: "Make your next wash easy: join the queue or plan a return visit." };
 
   return <>
     <section className="big-brothers-section location-weather-section" aria-label="Gaborone weather">
@@ -141,7 +150,7 @@ export default function LocationWeather({ showLocationGuide = true }: { showLoca
           <small>{weatherState === "stale" ? "Last available reading " + updated + " local time · saved on this device · may be out of date · " : updated ? "Updated " + updated + " local time · " : ""}Weather by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> (CC BY 4.0)</small>
         </div>
         {weather && <div className="bb-weather-metrics"><span><small>Humidity</small><strong>{weather.relative_humidity_2m}%</strong></span><span><small>Wind</small><strong>{Math.round(weather.wind_speed_10m)} km/h</strong></span></div>}
-        <button type="button" className="bb-weather-refresh" onClick={() => void loadWeather()} disabled={weatherState === "loading"}>{weatherState === "loading" ? "Loading…" : "Refresh weather"}</button>
+        <div className="bb-weather-actions"><button type="button" className="bb-weather-refresh" onClick={() => void loadWeather()} disabled={weatherState === "loading"}>{weatherState === "loading" ? "Checking…" : "↻ Refresh"}</button><a href="#request">Join the queue ↗</a></div>
       </div>
     </section>
     {showLocationGuide && <section className="big-brothers-section bb-location-guide" id="find-us">
