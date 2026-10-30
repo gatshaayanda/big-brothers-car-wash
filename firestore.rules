@@ -111,11 +111,14 @@ service cloud.firestore {
         && (!request.resource.data.keys().hasAny(['tipAmount'])
             || (request.resource.data.tipAmount is number
                 && request.resource.data.tipAmount >= 0
-                && request.resource.data.tipAmount <= 1000000))
+                && request.resource.data.tipAmount <= 1000000
+                && (!request.resource.data.keys().hasAny(['enteredBy']) || request.resource.data.enteredBy == 'customer' || request.resource.data.tipAmount == 0)))
         && (!request.resource.data.keys().hasAny(['agreedWashPrice'])
             || (request.resource.data.agreedWashPrice is number
                 && request.resource.data.agreedWashPrice > 0
-                && request.resource.data.agreedWashPrice <= 1000000))
+                && request.resource.data.agreedWashPrice <= 1000000
+                && request.resource.data.serviceId == 'customer-offer'
+                && request.resource.data.enteredBy == 'staff'))
         && (!request.resource.data.keys().hasAny(['washPriceStatus'])
             || request.resource.data.washPriceStatus in ['listed-service', 'pending-agreement', 'agreed-face-to-face'])
         && (!request.resource.data.keys().hasAny(['addOnInterest'])
