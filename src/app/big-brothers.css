@@ -398,3 +398,8 @@
 .bb-tip-summary .bb-tip-total>span{font-weight:750;color:#302825}
 .bb-tip-summary .bb-tip-total>strong{font-size:17px;color:#a71922}
 @media(max-width:420px){.bb-tip-summary{padding:14px;gap:12px}.bb-tip-summary>div{gap:9px}.bb-tip-summary>div>span{font-size:11px}}
+
+
+/* Keep the WhatsApp handoff as the immediate next action after queue confirmation. */
+.queue-whatsapp-primary{margin:14px 0 0!important;font-weight:800}
+.queue-trust-copy{margin:10px 0 18px!important}
