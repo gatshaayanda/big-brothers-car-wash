@@ -49,6 +49,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
   const [promoUnavailable, setPromoUnavailable] = useState(false);
   const [promoCaching, setPromoCaching] = useState(false);
   const [promoCacheMessage, setPromoCacheMessage] = useState("");
+  const [promoSaved, setPromoSaved] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   phaseRef.current = phase;
 
@@ -78,26 +79,87 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
     setPromoUnavailable(false);
     try { localStorage.setItem("big-brothers-racing:last-promo:v1", next); } catch {}
   }, [phase, expanded, embedded]);
+  useEffect(() => {
+    let cancelled = false;
+    async function inspectSavedMedia() {
+      if (!("caches" in window)) return;
+      try {
+        const cache = await caches.open("big-brothers-media-v2");
+        const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
+        const saved = await Promise.all(assets.map(asset => cache.match(new URL(asset, window.location.origin).toString())));
+        if (!cancelled && saved.every(Boolean)) {
+          setPromoSaved(true);
+          setPromoCacheMessage("All 3 wash clips are already saved on this device for offline playback.");
+        }
+      } catch { /* Private browsing or storage restrictions should not block racing. */ }
+    }
+    void inspectSavedMedia();
+    return () => { cancelled = true; };
+  }, []);
+
   async function savePromoMediaForOffline() {
     if (promoCaching) return;
-    if (!navigator.onLine) { setPromoCacheMessage("Connect to the internet to save the three clips first."); return; }
+    if (!navigator.onLine) { setPromoCacheMessage("Connect to the internet to save the three clips first. Previously saved clips remain available offline."); return; }
     if (!("caches" in window)) { setPromoCacheMessage("Offline media storage is not supported in this browser."); return; }
     setPromoCaching(true);
-    setPromoCacheMessage("Preparing offline media…");
+    setPromoSaved(false);
+    setPromoCacheMessage("Checking device storage before downloading about 104 MB…");
     const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
     let saved = 0;
+    let completedBytes = 0;
     try {
+      try { await navigator.storage?.persist?.(); } catch { /* Persistence is optional and browser-controlled. */ }
+      const estimate = await navigator.storage?.estimate?.();
+      if (typeof estimate?.quota === "number" && typeof estimate.usage === "number") {
+        const available = estimate.quota - estimate.usage;
+        if (available < 104 * 1024 * 1024 * 1.08) {
+          throw new Error("There may not be enough free browser storage. Free up at least 115 MB, then retry.");
+        }
+      }
       const cache = await caches.open("big-brothers-media-v2");
       for (const asset of assets) {
+        const url = new URL(asset, window.location.origin).toString();
+        const existing = await cache.match(url);
+        if (existing && existing.ok) {
+          const size = Number(existing.headers.get("content-length")) || 0;
+          completedBytes += size;
+          saved += 1;
+          setPromoCacheMessage("Checking saved clips · " + saved + " of 3 ready");
+          continue;
+        }
         const response = await fetch(asset, { cache: "no-store" });
-        if (!response.ok) throw new Error("Could not download " + asset.split("/").pop());
-        await cache.put(new URL(asset, window.location.origin).toString(), response.clone());
+        if (!response.ok || !response.body) throw new Error("Could not download " + asset.split("/").pop() + ". Check the connection and retry.");
+        const total = Number(response.headers.get("content-length")) || 0;
+        let currentBytes = 0;
+        const cacheWrite = cache.put(url, response.clone());
+        const reader = response.body.getReader();
+        try {
+          while (true) {
+            const chunk = await reader.read();
+            if (chunk.done) break;
+            currentBytes += chunk.value.byteLength;
+            const totalBytes = completedBytes + currentBytes;
+            const sizeLabel = (totalBytes / (1024 * 1024)).toFixed(1) + " MB";
+            const percent = total > 0 ? Math.min(99, Math.round(currentBytes / total * 100)) : null;
+            setPromoCacheMessage("Downloading " + asset.split("/").pop() + (percent === null ? "" : " · " + percent + "%") + " · " + sizeLabel + " received");
+          }
+        } finally { reader.releaseLock(); }
+        await cacheWrite;
+        const verified = await cache.match(url);
+        if (!verified || !verified.ok) throw new Error("The download finished but could not be verified in offline storage.");
+        const verifiedSize = Number(verified.headers.get("content-length")) || currentBytes;
+        if (total > 0 && verifiedSize !== total) throw new Error("The saved clip appears incomplete. Please retry while connected.");
+        completedBytes += currentBytes;
         saved += 1;
-        setPromoCacheMessage("Saved " + saved + " of 3 clips for offline use.");
+        setPromoCacheMessage("Saved " + saved + " of 3 clips · " + (completedBytes / (1024 * 1024)).toFixed(1) + " MB received.");
       }
-      setPromoCacheMessage(navigator.serviceWorker?.controller ? "All 3 clips are saved on this device for offline use." : "All 3 clips are saved. Reload the app once while online before testing offline playback.");
+      const allSaved = await Promise.all(assets.map(asset => cache.match(new URL(asset, window.location.origin).toString())));
+      if (!allSaved.every(Boolean)) throw new Error("One or more clips are missing from offline storage. Retry the download.");
+      setPromoSaved(true);
+      setPromoCacheMessage("All 3 clips are saved and verified on this device. They can play offline in Big Brothers Racing.");
     } catch (error) {
-      setPromoCacheMessage(saved + " of 3 clips saved. " + (error instanceof Error ? error.message : "Storage or download failed.") + " Connect again to retry.");
+      setPromoSaved(false);
+      setPromoCacheMessage(saved + " of 3 clips saved. " + (error instanceof Error ? error.message : "Storage or download failed.") + " Previously saved clips are kept; connect again to retry.");
     } finally { setPromoCaching(false); }
   }
   useEffect(() => { if (!embedded) document.title = "Big Brothers Racing · Circuit practice"; }, [businessName, embedded]);
@@ -478,7 +540,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
           <p>{phase === "ready" ? "Follow the green line. Brake at the boards, turn in on cue, clip the apex and unwind onto the exit." : phase === "countdown" ? "Get set. Smooth steering beats sudden corrections." : phase === "paused" ? "Take a breath. Resume when you're ready." : "Session complete. Take another lap and beat your time."}</p>
         </div>
       </div>
-      {(phase === "ready" || phase === "crashed") && <aside className="bb-racing-promo" aria-label="Big Brothers Car Wash promotion"><div className="bb-racing-promo-media">{!promoUnavailable ? <video key={promoMedia} src={promoMedia} controls playsInline muted preload="metadata" onError={() => setPromoUnavailable(true)} aria-label="Big Brothers Car Wash media"/> : <div className="bb-racing-promo-fallback"><span className="big-brothers-mark">BB</span><strong>BIG BROTHERS CAR WASH</strong><span>Wash. Care. Go.</span></div>}</div><div className="bb-racing-promo-copy"><span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH</span><strong>{phase === "crashed" ? "Need another lap?" : "While you're here, meet your wash team."}</strong><p>{phase === "crashed" ? "Take a breath, then try again. Your next run starts when you choose." : "Queue for your wash, keep your receipt, and come back for another race."}</p>{phase === "crashed" && <button type="button" className="big-brothers-button primary" onClick={startRace}>Try Again ↻</button>}<button type="button" className="big-brothers-button secondary" disabled={promoCaching} onClick={() => void savePromoMediaForOffline()}>{promoCaching ? "Saving clips…" : "Save 3 clips for offline · ~104 MB"}</button>{promoCacheMessage && <p role="status" aria-live="polite">{promoCacheMessage}</p>}</div></aside>}
+      {(phase === "ready" || phase === "crashed") && <aside className="bb-racing-promo" aria-label="Big Brothers Car Wash promotion"><div className="bb-racing-promo-media">{!promoUnavailable ? <video key={promoMedia} src={promoMedia} controls playsInline muted preload="metadata" onError={() => setPromoUnavailable(true)} aria-label="Big Brothers Car Wash media"/> : <div className="bb-racing-promo-fallback"><span className="big-brothers-mark">BB</span><strong>BIG BROTHERS CAR WASH</strong><span>Wash. Care. Go.</span></div>}</div><div className="bb-racing-promo-copy"><span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH</span><strong>{phase === "crashed" ? "Need another lap?" : "While you're here, meet your wash team."}</strong><p>{phase === "crashed" ? "Take a breath, then try again. Your next run starts when you choose." : "Queue for your wash, keep your receipt, and come back for another race."}</p>{phase === "crashed" && <button type="button" className="big-brothers-button primary" onClick={startRace}>Try Again ↻</button>}<button type="button" className="big-brothers-button secondary" disabled={promoCaching} onClick={() => void savePromoMediaForOffline()}>{promoCaching ? "Saving clips…" : promoSaved ? "3 clips saved for offline ✓" : "Save 3 clips for offline · ~104 MB"}</button>{promoCacheMessage && <p role="status" aria-live="polite">{promoCacheMessage}</p>}</div></aside>}
       <div className="warmup-nos"><div><strong>NOS</strong><span>{Math.round(nos)}%</span></div><div className="nos-track"><span style={{ width: nos + "%" }} /></div></div>
       <div className="warmup-controls warmup-circuit-controls">
         <div className="warmup-steering" aria-label="Analog steering">
