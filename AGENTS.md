@@ -217,3 +217,14 @@ This section records the product owner's latest explicit direction and takes pre
 - Financial records and customer tips are business-sensitive. Enforce staff/admin authorization server-side, keep customer ownership rules intact, and audit changes to prices, payment states, expenses and payroll. Do not expose owner financials to customers or ordinary staff without the configured role.
 - Customer-facing account navigation should use plain language such as **“My washes”** or **“My account & receipts”**, not internal abbreviations like “My BB CW Account”. Keep the full accessible label descriptive.
 - QA for the intake: test both entry modes; verify the tip defaults to zero, custom/suggested tips remain optional, staff mode hides tips and requires a face-to-face agreed price, no amount is represented as paid, and Firestore rules accept only the intended bounded fields. Verify customer/staff handoff and offline draft sync preserve the entry mode and amount fields.
+
+
+## Customer intake and landing-page direction — October 2026
+- Staff-entered agreed wash price appears only when staff selects “I’d like to propose my own price”. Published services already carry their configured price; do not ask staff to enter it again.
+- Customer entry may propose a custom amount and select an optional tip. Staff entry hides tipping completely. A staff-entered custom amount is the face-to-face agreed wash price. A listed service stays recorded at its published price.
+- Keep the optional tip beside service selection and separate from wash price. Default to no tip; the app does not process the transaction.
+- Make the optional car-description prompt personal using the entered customer name when available.
+- Landing page focuses on walk-in intake, Daily Drive, utility and light engagement. Account, reminder and announcement management belong on the account page, not as a duplicated landing-page section.
+- Racing promotion may invite customers to race with their laaities (kids, nephews or younger family) while waiting. Explain that special wash promotions, racing challenges and future-wash discount opportunities are being prepared. Never claim rewards are already earned/redeemable until implemented and verified.
+- Do not embed the racing warm-up/media-download experience on the landing page. Keep the separate games experience available; game-engine work is handled separately.
+- For Firebase permission denied, inspect the exact client payload and published rules in the configured Vula Firebase project. GitHub pushes do not deploy Firestore rules; never widen access to bypass a schema mismatch.
