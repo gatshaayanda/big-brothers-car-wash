@@ -389,3 +389,12 @@
 .bb-custom-tip{display:grid;gap:6px;font-size:12px;font-weight:750}
 .bb-custom-tip input{width:100%}
 @media(max-width:420px){.bb-tip-panel{padding:14px}.bb-tip-choices{gap:5px}.bb-tip-choices button{min-height:60px}.bb-tip-choices button strong{font-size:10px}}
+
+.bb-tip-summary{display:grid;gap:10px;margin-top:7px;padding:16px;border:1px solid #e9dfdc;border-radius:10px;background:#fff}
+.bb-tip-summary>div{display:flex;justify-content:space-between;align-items:center;gap:16px;min-width:0}
+.bb-tip-summary>div>span{font-size:12px;color:#655c58}
+.bb-tip-summary>div>strong{font-size:14px;font-weight:800;color:#292321;text-align:right}
+.bb-tip-summary .bb-tip-total{margin-top:3px;padding-top:13px;border-top:1px solid #e9dfdc}
+.bb-tip-summary .bb-tip-total>span{font-weight:750;color:#302825}
+.bb-tip-summary .bb-tip-total>strong{font-size:17px;color:#a71922}
+@media(max-width:420px){.bb-tip-summary{padding:14px;gap:12px}.bb-tip-summary>div{gap:9px}.bb-tip-summary>div>span{font-size:11px}}
