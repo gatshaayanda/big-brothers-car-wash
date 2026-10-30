@@ -26,7 +26,7 @@ function normalizeWhatsAppDigits(value: string) {
 }
 function buildWhatsAppSelfLink(phone: string, appUrl: string) {
   const digits = normalizeWhatsAppDigits(phone);
-  const message = "Thanks for choosing Big Brothers Car Wash! 🚗❤️\n\nWe appreciate you trusting us with your ride.\n\nYour Big Brothers account makes every visit easier. Keep your wash receipts and vehicle details together, check your wash history and book your next visit without starting from scratch.\n\nPlanning a regular wash routine? Your account makes it easier to come back and keep your ride looking its best.\n\nAccess your car wash account here:\n" + appUrl + "\n\nBig Brothers Car Wash\nWash. Care. Go. ❤️";
+  const message = "Thanks for choosing Big Brothers Car Wash!\n\nWe appreciate you trusting us with your ride.\n\nYour Big Brothers account makes every visit easier. Keep your wash receipts and vehicle details together, check your wash history and book your next visit without starting from scratch.\n\nPlanning a regular wash routine? Your account makes it easier to come back and keep your ride looking its best.\n\nAccess your car wash account here:\n" + appUrl + "\n\nBig Brothers Car Wash\nWash. Care. Go.";
   return "https://wa.me/" + digits + "?text=" + encodeURIComponent(message);
 }
 
@@ -63,7 +63,9 @@ export default function Home() {
   const [connectionError, setConnectionError] = useState("");
   const [customerNameInput, setCustomerNameInput] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const [helpTeaserDismissed, setHelpTeaserDismissed] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
+  const offlineSyncInProgress = useRef(false);
   const mobileCoverage = Array.isArray(settings.mobileCoverage) ? settings.mobileCoverage as string[] : [];
   const configuredBusinessName = typeof settings.businessName === "string" ? settings.businessName.trim() : "";
   const businessName = configuredBusinessName && !/car\s+a\s+wash|😎/i.test(configuredBusinessName) ? configuredBusinessName : "Big Brothers Car Wash";
@@ -102,10 +104,18 @@ export default function Home() {
     setOnline(navigator.onLine);
     const onOnline = () => { setOnline(true); void syncOfflineRequests(); };
     const onOffline = () => { setOnline(false); setNotice({ kind: "pending", text: "Offline: requests can be saved on this device, but the team cannot see them until they sync." }); };
+    const onResume = () => {
+      if (document.visibilityState === "visible" && navigator.onLine) void syncOfflineRequests();
+    };
     const stops = [subscribeServices(setServices, error => setConnectionError(error.message)), subscribeSettings(value => setSettings(value ?? {}), () => {})];
     window.addEventListener("online", onOnline); window.addEventListener("offline", onOffline);
+    window.addEventListener("pageshow", onResume); document.addEventListener("visibilitychange", onResume);
     if (navigator.onLine) void syncOfflineRequests();
-    return () => { stops.forEach(stop => stop()); window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
+    return () => {
+      stops.forEach(stop => stop());
+      window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline);
+      window.removeEventListener("pageshow", onResume); document.removeEventListener("visibilitychange", onResume);
+    };
   }, []);
 
   useEffect(() => { const params = new URLSearchParams(window.location.search); if (params.get("journey") === "book") { setTab("book"); setBookingDate(params.get("preferredDate") || ""); setBookingTime(params.get("preferredTime") || ""); } }, []);
@@ -154,7 +164,8 @@ export default function Home() {
     return (await signInAnonymously(auth)).user;
   }
   async function syncOfflineRequests() {
-    if (!navigator.onLine || !hasFirebaseWebConfig) return;
+    if (!navigator.onLine || !hasFirebaseWebConfig || offlineSyncInProgress.current) return;
+    offlineSyncInProgress.current = true;
     let drafts: Array<{ id?: string; collection: string; data: Record<string, unknown>; enteredBy?: "customer" | "staff" }> = [];
     try { drafts = JSON.parse(localStorage.getItem(pendingKey) || "[]") as typeof drafts; } catch {}
     if (!drafts.length) return;
@@ -170,6 +181,7 @@ export default function Home() {
       setNotice(remaining.length ? { kind: "pending", text: remaining.length + " saved request(s) still have not synced." } : { kind: "success", text: "Saved requests have synced to Big Brothers' system. Bookings still need staff confirmation." });
       if (queueDraft && !remaining.some(draft => draft.id === queueDraft.id)) { setQueueReference(queueDraft.id || ""); setQueueCustomerName(String(queueDraft.data.customerName || "")); setQueueWhatsAppPhone(String(queueDraft.data.phone || "")); setQueueEnteredBy(queueDraft.enteredBy === "staff" ? "staff" : "customer"); setQueueAppUrl(window.location.origin + "/account"); setQueueHandoff("synced"); }
     } catch { setNotice({ kind: "pending", text: "Sync is not complete. Your saved requests remain on this device." }); }
+    finally { offlineSyncInProgress.current = false; }
   }
 
   async function submitRequest(event: React.FormEvent<HTMLFormElement>) {
@@ -290,6 +302,10 @@ export default function Home() {
     }
   }
 
+  useEffect(() => {
+    if (queueHandoff) window.scrollTo(0, 0);
+  }, [queueHandoff]);
+
   if (queueHandoff) {
     return <main className="vula queue-handoff-page"><section className="queue-handoff-card" aria-labelledby="queue-handoff-title">
       <span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH · WALK-IN</span>
@@ -338,6 +354,10 @@ export default function Home() {
           <a href="#big-brothers-racing" onClick={() => setChatOpen(false)}>Racing &amp; wash offers ↗</a>
         </section>
       )}
+      {!helpTeaserDismissed && !chatOpen && <div className="bb-help-teaser" role="note">
+        <button type="button" aria-label="Dismiss quick help" onClick={() => setHelpTeaserDismissed(true)}>×</button>
+        <p>All sorted? Hand the phone back to the Brothers. While your ride gets its shine, you can try Big Brothers Racing or check your own WhatsApp for the app link.</p>
+      </div>}
       <button type="button" className="bb-help-launcher" aria-expanded={chatOpen} onClick={() => setChatOpen(open => !open)}>
         <span aria-hidden="true">{chatOpen ? "×" : "?"}</span>
         {chatOpen ? "Close help" : "Need a hand?"}

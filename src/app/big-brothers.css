@@ -403,3 +403,9 @@
 /* Keep the WhatsApp handoff as the immediate next action after queue confirmation. */
 .queue-whatsapp-primary{margin:14px 0 0!important;font-weight:800}
 .queue-trust-copy{margin:10px 0 18px!important}
+
+/* Small dismissible hand-back prompt; secondary to the queue and service actions. */
+.bb-help-teaser{position:relative;width:min(330px,calc(100vw - 32px));padding:15px 38px 14px 15px;border:1px solid #e7dfdc;border-radius:12px;background:#fff;color:#302a27;box-shadow:0 12px 36px #0002}
+.bb-help-teaser p{margin:0;font-size:11px;line-height:1.65;color:#514945}
+.bb-help-teaser>button{position:absolute;top:7px;right:8px;width:28px;height:28px;border:0;border-radius:50%;background:#f4efed;color:#302a27;font-size:18px;line-height:1}
+.record-handoff-note{font-size:11px;line-height:1.55;color:#655b56}
