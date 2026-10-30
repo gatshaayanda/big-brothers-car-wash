@@ -164,11 +164,11 @@ export default function Home() {
     return (await signInAnonymously(auth)).user;
   }
   async function syncOfflineRequests() {
-    if (!navigator.onLine || !hasFirebaseWebConfig || offlineSyncInProgress.current) return;
-    offlineSyncInProgress.current = true;
+    if (!navigator.onLine || !hasFirebaseWebConfig) return;
     let drafts: Array<{ id?: string; collection: string; data: Record<string, unknown>; enteredBy?: "customer" | "staff" }> = [];
     try { drafts = JSON.parse(localStorage.getItem(pendingKey) || "[]") as typeof drafts; } catch {}
-    if (!drafts.length) return;
+    if (!drafts.length || offlineSyncInProgress.current) return;
+    offlineSyncInProgress.current = true;
     try {
       const user = await ensureUser(); if (!user) return;
       const remaining: typeof drafts = [];
