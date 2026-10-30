@@ -319,3 +319,17 @@
 .receipt-next-booking{margin-top:24px;padding-top:20px;border-top:1px solid #e5e5e5}
 .receipt-next-booking-options{display:grid;gap:8px;margin-top:14px}
 @media(max-width:560px){.public-review-list,.public-wash-gallery{grid-template-columns:1fr}}
+
+
+/* Queue hand-off: make the customer identity and trusted next action unmistakable. */
+.queue-customer-confirm{display:flex;align-items:flex-start;gap:13px;padding:16px;border:1px solid #b9dec5;background:#f0faf3;border-radius:10px;margin:18px 0}
+.queue-customer-confirm>span{font-size:25px;line-height:1}
+.queue-customer-confirm strong{display:block;color:#173d25;font-size:16px}
+.queue-customer-confirm p{margin:5px 0 0;color:#315b3d;font-size:12px;line-height:1.5}
+.queue-share-title{font-size:clamp(23px,4vw,30px);line-height:1.1;letter-spacing:-.045em;margin:24px 0 10px}
+.queue-handoff-card>p{font-size:14px;line-height:1.7;color:#49433f}
+.queue-benefits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:18px 0 20px}
+.queue-benefits span{display:flex;align-items:center;min-height:48px;padding:10px 12px;border:1px solid #e9e2de;border-radius:8px;background:#fff;font-size:12px;font-weight:700;color:#312b28}
+.queue-trust-copy{margin:12px 0 18px!important;padding:12px 14px;border-left:3px solid #e51f2a;background:#fff6f5;border-radius:0 7px 7px 0;color:#5a3937!important}
+.queue-reference strong{overflow-wrap:anywhere}
+@media(max-width:560px){.queue-benefits{grid-template-columns:1fr}.queue-handoff-card{padding:24px 18px}.queue-share-title{font-size:25px}}
