@@ -44,12 +44,6 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
   const [boostActive, setBoostActive] = useState(false);
   const [toast, setToast] = useState<{ text: string; kind: "success" | "error" | "info" } | null>(null);
   const [businessName, setBusinessName] = useState("Big Brothers Car Wash");
-  const [promoMedia, setPromoMedia] = useState("/videos/Left.mp4");
-  const promoLastRef = useRef("");
-  const [promoUnavailable, setPromoUnavailable] = useState(false);
-  const [promoCaching, setPromoCaching] = useState(false);
-  const [promoCacheMessage, setPromoCacheMessage] = useState("");
-  const [promoSaved, setPromoSaved] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   phaseRef.current = phase;
 
@@ -62,107 +56,11 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
   useEffect(() => {
     const stop = subscribeSettings(settings => {
       const name = settings?.businessName;
-      if (typeof name === "string" && name.trim() && !/car\s+a\s+wash|😎/i.test(name.trim())) setBusinessName(name.trim());
-      else setBusinessName("Big Brothers Car Wash");
+      if (typeof name === "string" && name.trim()) setBusinessName(name.trim());
     }, () => {});
     return stop;
   }, []);
-  useEffect(() => {
-    if ((phase !== "ready" && phase !== "crashed") || (embedded && !expanded)) return;
-    const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
-    let previous = promoLastRef.current;
-    try { previous = localStorage.getItem("big-brothers-racing:last-promo:v1") || previous; } catch {}
-    const choices = assets.filter(asset => asset !== previous);
-    const next = choices[Math.floor(Math.random() * choices.length)] || assets[0];
-    promoLastRef.current = next;
-    setPromoMedia(next);
-    setPromoUnavailable(false);
-    try { localStorage.setItem("big-brothers-racing:last-promo:v1", next); } catch {}
-  }, [phase, expanded, embedded]);
-  useEffect(() => {
-    let cancelled = false;
-    async function inspectSavedMedia() {
-      if (!("caches" in window)) return;
-      try {
-        const cache = await caches.open("big-brothers-media-v2");
-        const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
-        const saved = await Promise.all(assets.map(asset => cache.match(new URL(asset, window.location.origin).toString())));
-        if (!cancelled && saved.every(Boolean)) {
-          setPromoSaved(true);
-          setPromoCacheMessage("All 3 wash clips are already saved on this device for offline playback.");
-        }
-      } catch { /* Private browsing or storage restrictions should not block racing. */ }
-    }
-    void inspectSavedMedia();
-    return () => { cancelled = true; };
-  }, []);
-
-  async function savePromoMediaForOffline() {
-    if (promoCaching) return;
-    if (!navigator.onLine) { setPromoCacheMessage("Connect to the internet to save the three clips first. Previously saved clips remain available offline."); return; }
-    if (!("caches" in window)) { setPromoCacheMessage("Offline media storage is not supported in this browser."); return; }
-    setPromoCaching(true);
-    setPromoSaved(false);
-    setPromoCacheMessage("Checking device storage before downloading about 104 MB…");
-    const assets = ["/videos/Left.mp4", "/videos/Right.mp4", "/videos/Bays.mp4"];
-    let saved = 0;
-    let completedBytes = 0;
-    try {
-      try { await navigator.storage?.persist?.(); } catch { /* Persistence is optional and browser-controlled. */ }
-      const estimate = await navigator.storage?.estimate?.();
-      if (typeof estimate?.quota === "number" && typeof estimate.usage === "number") {
-        const available = estimate.quota - estimate.usage;
-        if (available < 104 * 1024 * 1024 * 1.08) {
-          throw new Error("There may not be enough free browser storage. Free up at least 115 MB, then retry.");
-        }
-      }
-      const cache = await caches.open("big-brothers-media-v2");
-      for (const asset of assets) {
-        const url = new URL(asset, window.location.origin).toString();
-        const existing = await cache.match(url);
-        if (existing && existing.ok) {
-          const size = Number(existing.headers.get("content-length")) || 0;
-          completedBytes += size;
-          saved += 1;
-          setPromoCacheMessage("Checking saved clips · " + saved + " of 3 ready");
-          continue;
-        }
-        const response = await fetch(asset, { cache: "no-store" });
-        if (!response.ok || !response.body) throw new Error("Could not download " + asset.split("/").pop() + ". Check the connection and retry.");
-        const total = Number(response.headers.get("content-length")) || 0;
-        let currentBytes = 0;
-        const cacheWrite = cache.put(url, response.clone());
-        const reader = response.body.getReader();
-        try {
-          while (true) {
-            const chunk = await reader.read();
-            if (chunk.done) break;
-            currentBytes += chunk.value.byteLength;
-            const totalBytes = completedBytes + currentBytes;
-            const sizeLabel = (totalBytes / (1024 * 1024)).toFixed(1) + " MB";
-            const percent = total > 0 ? Math.min(99, Math.round(currentBytes / total * 100)) : null;
-            setPromoCacheMessage("Downloading " + asset.split("/").pop() + (percent === null ? "" : " · " + percent + "%") + " · " + sizeLabel + " received");
-          }
-        } finally { reader.releaseLock(); }
-        await cacheWrite;
-        const verified = await cache.match(url);
-        if (!verified || !verified.ok) throw new Error("The download finished but could not be verified in offline storage.");
-        const verifiedSize = Number(verified.headers.get("content-length")) || currentBytes;
-        if (total > 0 && verifiedSize !== total) throw new Error("The saved clip appears incomplete. Please retry while connected.");
-        completedBytes += currentBytes;
-        saved += 1;
-        setPromoCacheMessage("Saved " + saved + " of 3 clips · " + (completedBytes / (1024 * 1024)).toFixed(1) + " MB received.");
-      }
-      const allSaved = await Promise.all(assets.map(asset => cache.match(new URL(asset, window.location.origin).toString())));
-      if (!allSaved.every(Boolean)) throw new Error("One or more clips are missing from offline storage. Retry the download.");
-      setPromoSaved(true);
-      setPromoCacheMessage("All 3 clips are saved and verified on this device. They can play offline in Big Brothers Racing.");
-    } catch (error) {
-      setPromoSaved(false);
-      setPromoCacheMessage(saved + " of 3 clips saved. " + (error instanceof Error ? error.message : "Storage or download failed.") + " Previously saved clips are kept; connect again to retry.");
-    } finally { setPromoCaching(false); }
-  }
-  useEffect(() => { if (!embedded) document.title = "Big Brothers Racing · Circuit practice"; }, [businessName, embedded]);
+  useEffect(() => { if (!embedded) document.title = businessName + " · Racing warm-up"; }, [businessName, embedded]);
 
   const reset = useCallback((start: boolean) => {
     raceRef.current = newRace();
@@ -191,8 +89,6 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
     return () => window.clearTimeout(timer);
   }, [phase, countdown]);
 
-
-
   useEffect(() => {
     let raf = 0;
     let previous = 0;
@@ -213,7 +109,7 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
         const bend = clamp(Math.abs(trackTurn) * 28, 0, 1);
         const upcomingTurn = getTrackTurn(trackRef.current!, t + .018, .006);
         const upcomingBend = clamp(Math.abs(upcomingTurn) * 28, 0, 1);
-        const speedRatio = race.speed / 205;
+        const speedRatio = race.speed / 230;
         const throttleTarget = controls.accelerate && !controls.brake ? 1 : 0;
         const brakeTarget = controls.brake ? 1 : 0;
         race.throttle += (throttleTarget - race.throttle) * (1 - Math.exp(-dt * (throttleTarget ? 3.8 : 6.5)));
@@ -245,17 +141,17 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
         const brakeEfficiency = 1 - race.wheelLock * (absActive ? 0.12 : 0.52);
         const brakeDeceleration = 36 * race.brakePressure * brakeEfficiency
           * clamp(availableGrip / Math.max(0.82, combinedDemand), 0.35, 1.08);
-        const engineAcceleration = 34 * race.throttle + exitBonus;
+        const engineAcceleration = 42 * race.throttle + exitBonus;
         const aerodynamicDrag = race.speed * (0.055 + speedRatio * 0.025);
-        const boostAcceleration = boost ? 30 : 0;
-        race.speed = clamp(race.speed + (engineAcceleration + boostAcceleration - aerodynamicDrag - brakeDeceleration) * dt, 0, boost ? 250 : 205);
+        const boostAcceleration = boost ? 52 : 0;
+        race.speed = clamp(race.speed + (engineAcceleration + boostAcceleration - aerodynamicDrag - brakeDeceleration) * dt, 0, boost ? 290 : 230);
         race.nos = boost ? Math.max(0, race.nos - 25 * dt) : Math.min(100, race.nos + (controls.accelerate ? 4 : 9) * dt);
         if (race.nos <= 0 && controls.boost) { controls.boost = false; setBoostActive(false); }
 
         // A friction-circle model limits cornering when the tyres are already
         // spending grip on braking. Low-speed steering remains stable; excess
         // lateral demand at speed becomes slip instead of an arbitrary bend skid.
-        const updatedSpeedRatio = race.speed / 205;
+        const updatedSpeedRatio = race.speed / 230;
         const updatedLateralDemand = Math.abs(steering) * updatedSpeedRatio * updatedSpeedRatio * 0.92;
         const updatedLongitudinalDemand = race.brakePressure * 0.94;
         const remainingGrip = Math.sqrt(Math.max(0, availableGrip * availableGrip
@@ -266,74 +162,91 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
         const brakeTurnSlide = clamp((gripUse - 0.88) / 0.55, 0, 1)
           * clamp((race.speed - 68) / 105, 0, 1)
           * clamp((Math.abs(steering) - 0.22) / 0.5, 0, 1);
-        // The driver should be able to influence the car's balance: trail-braking
-        // into a corner can loosen the rear, while steady throttle can sustain a
-        // controllable power slide. These effects only appear at speed and near
-        // the tyre-grip limit; they must not make low-speed turns feel slippery.
-        const powerSlide = race.throttle
-          * clamp((race.speed - 58) / 105, 0, 1)
-          * clamp((Math.abs(steering) - 0.18) / 0.62, 0, 1)
-          * clamp((gripUse - 0.48) / 0.75, 0, 1);
-        const counterSteering = Math.abs(race.heading) > 0.035
-          && Math.sign(steering) === -Math.sign(race.heading);
         const excessSteering = (1 - cornerGripRatio) * clamp(updatedLateralDemand, 0, 1);
         const corneringLoss = excessSteering * (3 + race.speed * 0.018);
         if (excessSteering > 0) race.speed = Math.max(0, race.speed - corneringLoss * dt);
 
-        // Heading and lateral motion now respond to speed, grip and load transfer.
-        const grip = clamp(1.12 - updatedSpeedRatio * 0.06 - race.brakePressure * 0.08 - race.wheelLock * 0.18, 0.62, 1.12);
+        // Vehicle dynamics must integrate tyre forces in WORLD space. The old
+        // implementation decomposed velocity in the old car basis, rotated the
+        // chassis, then rebuilt velocity in the new basis every frame. That rotated
+        // the velocity vector with the nose and erased the very slip angle needed
+        // for a sustained, controllable drift.
         // GOLDEN BASE STEERING SIGN CONVENTION:
-        // The car's forward vector is (-sin(yaw), 0, -cos(yaw)); in this world
-        // coordinate system, positive yaw turns the nose toward world -X (left).
-        // Therefore negate the thumb input here so LEFT input produces a LEFT turn
-        // and RIGHT input produces a RIGHT turn, consistently with the chase camera.
-        // The track never advances the car; tyre grip determines how velocity follows.
-        const steerAngle = -steering * (0.34 - updatedSpeedRatio * 0.12);
+        // Forward is (-sin(yaw), 0, -cos(yaw)); positive yaw turns toward world -X.
+        // Negating the signed steering input keeps left thumb input turning left.
+        const steerAngle = -steering * (0.38 - updatedSpeedRatio * 0.10);
         const forwardX = -Math.sin(race.worldYaw);
         const forwardZ = -Math.cos(race.worldYaw);
         const lateralX = Math.cos(race.worldYaw);
         const lateralZ = -Math.sin(race.worldYaw);
         const longitudinalVelocity = race.velocityX * forwardX + race.velocityZ * forwardZ;
         const lateralVelocity = race.velocityX * lateralX + race.velocityZ * lateralZ;
-        // Signed longitudinal velocity preserves natural counter-steering while reversing.
-        // At negative velocity, steering rotates the nose in the opposite direction as expected.
-        const baseYawRate = Math.tan(steerAngle) * longitudinalVelocity / 2.65;
-        // Braking while turning can rotate the rear; throttle can keep that slide
-        // alive. Counter-steering adds a gentle self-correction toward the travel
-        // direction, so the player can catch the car instead of being spun at once.
-        const slideYawRate = Math.sign(baseYawRate || -steering)
-          * (brakeTurnSlide * 0.72 + powerSlide * 0.52);
-        const selfAlignYawRate = clamp(race.heading * (counterSteering ? 1.35 : 0.48), -1.25, 1.25);
-        const targetYawRate = baseYawRate + slideYawRate + selfAlignYawRate;
-        const gripLimit = 9.2 * clamp(1.08 - race.brakePressure * 0.35 - race.wheelLock * 0.5
-          - brakeTurnSlide * 0.12 - powerSlide * 0.08, 0.36, 1.08);
-        const demandedLateralAccel = targetYawRate * Math.max(0, longitudinalVelocity);
-        const gripRatio = Math.min(1, gripLimit / Math.max(0.001, Math.abs(demandedLateralAccel)));
-        race.worldYaw += targetYawRate * gripRatio * dt;
+        // Signed velocity keeps steering/recovery natural when backing up.
+        // Braking while turning deliberately unloads rear grip: the same steering input
+        // creates a stronger yaw response under a high-speed trail-brake, rather than
+        // the brake simply scrubbing speed and keeping the car planted.
+        const targetYawRate = Math.tan(steerAngle) * longitudinalVelocity / 2.65 * (1 + brakeTurnSlide * 0.72);
+        const gripLimit = 7.6 * clamp(1.04 - race.brakePressure * 0.48 - race.wheelLock * 0.58, 0.28, 1.04);
+        // Braking and cornering share tyre grip. Hard trail-braking therefore
+        // leaves less lateral force available and can naturally start a slide.
+        const brakeGripShare = clamp(race.brakePressure * 1.05, 0, 0.97);
+        const availableLateralGrip = gripLimit * Math.sqrt(Math.max(0.08, 1 - brakeGripShare * brakeGripShare));
+        const demandedLateralAccel = -targetYawRate * longitudinalVelocity;
+        const gripRatio = clamp(availableLateralGrip / Math.max(0.001, Math.abs(demandedLateralAccel)), 0, 1);
+        // Chassis yaw does not get artificially locked to the velocity heading
+        // when the tyres saturate; this is what lets the rear step out under load.
+        const yawGrip = gripRatio < 1 ? 0.88 + gripRatio * 0.12 : 1;
+        race.worldYaw += targetYawRate * yawGrip * dt;
         race.worldYaw = Math.atan2(Math.sin(race.worldYaw), Math.cos(race.worldYaw));
-        const updatedForwardX = -Math.sin(race.worldYaw);
-        const updatedForwardZ = -Math.cos(race.worldYaw);
-        const updatedLateralX = Math.cos(race.worldYaw);
-        const updatedLateralZ = -Math.sin(race.worldYaw);
-        const driveAccel = (race.throttle * 17 + (boost ? 12 : 0)) * (longitudinalVelocity < 0 ? 1.7 : 1);
-        const brakeAccel = race.brakePressure * 28 * brakeEfficiency;
-        const dragAccel = longitudinalVelocity * (0.32 + Math.abs(longitudinalVelocity) * 0.012);
-        let nextLongitudinal = longitudinalVelocity + (driveAccel - brakeAccel - dragAccel) * dt;
-        nextLongitudinal = clamp(nextLongitudinal, -7, 15.9);
-        const lateralSlipDamping = gripRatio < 0.98 ? 0.72 : counterSteering ? 6.4 : 4.8;
-        const lateralSlipAccel = clamp(-lateralVelocity * lateralSlipDamping, -gripLimit, gripLimit);
-        const nextLateral = lateralVelocity + lateralSlipAccel * dt;
-        race.velocityX = updatedForwardX * nextLongitudinal + updatedLateralX * nextLateral;
-        race.velocityZ = updatedForwardZ * nextLongitudinal + updatedLateralZ * nextLateral;
+
+        const driveAccel = (race.throttle * 20 + (boost ? 20 : 0)) * (longitudinalVelocity < 0 ? 1.7 : 1);
+        const brakeAccel = race.brakePressure * 13.5 * brakeEfficiency;
+        const dragAccel = longitudinalVelocity * (0.24 + Math.abs(longitudinalVelocity) * 0.009);
+        const nextLongitudinal = clamp(longitudinalVelocity + (driveAccel - brakeAccel - dragAccel) * dt, -7, 22.5);
+        const longitudinalAccel = dt > 0 ? (nextLongitudinal - longitudinalVelocity) / dt : 0;
+        // Normal grip recentres lateral slip progressively. Once the friction
+        // circle is exceeded, weaker recovery lets momentum carry the car sideways
+        // until the driver counter-steers or eases off the brake/throttle.
+        const slipRecovery = gripRatio < 0.98 ? 0.22 : 1.65;
+        const lateralAccel = clamp(demandedLateralAccel - lateralVelocity * slipRecovery,
+          -availableLateralGrip, availableLateralGrip);
+
+        // Drift invariant: preserve world-space momentum while the chassis yaws.
+        // Keep this physics path independent of UI refresh cadence.
+        // QA checkpoint: keep this world-space integration intact; rebuilding velocity
+        // from the new chassis heading would make the car snap straight and kill drift.
+        // Integrate forces against the current world velocity; do not reconstruct
+        // velocity from a freshly rotated chassis basis (which suppresses drifting).
+        race.velocityX += (forwardX * longitudinalAccel + lateralX * lateralAccel) * dt;
+        race.velocityZ += (forwardZ * longitudinalAccel + lateralZ * lateralAccel) * dt;
+        const maxWorldSpeed = (boost ? 290 : 230) * 0.28 / 3.6;
+        const worldSpeed = Math.hypot(race.velocityX, race.velocityZ);
+        if (worldSpeed > maxWorldSpeed) {
+          const speedScale = maxWorldSpeed / worldSpeed;
+          race.velocityX *= speedScale;
+          race.velocityZ *= speedScale;
+        }
         race.worldX += race.velocityX * dt;
         race.worldZ += race.velocityZ * dt;
-        race.speed = clamp(Math.hypot(race.velocityX, race.velocityZ) * 3.6 / 0.28, 0, boost ? 250 : 205);
-        race.heading = Math.atan2(race.velocityX, -race.velocityZ) - race.worldYaw;
+        race.speed = clamp(Math.hypot(race.velocityX, race.velocityZ) * 3.6 / 0.28, 0, boost ? 290 : 230);
+        const finalForwardX = -Math.sin(race.worldYaw);
+        const finalForwardZ = -Math.cos(race.worldYaw);
+        const finalLateralX = Math.cos(race.worldYaw);
+        const finalLateralZ = -Math.sin(race.worldYaw);
+        const finalLongitudinalVelocity = race.velocityX * finalForwardX + race.velocityZ * finalForwardZ;
+        const finalLateralVelocity = race.velocityX * finalLateralX + race.velocityZ * finalLateralZ;
+        // Measure sideslip against the car's forward direction, not the world
+        // velocity sign; pure reverse travel must not look like a 180-degree drift.
+        race.heading = Math.atan2(-race.velocityX, -race.velocityZ) - race.worldYaw;
         race.heading = Math.atan2(Math.sin(race.heading), Math.cos(race.heading));
-        race.lateral = clamp(nextLateral, -18, 18);
-        race.lateralVelocity = nextLateral;
-        race.lateralG += ((targetYawRate * gripRatio) - race.lateralG) * (1 - Math.exp(-dt * 5));
-        race.drift = clamp(race.heading * clamp(Math.abs(nextLateral) / 5.5, 0, 1) * 0.34, -0.32, 0.32);
+        if (finalLongitudinalVelocity < -0.2) {
+          race.heading = Math.atan2(Math.sin(race.heading - Math.PI), Math.cos(race.heading - Math.PI));
+        }
+        race.lateral = clamp(finalLateralVelocity, -18, 18);
+        race.lateralVelocity = finalLateralVelocity;
+        race.lateralG += ((targetYawRate * yawGrip) - race.lateralG) * (1 - Math.exp(-dt * 5));
+        // A meaningful, signed slip angle feeds the car's body lean and drift visuals.
+        race.drift = clamp(race.heading * clamp(Math.abs(finalLateralVelocity) / 1.8, 0, 1) * 1.15, -0.95, 0.95);
 
         // Circuit projection is used only for lap timing, track limits, and collision queries.
         let nearestT = wrap(race.trackT, 1);
@@ -523,11 +436,11 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
     setBoostActive(next);
   };
 
-  if (embedded && !expanded) return <div className="race-inline-promo"><div><p className="big-brothers-eyebrow">BIG BROTHERS RACING · QUICK BREAK</p><h2>Take a quick lap.</h2><p>A quick driving challenge while you wait—or a practice session at home. Your wash booking stays right where you left it. Offline practice does not need data.</p></div><button type="button" className="big-brothers-button primary" onClick={() => setExpanded(true)}>Play now ↗</button></div>;
+  if (embedded && !expanded) return <div className="race-inline-promo"><div><p className="big-brothers-eyebrow">BIG BROTHERS RACING · QUICK BREAK</p><h2>Take a quick lap.</h2><p>A little circuit practice while you wait. Your wash booking stays right where you left it.</p></div><button type="button" className="big-brothers-button primary" onClick={() => setExpanded(true)}>Play now ↗</button></div>;
 
-  return <div className={"vula race-hub" + (embedded ? " race-hub-embedded" : "")}>
-    {!embedded && <><div className="big-brothers-status"><span className="status-dot online" />Big Brothers Racing · solo circuit practice</div><header className="big-brothers-nav"><Link href="/" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Big Brothers Racing</small></span></Link><nav><Link href="/#request">Book a wash</Link><Link href="/#my-wash">My Wash</Link></nav></header><section className="big-brothers-section warmup-intro"><p className="big-brothers-eyebrow">BIG BROTHERS RACING · PRACTICE ANYTIME</p><h1>Practice today. Race your people tomorrow.</h1><p>Sharpen your braking, smooth your corners and chase a cleaner lap. The practice circuit is here for quick breaks at home, at the tuckshop or while you wait for a wash—even when your connection is gone.</p><p className="warmup-family-note">Big brother tip: invite a parent, sibling or friend to take the next turn. The best rivalry is the one you can laugh about together.</p></section></>}
-    {embedded && <div className="race-inline-heading"><div><p className="big-brothers-eyebrow">BIG BROTHERS RACING · CIRCUIT PRACTICE</p><h2>Find your racing line.</h2><p>One more lap? Smooth corners, clean exits, well-timed NOS. Practice solo offline; family races and shared online competition are future upgrades.</p></div><button type="button" className="big-brothers-button secondary" onClick={() => { if (phaseRef.current === "running") pauseRace(); setExpanded(false); }}>Close game ×</button></div>}
+  return <div className={"big-brothers race-hub" + (embedded ? " race-hub-embedded" : "")}>
+    {!embedded && <><div className="big-brothers-status"><span className="status-dot online" />Big Brothers Racing · solo circuit practice</div><header className="big-brothers-nav"><Link href="/" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Racing warm-up</small></span></Link><nav><Link href="/#request">Book a wash</Link><Link href="/account">My Wash</Link></nav></header><section className="big-brothers-section warmup-intro"><p className="big-brothers-eyebrow">BIG BROTHERS RACING · SOLO PRACTICE</p><h1>Find your racing line.</h1><p>Follow the recommended line: brake before turn-in, ease off through the apex, then build throttle on exit. Save NOS for straights.</p></section></>}
+    {embedded && <div className="race-inline-heading"><div><p className="big-brothers-eyebrow">BIG BROTHERS RACING · CIRCUIT PRACTICE</p><h2>Find your racing line.</h2><p>One more lap? Smooth corners, clean exits, well-timed NOS.</p></div><button type="button" className="big-brothers-button secondary" onClick={() => { if (phaseRef.current === "running") pauseRace(); setExpanded(false); }}>Close game ×</button></div>}
     <section className="big-brothers-section warmup-game">
       <div className="warmup-hud warmup-circuit-hud"><div><span>Speed</span><strong>{Math.round(speed)} <small>km/h</small></strong></div><div><span>Lap</span><strong>{lap}</strong></div><div><span>Current lap</span><strong>{fmt(lapTime)}</strong></div><div><span>Best lap</span><strong>{fmt(bestLap)}</strong></div></div>
       <div className="warmup-canvas-wrap warmup-circuit-wrap">
@@ -540,7 +453,6 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
           <p>{phase === "ready" ? "Follow the green line. Brake at the boards, turn in on cue, clip the apex and unwind onto the exit." : phase === "countdown" ? "Get set. Smooth steering beats sudden corrections." : phase === "paused" ? "Take a breath. Resume when you're ready." : "Session complete. Take another lap and beat your time."}</p>
         </div>
       </div>
-      {(phase === "ready" || phase === "crashed") && <aside className="bb-racing-promo" aria-label="Big Brothers Car Wash promotion"><div className="bb-racing-promo-media">{!promoUnavailable ? <video key={promoMedia} src={promoMedia} controls playsInline muted preload="metadata" onError={() => setPromoUnavailable(true)} aria-label="Big Brothers Car Wash media"/> : <div className="bb-racing-promo-fallback"><span className="big-brothers-mark">BB</span><strong>BIG BROTHERS CAR WASH</strong><span>Wash. Care. Go.</span></div>}</div><div className="bb-racing-promo-copy"><span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH</span><strong>{phase === "crashed" ? "Need another lap?" : "While you're here, meet your wash team."}</strong><p>{phase === "crashed" ? "Take a breath, then try again. Your next run starts when you choose." : "Queue for your wash, keep your receipt, and come back for another race."}</p>{phase === "crashed" && <button type="button" className="big-brothers-button primary" onClick={startRace}>Try Again ↻</button>}<button type="button" className="big-brothers-button secondary" disabled={promoCaching} onClick={() => void savePromoMediaForOffline()}>{promoCaching ? "Saving clips…" : promoSaved ? "3 clips saved for offline ✓" : "Save 3 clips for offline · ~104 MB"}</button>{promoCacheMessage && <p role="status" aria-live="polite">{promoCacheMessage}</p>}</div></aside>}
       <div className="warmup-nos"><div><strong>NOS</strong><span>{Math.round(nos)}%</span></div><div className="nos-track"><span style={{ width: nos + "%" }} /></div></div>
       <div className="warmup-controls warmup-circuit-controls">
         <div className="warmup-steering" aria-label="Analog steering">
@@ -563,10 +475,10 @@ export default function RacingWarmup({ embedded = false }: { embedded?: boolean 
           <button type="button" className="accelerate-button" aria-label="Accelerate" disabled={phase !== "running"} onPointerDown={e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); hold("accelerate", true); }} onPointerUp={() => hold("accelerate", false)} onPointerCancel={() => hold("accelerate", false)} onLostPointerCapture={() => hold("accelerate", false)}>GAS ↑</button>
           <button type="button" className="nos-button" aria-label="Toggle NOS burst" aria-pressed={boostActive} disabled={phase !== "running" || nos <= 0} onClick={toggleBoost}>{boostActive ? "NOS ON ⚡" : "TAP NOS ⚡"}</button>
         </div>
-        <div className="warmup-actions">{phase === "ready" ? <button type="button" className="big-brothers-button primary" onClick={startRace}>Start driving ↗</button> : phase === "countdown" ? <button type="button" className="big-brothers-button primary" disabled>Ready {countdown || 1}…</button> : phase === "running" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Pause Ⅱ</button> : phase === "paused" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Resume ▶</button> : <button type="button" className="big-brothers-button primary" onClick={startRace}>Try Again ↻</button>}<button type="button" className="big-brothers-button secondary" onClick={() => reset(false)}>Restart ↻</button></div>
+        <div className="warmup-actions">{phase === "ready" ? <button type="button" className="big-brothers-button primary" onClick={startRace}>Start driving ↗</button> : phase === "countdown" ? <button type="button" className="big-brothers-button primary" disabled>Ready {countdown || 1}…</button> : phase === "running" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Pause Ⅱ</button> : phase === "paused" ? <button type="button" className="big-brothers-button primary" onClick={pauseRace}>Resume ▶</button> : <button type="button" className="big-brothers-button primary" onClick={startRace}>Drive again ↻</button>}<button type="button" className="big-brothers-button secondary" onClick={() => reset(false)}>Restart ↻</button></div>
       </div>
-      <p className="warmup-help">Phone: move the circular thumbstick with your left thumb; BRAKE is left and GAS is right under your right thumb. Tap NOS once for a burst, tap again to stop. Desktop: ← / → or A / D steer, ↑ / W gas, ↓ / S brake, Space / Shift NOS, P pause. Practice is free. Any real wash discount or prize must be explicitly published and confirmed by the Big Brothers team; lap times alone do not promise money off.</p>
+      <p className="warmup-help">Phone: move the circular thumbstick with your left thumb; BRAKE is left and GAS is right under your right thumb. Tap NOS once for a burst, tap again to stop. Desktop: ← / → or A / D steer, ↑ / W gas, ↓ / S brake, Space / Shift NOS, P pause.</p>
     </section>
-    {!embedded && <footer className="big-brothers-footer"><Link href="/" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></Link><Link href="/#request">Book a wash</Link><Link href="/#my-wash">My Wash</Link></footer>}
+    {!embedded && <footer className="big-brothers-footer"><Link href="/" className="big-brothers-brand"><span className="big-brothers-mark">BB</span><span>{businessName}<small>Wash. Care. Go.</small></span></Link><Link href="/#request">Book a wash</Link><Link href="/account">My Wash</Link></footer>}
   </div>;
 }
