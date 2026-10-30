@@ -119,7 +119,7 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => { const params = new URLSearchParams(window.location.search); if (params.get("journey") === "book") { setTab("book"); setBookingDate(params.get("preferredDate") || ""); setBookingTime(params.get("preferredTime") || ""); } }, []);
+  useEffect(() => { const params = new URLSearchParams(window.location.search); if (params.get("journey") === "book") { setTab("book"); setBookingDate(params.get("preferredDate") || ""); setBookingTime(params.get("preferredTime") || ""); setMode(params.get("mode") === "mobile" ? "mobile" : "site"); } }, []);
   useEffect(() => {
     if (tab !== "book" || !bookingDate) { setAvailableSlots([]); setAvailabilityConfigured(null); setAvailabilityMessage(""); return; }
     if (!online) { setAvailableSlots([]); setAvailabilityConfigured(null); setAvailabilityMessage("Offline: live availability cannot be checked. Any saved request remains unconfirmed until staff review."); return; }

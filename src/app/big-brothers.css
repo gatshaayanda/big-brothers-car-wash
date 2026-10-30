@@ -409,3 +409,52 @@
 .bb-help-teaser p{margin:0;font-size:11px;line-height:1.65;color:#514945}
 .bb-help-teaser>button{position:absolute;top:7px;right:8px;width:28px;height:28px;border:0;border-radius:50%;background:#f4efed;color:#302a27;font-size:18px;line-height:1}
 .record-handoff-note{font-size:11px;line-height:1.55;color:#655b56}
+
+
+/* Customer next-wash planner */
+.bb-next-wash{max-width:1120px;margin:28px auto 34px;padding:24px;border:1px solid #e9dfdc;border-radius:12px;background:#fff;box-shadow:0 12px 35px #24171408}
+.bb-next-wash-heading h2{margin:0 0 7px;font:600 clamp(27px,4vw,38px)/1.05 "Space Grotesk",Arial,sans-serif;letter-spacing:-.055em}
+.bb-next-wash-heading>p:last-child{margin:0;color:#625955;font-size:13px;line-height:1.6}
+.bb-wash-suggestions{margin-top:20px;padding:17px;border-radius:10px;background:#fff8f6;border:1px solid #f0dedb}
+.bb-wash-suggestions-title{display:flex;align-items:flex-start;gap:12px}
+.bb-wash-suggestions-title>span{font-size:24px}
+.bb-wash-suggestions-title strong,.bb-wash-suggestions-title small{display:block}
+.bb-wash-suggestions-title strong{font-size:15px}
+.bb-wash-suggestions-title small{margin-top:4px;color:#716561;font-size:11px;line-height:1.55}
+.bb-wash-suggestion-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:15px}
+.bb-wash-suggestion{display:grid;gap:7px;text-align:left;padding:15px;border:1px solid #e8d8d4;border-radius:9px;background:#fff;color:#28211e;cursor:pointer}
+.bb-wash-suggestion.selected{border-color:#c51f2a;box-shadow:inset 0 0 0 1px #c51f2a;background:#fffafa}
+.bb-wash-suggestion>span,.bb-selected-wash>div>span{font-size:9px;font-weight:850;letter-spacing:.13em;color:#a71922}
+.bb-wash-suggestion>strong{font-size:15px}
+.bb-wash-suggestion>b{font-size:13px}
+.bb-wash-suggestion>small{font-size:10px;color:#756a66;line-height:1.45}
+.bb-wash-suggestion>i{font-size:11px;font-style:normal;font-weight:800;color:#a71922}
+.bb-planner-status,.bb-planner-toast{padding:11px 13px;border-radius:8px;background:#f6f2f0;color:#514844;font-size:11px;line-height:1.5}
+.bb-planner-toast{margin:13px 0 0;background:#fff2ef;border:1px solid #f0d0ca;color:#84212a}
+.bb-calendar-panel{margin-top:18px;padding:17px;border:1px solid #ece5e2;border-radius:10px}
+.bb-calendar-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.bb-calendar-top>div:first-child strong{font-size:14px}
+.bb-calendar-top p{margin:4px 0 0;font-size:11px;color:#766b67;line-height:1.5}
+.bb-calendar-month{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.bb-calendar-month button{width:30px;height:30px;border:1px solid #e5dcda;border-radius:50%;background:#fff;font-size:19px}
+.bb-calendar-month button:disabled{opacity:.35}
+.bb-calendar-month strong{font-size:12px}
+.bb-calendar-weekdays,.bb-calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.bb-calendar-weekdays span{text-align:center;padding:7px 0;font-size:10px;font-weight:800;color:#756a66}
+.bb-calendar-days button,.bb-calendar-days>span{min-width:0;aspect-ratio:1;border:1px solid #eee8e5;border-radius:7px;background:#fff;font:700 12px inherit;color:#342c28}
+.bb-calendar-days button:disabled{opacity:.3;background:#f6f3f1;cursor:not-allowed}
+.bb-calendar-days button.closed{text-decoration:line-through}
+.bb-calendar-days button.selected{background:#a71922;border-color:#a71922;color:#fff}
+.bb-calendar-note{margin:13px 0 0;font-size:10px;line-height:1.55;color:#766b67}
+.bb-selected-wash{display:grid;grid-template-columns:1fr auto auto;align-items:end;gap:13px;margin-top:15px;padding:16px;border:1px solid #e9d7d4;border-radius:10px;background:#fffafa}
+.bb-selected-wash>div{display:grid;gap:5px}
+.bb-selected-wash>div>strong{font-size:15px}
+.bb-selected-wash>div>small{font-size:10px;color:#776d69}
+.bb-selected-wash label{display:grid;gap:5px;font-size:10px;font-weight:800}
+.bb-selected-wash select{min-height:42px;padding:8px;border:1px solid #ddd2cf;border-radius:7px;background:#fff;color:#211c1a}
+.bb-selected-wash .big-brothers-button{min-height:42px;white-space:nowrap}
+.bb-mobile-wash-inquiry{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:18px;padding:16px;border-radius:9px;background:#f7f5f3}
+.bb-mobile-wash-inquiry strong{font-size:13px}
+.bb-mobile-wash-inquiry p{margin:4px 0 0;font-size:11px;line-height:1.5;color:#665d58}
+.bb-mobile-wash-inquiry .big-brothers-button{white-space:nowrap}
+@media(max-width:650px){.bb-next-wash{margin:20px 12px;padding:17px}.bb-wash-suggestion-grid{grid-template-columns:1fr}.bb-calendar-top{display:grid}.bb-calendar-month{justify-content:space-between}.bb-selected-wash{grid-template-columns:1fr 1fr}.bb-selected-wash>div{grid-column:1/-1}.bb-selected-wash .big-brothers-button{grid-column:1/-1;width:100%}.bb-mobile-wash-inquiry{align-items:stretch;flex-direction:column}.bb-mobile-wash-inquiry .big-brothers-button{width:100%}}
