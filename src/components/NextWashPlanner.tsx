@@ -21,9 +21,8 @@ export default function NextWashPlanner() {
  const [availabilityLoading,setAvailabilityLoading] = useState(false);
  const opening = typeof settings.openingTime==="string" ? settings.openingTime : "";
  const closing = typeof settings.closingTime==="string" ? settings.closingTime : "";
- const startHour = opening ? Number(opening.slice(0,2)) : 8;
- const endHour = closing ? Number(closing.slice(0,2)) : 18;
- const closedDays = Array.isArray(settings.closedDays) ? settings.closedDays.map(v=>String(v).toLowerCase()) : [];
+ const openingMinutes = opening ? Number(opening.slice(0,2))*60+Number(opening.slice(3,5)) : 8*60;
+ const closingMinutes = closing ? Number(closing.slice(0,2))*60+Number(closing.slice(3,5)) : 18*60;
  const hoursConfigured = Boolean(opening && closing);
 
  useEffect(()=>subscribeSettings(value=>setSettings(value||{}),()=>setToast("Business hours could not be loaded. Your request will need staff confirmation.")),[]);
@@ -55,7 +54,7 @@ export default function NextWashPlanner() {
  const offset=(first.getDay()+6)%7;
  const monthLabel=new Intl.DateTimeFormat("en-BW",{month:"long",year:"numeric"}).format(first);
  const shiftMonth=(delta:number)=>{const d=new Date(monthParts[0],monthParts[1]-1+delta,1);setMonth(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"))};
- const timeSlots=useMemo(()=>{const slots:string[]=[];const from=Math.max(0,Math.min(23,startHour));const to=Math.max(from,Math.min(23,endHour));for(let h=from;h<=to;h++)for(const m of [0,30])if(!(h===to&&m>Number((closing||"18:00").slice(3,5))))slots.push(String(h).padStart(2,"0")+":"+String(m).padStart(2,"0"));return slots},[startHour,endHour,closing]);
+ const timeSlots=useMemo(()=>{const slots:string[]=[];for(let minute=openingMinutes;minute<=closingMinutes;minute+=30){slots.push(String(Math.floor(minute/60)).padStart(2,"0")+":"+String(minute%60).padStart(2,"0"))}return slots},[openingMinutes,closingMinutes]);
  const choose=(date:string,selectedTime=(timeSlots.includes("11:00")?"11:00":timeSlots[0]||"11:00"))=>{setSelected(date);setTime(selectedTime);setToast("Selected "+displayDate(date)+". Choose your preferred time, then send the request to the Brothers.");};
  const continueToRequest=()=>{if(!selected){setToast("Choose a suggested day or a date in the calendar first.");return}window.location.assign("/?journey=book&preferredDate="+encodeURIComponent(selected)+"&preferredTime="+encodeURIComponent(time)+"#request")};
  useEffect(()=>{
