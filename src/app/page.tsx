@@ -355,10 +355,6 @@ export default function Home() {
           <a href="#big-brothers-racing" onClick={() => setChatOpen(false)}>Racing &amp; wash offers ↗</a>
         </section>
       )}
-      {!helpTeaserDismissed && !chatOpen && <div className="bb-help-teaser" role="note">
-        <button type="button" aria-label="Dismiss quick help" onClick={() => setHelpTeaserDismissed(true)}>×</button>
-        <p>All sorted? Hand the phone back to the Brothers. While your ride gets its shine, you can try Big Brothers Racing or check your own WhatsApp for the app link.</p>
-      </div>}
       <button type="button" className="bb-help-launcher" aria-expanded={chatOpen} onClick={() => setChatOpen(open => !open)}>
         <span aria-hidden="true">{chatOpen ? "×" : "?"}</span>
         {chatOpen ? "Close help" : "Need a hand?"}
