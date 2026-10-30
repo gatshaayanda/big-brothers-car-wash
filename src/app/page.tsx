@@ -238,6 +238,7 @@ export default function Home() {
     if (tab === "queue" && !/^\d{8,15}$/.test(normalizeWhatsAppDigits(phone))) { setNotice({ kind: "error", text: "Enter a valid WhatsApp number with its country code (Botswana numbers can use +267 or the local 8-digit number)." }); return; }
     if (tab === "queue" && !serviceId) { setNotice({ kind: "error", text: "Choose a listed wash service or select “I’d like to propose my own price” to enter an amount for the attendant to consider." }); return; }
     setBusy(true); setNotice(null);
+    let submissionStage: "authentication" | "customer profile" | "queue entry" | "booking request" | "fleet enquiry" = "authentication";
     try {
       const common: Record<string, unknown> = { customerName, phone, vehicleType: vehicleDescription || "Not described", vehicleRegistration: "", notes, createdAt: now, updatedAt: now };
       let collectionName: string; let data: Record<string, unknown>;
@@ -272,7 +273,9 @@ export default function Home() {
       }
       const user = await ensureUser();
       if (!user) throw new Error("Online service is not configured yet. Your request has not been sent.");
+      submissionStage = "customer profile";
       await saveCustomerRecord(user.uid, customerName, phone, String(form.get("email") || user.email || ""));
+      submissionStage = tab === "queue" ? "queue entry" : tab === "book" ? "booking request" : "fleet enquiry";
       const requestRef = doc(collection(db, collectionName));
       const writePromise = setDoc(requestRef, { ...data, customerId: user.uid });
       setNotice({ kind: "pending", text: "Sending securely to Big Brothers' system…" });
@@ -281,7 +284,12 @@ export default function Home() {
       if (tab === "queue") { setQueueReference(requestRef.id); setQueueWhatsAppPhone(phone); setQueueAppUrl(window.location.origin); setQueueHandoff("synced"); }
       setNotice({ kind: "success", text: tab === "queue" ? "You’re on the shared queue. Staff can send your secure receipt and account link to this WhatsApp number after the wash is completed." : "Your booking request reached Big Brothers. The team will check availability and confirm it with you." });
     } catch (error) {
-      setNotice({ kind: "error", text: error instanceof Error ? error.message : "We couldn't send this request. Please try again when connected." });
+      const detail = error instanceof Error ? error.message : "Unknown Firebase error.";
+      const permissionDenied = typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "permission-denied";
+      const stageMessage = permissionDenied
+        ? `Firebase denied the ${submissionStage} step. No queue entry was confirmed. Check that the published rules match the Big Brothers app and that this app is connected to the intended Vula Firebase project.`
+        : `The ${submissionStage} step failed: ${detail}`;
+      setNotice({ kind: "error", text: stageMessage });
     } finally { setBusy(false); }
   }
 
