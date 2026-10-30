@@ -7,7 +7,7 @@ import { onAuthStateChanged, signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, hasFirebaseWebConfig } from "@/lib/firebase/client";
 import { enableVulaPushNotifications } from "@/lib/firebase/big-brothers-notifications";
-import { saveAnnouncementPreferences, saveReminderPreferences, subscribeLoyaltyAccount, subscribeReminderPreferences, subscribeServices, subscribeSettings, type VulaService } from "@/lib/firebase/big-brothers-data";
+import { saveAnnouncementPreferences, saveReminderPreferences, subscribeReminderPreferences, subscribeServices, subscribeSettings, type VulaService } from "@/lib/firebase/big-brothers-data";
 import "./big-brothers.css";
 import RacingWarmup from "./games/racing-warmup";
 import LocationWeather from "@/components/LocationWeather";
@@ -61,7 +61,6 @@ export default function Home() {
   const [tab, setTab] = useState<"book" | "queue" | "fleet">("queue");
   const [repeatPrefill, setRepeatPrefill] = useState<{customerName?:string;phone?:string;vehicleType?:string;vehicleRegistration?:string}|null>(null);
   const [connectionError, setConnectionError] = useState("");
-  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [announcementsEnabled, setAnnouncementsEnabled] = useState(false);
   const [announcementNotice, setAnnouncementNotice] = useState("");
@@ -139,10 +138,9 @@ export default function Home() {
 
 
   useEffect(() => {
-    if (!userId) { setLoyaltyPoints(0); setRemindersEnabled(false); setAnnouncementsEnabled(false); return; }
+    if (!userId) { setRemindersEnabled(false); setAnnouncementsEnabled(false); return; }
     const fail = () => {};
     const stops = [
-      subscribeLoyaltyAccount(userId, value => setLoyaltyPoints(Number(value?.pointsBalance ?? 0)), fail),
       subscribeReminderPreferences(userId, value => { setRemindersEnabled(Boolean(value?.enabled)); setAnnouncementsEnabled(Boolean(value?.announcementsEnabled)); }, fail),
     ];
     return () => stops.forEach(stop => stop());
@@ -311,7 +309,6 @@ export default function Home() {
       setNotice(null);
       setReminderNotice("");
       setPushNotice("");
-      setLoyaltyPoints(0);
       setRemindersEnabled(false);
       setAnnouncementsEnabled(false);
       setServiceId("");
