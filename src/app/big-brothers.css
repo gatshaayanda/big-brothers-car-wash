@@ -458,3 +458,17 @@
 .bb-mobile-wash-inquiry p{margin:4px 0 0;font-size:11px;line-height:1.5;color:#665d58}
 .bb-mobile-wash-inquiry .big-brothers-button{white-space:nowrap}
 @media(max-width:650px){.bb-next-wash{margin:20px 12px;padding:17px}.bb-wash-suggestion-grid{grid-template-columns:1fr}.bb-calendar-top{display:grid}.bb-calendar-month{justify-content:space-between}.bb-selected-wash{grid-template-columns:1fr 1fr}.bb-selected-wash>div{grid-column:1/-1}.bb-selected-wash .big-brothers-button{grid-column:1/-1;width:100%}.bb-mobile-wash-inquiry{align-items:stretch;flex-direction:column}.bb-mobile-wash-inquiry .big-brothers-button{width:100%}}
+
+
+/* Customer account engagement controls */
+.customer-account-page>.customer-account-card{width:min(1120px,calc(100% - 28px));margin:14px auto}
+.customer-preference-list{display:grid;gap:0;margin:18px 0}
+.customer-preference-list label{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid #eee;cursor:pointer}
+.customer-preference-list label>span{display:grid;gap:4px}
+.customer-preference-list strong{font-size:.88rem;color:#222}
+.customer-preference-list small{font-size:.76rem;line-height:1.45;color:#666}
+.customer-preference-list input{width:22px;height:22px;flex:0 0 auto;accent-color:#c71920}
+.customer-rewards-balance{display:flex;align-items:baseline;gap:10px;margin:18px 0;padding:18px 20px;border:1px solid #f0d6d6;border-radius:12px;background:#fffafa}
+.customer-rewards-balance strong{font:700 clamp(34px,7vw,48px)/1 "Space Grotesk",Arial,sans-serif;color:#b71920}
+.customer-rewards-balance span{font-size:.8rem;font-weight:800;color:#555}
+@media(max-width:680px){.customer-account-page>.customer-account-card{width:calc(100% - 28px);margin:12px auto}.customer-preference-list label{align-items:flex-start}}
