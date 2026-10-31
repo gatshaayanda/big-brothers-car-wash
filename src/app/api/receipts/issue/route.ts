@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
-    const token = request.headers.get("authorization")?.match(/^Bearer\\s+(.+)$/i)?.[1];
+    const token = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
     if (!token) return NextResponse.json({ error: "Customer session is required to issue this walk-in receipt." }, { status: 401 });
 
     const app = bigBrothersAdminApp();
