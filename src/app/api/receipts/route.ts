@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFirestore } from "firebase-admin/firestore";
-import { createReceiptToken, receiptTokenHash, requireBigBrothersStaff } from "@/lib/server/big-brothers-receipts";
+import { createReceiptToken, receiptTokenHash, requireBigBrothersStaff, createWalkInTicketReceipt } from "@/lib/server/big-brothers-receipts";
 
 export const runtime = "nodejs";
 
@@ -17,8 +17,11 @@ export async function GET(request: Request) {
     const queueSnap = await db.doc(`queueEntries/${queueEntryId}`).get();
     if (!queueSnap.exists) return NextResponse.json({ error: "That saved walk-in could not be found." }, { status: 404 });
 
-    const receiptSnap = await db.doc(`receipts/${queueEntryId}`).get();
-    if (!receiptSnap.exists) return NextResponse.json({ exists: false }, { headers: { "Cache-Control": "no-store" } });
+    let receiptSnap = await db.doc(`receipts/${queueEntryId}`).get();
+    if (!receiptSnap.exists) {
+      await createWalkInTicketReceipt(queueEntryId, queueSnap.data() || {});
+      receiptSnap = await db.doc(`receipts/${queueEntryId}`).get();
+    }
 
     const receipt = receiptSnap.data() || {};
     const token = String(receipt.token || "");
@@ -35,6 +38,8 @@ export async function GET(request: Request) {
       available,
       url: available ? new URL("/receipt/" + token, request.url).toString() : null,
       receiptRef: String(receipt.receiptRef || ""),
+      receiptKind: String(receipt.receiptKind || "completed-receipt"),
+      priceNote: String(receipt.priceNote || ""),
       amount: typeof receipt.amount === "number" && Number.isFinite(receipt.amount) ? receipt.amount : null,
       tipAmount: typeof receipt.tipAmount === "number" && Number.isFinite(receipt.tipAmount) ? receipt.tipAmount : 0,
       paymentStatus: String(receipt.paymentStatus || "unpaid"),
