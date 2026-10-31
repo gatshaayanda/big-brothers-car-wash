@@ -6,7 +6,7 @@ import { bigBrothersAdminApp } from "@/lib/server/big-brothers-receipts";
 export const runtime = "nodejs";
 
 async function customerFromRequest(request: Request) {
-  const token = request.headers.get("authorization")?.match(/^Bearer\\s+(.+)$/i)?.[1];
+  const token = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) throw new Error("Sign in to your customer account before sending an enquiry.");
   const app = bigBrothersAdminApp();
   const decoded = await getAuth(app).verifyIdToken(token);
