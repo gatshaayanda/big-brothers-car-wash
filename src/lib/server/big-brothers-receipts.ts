@@ -166,40 +166,40 @@ function pdfEscape(value: string) {
 
 export function createReceiptPdf(receipt: PublicReceipt) {
   const lines: Array<{ text: string; size: number; color: string }> = [
-    { text: receipt.businessName.toUpperCase(), size: 20, color: "0.08 0.13 0.11" },
-    { text: receipt.locationName, size: 10, color: "0.32 0.38 0.34" },
-    { text: receipt.receiptKind === "walk-in-ticket" ? "WALK-IN RECEIPT" : "CAR WASH RECEIPT", size: 15, color: "0.08 0.13 0.11" },
-    { text: "Receipt reference: " + receipt.receiptRef, size: 10, color: "0.08 0.13 0.11" },
-    { text: (receipt.receiptKind === "walk-in-ticket" ? "Joined: " : "Completed: ") + (receipt.receiptKind === "walk-in-ticket" ? (receipt.joinedAt ? new Date(receipt.joinedAt).toLocaleString("en-BW", { timeZone: "Africa/Gaborone" }) : "Not recorded") : (receipt.completedAt ? new Date(receipt.completedAt).toLocaleString("en-BW", { timeZone: "Africa/Gaborone" }) : "Not recorded")), size: 10, color: "0.08 0.13 0.11" },
+    { text: receipt.businessName.toUpperCase(), size: 20, color: "1 1 1" },
+    { text: receipt.locationName, size: 10, color: "1 1 1" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? "WALK-IN SERVICE RECEIPT" : "CAR WASH SERVICE RECEIPT", size: 15, color: "1 1 1" },
+    { text: "Receipt reference: " + receipt.receiptRef, size: 10, color: "0.08 0.10 0.14" },
+    { text: (receipt.receiptKind === "walk-in-ticket" ? "Received: " : "Completed: ") + (receipt.receiptKind === "walk-in-ticket" ? (receipt.joinedAt ? new Date(receipt.joinedAt).toLocaleString("en-BW", { timeZone: "Africa/Gaborone" }) : "Not recorded") : (receipt.completedAt ? new Date(receipt.completedAt).toLocaleString("en-BW", { timeZone: "Africa/Gaborone" }) : "Not recorded")), size: 10, color: "0.08 0.10 0.14" },
     { text: "", size: 8, color: "0 0 0" },
-    { text: "CUSTOMER", size: 10, color: "0.25 0.32 0.27" },
+    { text: "CUSTOMER", size: 10, color: "0.78 0.10 0.13" },
     { text: "Name: " + receipt.customerName, size: 11, color: "0.08 0.13 0.11" },
     { text: "Phone: " + receipt.phone, size: 11, color: "0.08 0.13 0.11" },
-    { text: "VEHICLE & SERVICE", size: 10, color: "0.25 0.32 0.27" },
+    { text: "VEHICLE & SERVICE", size: 10, color: "0.78 0.10 0.13" },
     { text: "Vehicle: " + receipt.vehicleType, size: 11, color: "0.08 0.13 0.11" },
     { text: "Service: " + receipt.serviceName, size: 11, color: "0.08 0.13 0.11" },
     { text: "", size: 8, color: "0 0 0" },
-    { text: receipt.receiptKind === "walk-in-ticket" ? "PRICE INFORMATION" : "FINAL AGREED CHARGE", size: 10, color: "0.25 0.32 0.27" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? "SERVICE PRICE" : "FINAL AGREED CHARGE", size: 10, color: "0.78 0.10 0.13" },
     { text: receipt.receiptKind === "walk-in-ticket" ? receipt.priceNote : "BWP " + receipt.amount.toFixed(2), size: receipt.receiptKind === "walk-in-ticket" ? 12 : 22, color: "0.08 0.13 0.11" },
     ...(receipt.receiptKind === "walk-in-ticket" ? [] : [
       { text: "Voluntary tip: BWP " + receipt.tipAmount.toFixed(2), size: 11, color: "0.08 0.13 0.11" },
       { text: "Total recorded: BWP " + (receipt.amount + receipt.tipAmount).toFixed(2), size: 13, color: "0.08 0.13 0.11" },
       { text: "Payment method: " + receipt.paymentMethod.toUpperCase().replaceAll("-", " "), size: 10, color: "0.08 0.13 0.11" },
     ]),
-    { text: "Payment status: " + receipt.paymentStatus.toUpperCase(), size: 11, color: "0.08 0.13 0.11" },
+    { text: "Payment status: " + (receipt.receiptKind === "walk-in-ticket" ? "NOT YET PAID" : receipt.paymentStatus.toUpperCase()), size: 11, color: "0.08 0.10 0.14" },
     { text: "", size: 10, color: "0 0 0" },
-    { text: receipt.receiptKind === "walk-in-ticket" ? "This confirms your walk-in details were recorded. It is not a completed-wash or payment receipt." : "This receipt records the details and payment status entered by staff.", size: 9, color: "0.32 0.38 0.34" },
-    { text: receipt.receiptKind === "walk-in-ticket" ? "Any proposed price remains subject to agreement at the wash." : "It is not proof of payment unless the status above says PAID.", size: 9, color: "0.32 0.38 0.34" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? "Your walk-in service order has been received by Big Brothers Car Wash." : "This receipt records the service details and payment status entered by staff.", size: 9, color: "0.28 0.31 0.36" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? "Payment has not yet been recorded. Any proposed price remains subject to agreement." : "Proof of payment applies when the status above says PAID.", size: 9, color: "0.28 0.31 0.36" },
   ];
   let y = 780;
-  const ops = ["q", "0.96 0.98 0.94 rg", "40 720 515 92 re f", "Q", "0.78 0.95 0.42 rg", "40 712 515 5 re f"];
+  const ops = ["q", "0.78 0.10 0.13 rg", "40 720 515 92 re f", "Q", "0.78 0.10 0.13 rg", "40 712 515 5 re f"];
   for (const line of lines) {
     if (!line.text) { y -= line.size + 8; continue; }
     ops.push(line.color + " rg");
     ops.push("BT /F1 " + line.size + " Tf 52 " + y + " Td (" + pdfEscape(line.text) + ") Tj ET");
     y -= line.size + 15;
   }
-  ops.push("0.78 0.95 0.42 rg", "40 40 515 4 re f");
+  ops.push("0.78 0.10 0.13 rg", "40 40 515 4 re f");
   const stream = ops.join("\n");
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
