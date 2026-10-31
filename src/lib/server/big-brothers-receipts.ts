@@ -50,13 +50,8 @@ export async function createWalkInTicketReceipt(queueEntryId: string, job: Recor
     const publishedPrice = typeof job.servicePrice === "number" && Number.isFinite(job.servicePrice) ? job.servicePrice : null;
     const proposedPrice = typeof job.customerOfferAmount === "number" && Number.isFinite(job.customerOfferAmount) ? job.customerOfferAmount : null;
     const agreedPrice = typeof job.agreedWashPrice === "number" && Number.isFinite(job.agreedWashPrice) ? job.agreedWashPrice : null;
-    const priceNote = agreedPrice !== null
-      ? "Face-to-face agreed wash price: BWP " + agreedPrice.toFixed(2)
-      : publishedPrice !== null
-        ? "Published service price: BWP " + publishedPrice.toFixed(2) + " (final charge may be confirmed at the wash)"
-        : proposedPrice !== null
-          ? "Customer-proposed amount: BWP " + proposedPrice.toFixed(2) + " (not yet accepted; final price to be agreed)"
-          : "Final wash price to be agreed with Big Brothers.";
+    const displayPrice = agreedPrice ?? publishedPrice;
+    const priceNote = displayPrice !== null ? "BWP " + displayPrice.toFixed(2) : "";
     const record = existing.exists
       ? { ...current, queueEntryId, token, tokenHash, expiresAt, updatedAt: createdAt, revoked: false }
       : {
@@ -186,10 +181,14 @@ export function createReceiptPdf(receipt: PublicReceipt) {
       { text: "Total recorded: BWP " + (receipt.amount + receipt.tipAmount).toFixed(2), size: 13, color: "0.08 0.13 0.11" },
       { text: "Payment method: " + receipt.paymentMethod.toUpperCase().replaceAll("-", " "), size: 10, color: "0.08 0.13 0.11" },
     ]),
-    { text: "Payment status: " + (receipt.receiptKind === "walk-in-ticket" ? "NOT YET PAID" : receipt.paymentStatus.toUpperCase()), size: 11, color: "0.08 0.10 0.14" },
-    { text: "", size: 10, color: "0 0 0" },
-    { text: receipt.receiptKind === "walk-in-ticket" ? "Your walk-in service order has been received by Big Brothers Car Wash." : "This receipt records the service details and payment status entered by staff.", size: 9, color: "0.28 0.31 0.36" },
-    { text: receipt.receiptKind === "walk-in-ticket" ? "Payment has not yet been recorded. Any proposed price remains subject to agreement." : "Proof of payment applies when the status above says PAID.", size: 9, color: "0.28 0.31 0.36" },
+    ...(receipt.receiptKind === "walk-in-ticket" ? [
+      { text: "Thank you. Your walk-in service order has been received.", size: 10, color: "0.28 0.31 0.36" },
+    ] : [
+      { text: "Payment status: " + receipt.paymentStatus.toUpperCase(), size: 11, color: "0.08 0.10 0.14" },
+      { text: "", size: 10, color: "0 0 0" },
+      { text: "This receipt records the service details and payment status entered by staff.", size: 9, color: "0.28 0.31 0.36" },
+      { text: "Proof of payment applies when the status above says PAID.", size: 9, color: "0.28 0.31 0.36" },
+    ]),
   ];
   let y = 780;
   const ops = ["q", "0.78 0.10 0.13 rg", "40 720 515 92 re f", "Q", "0.78 0.10 0.13 rg", "40 712 515 5 re f"];
