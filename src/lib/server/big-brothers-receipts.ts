@@ -57,28 +57,29 @@ export async function createWalkInTicketReceipt(queueEntryId: string, job: Recor
         : proposedPrice !== null
           ? "Customer-proposed amount: BWP " + proposedPrice.toFixed(2) + " (not yet accepted; final price to be agreed)"
           : "Final wash price to be agreed with Big Brothers.";
-    const record = {
-      queueEntryId, token, tokenHash, receiptRef: receiptNumber,
-      receiptKind: "walk-in-ticket",
-      priceNote,
-      customerId: String(job.customerId || ""),
-      customerName: String(job.customerName || ""),
-      phone: String(job.phone || ""),
-      email: String(job.email || ""),
-      vehicleType: String(job.vehicleType || ""),
-      vehicleRegistration: String(job.vehicleRegistration || ""),
-      serviceName: String(job.serviceName || "Car wash service"),
-      amount: agreedPrice ?? publishedPrice ?? 0,
-      tipAmount: 0,
-      paymentStatus: "not-due",
-      paymentMethod: "not-recorded",
-      joinedAt: String(job.createdAt || createdAt),
-      completedAt: "",
-      createdAt,
-      expiresAt,
-      revoked: false,
-      ...(current.claimedBy ? { claimedBy: current.claimedBy, claimedAt: current.claimedAt } : {}),
-    };
+    const record = existing.exists
+      ? { ...current, queueEntryId, token, tokenHash, createdAt, expiresAt, revoked: false }
+      : {
+          queueEntryId, token, tokenHash, receiptRef: receiptNumber,
+          receiptKind: "walk-in-ticket",
+          priceNote,
+          customerId: String(job.customerId || ""),
+          customerName: String(job.customerName || ""),
+          phone: String(job.phone || ""),
+          email: String(job.email || ""),
+          vehicleType: String(job.vehicleType || ""),
+          vehicleRegistration: String(job.vehicleRegistration || ""),
+          serviceName: String(job.serviceName || "Car wash service"),
+          amount: agreedPrice ?? publishedPrice ?? 0,
+          tipAmount: 0,
+          paymentStatus: "not-due",
+          paymentMethod: "not-recorded",
+          joinedAt: String(job.createdAt || createdAt),
+          completedAt: "",
+          createdAt,
+          expiresAt,
+          revoked: false,
+        };
     transaction.set(receiptRef, record);
     transaction.set(db.doc(`receiptTokens/${tokenHash}`), { queueEntryId, createdAt, expiresAt });
     return { token, receiptRef: receiptNumber, reused: false };
