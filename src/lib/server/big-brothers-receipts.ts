@@ -58,7 +58,7 @@ export async function createWalkInTicketReceipt(queueEntryId: string, job: Recor
           ? "Customer-proposed amount: BWP " + proposedPrice.toFixed(2) + " (not yet accepted; final price to be agreed)"
           : "Final wash price to be agreed with Big Brothers.";
     const record = existing.exists
-      ? { ...current, queueEntryId, token, tokenHash, createdAt, expiresAt, revoked: false }
+      ? { ...current, queueEntryId, token, tokenHash, expiresAt, updatedAt: createdAt, revoked: false }
       : {
           queueEntryId, token, tokenHash, receiptRef: receiptNumber,
           receiptKind: "walk-in-ticket",
