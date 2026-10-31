@@ -25,6 +25,18 @@ function normalizeWhatsAppDigits(value: string) {
   }
   return digits;
 }
+function storeOfflineDraft(draft: { id: string; collection: string; data: Record<string, unknown>; enteredBy?: "customer" | "staff" }) {
+  const raw = localStorage.getItem(pendingKey) || "[]";
+  const parsed = JSON.parse(raw) as unknown;
+  if (!Array.isArray(parsed)) throw new Error("The saved offline request list is damaged. Keep this screen open and reconnect before retrying.");
+  const drafts = parsed as Array<{ id?: string }>;
+  if (!drafts.some(item => item.id === draft.id) && drafts.length >= 25) {
+    throw new Error("This device already has 25 pending requests. Reconnect and sync them before saving another walk-in.");
+  }
+  if (!drafts.some(item => item.id === draft.id)) drafts.push(draft);
+  localStorage.setItem(pendingKey, JSON.stringify(drafts));
+}
+
 function buildWhatsAppSelfLink(phone: string, appUrl: string) {
   const digits = normalizeWhatsAppDigits(phone);
   const message = "Thanks for choosing Big Brothers Car Wash!\n\nWe appreciate you trusting us with your ride.\n\nYour Big Brothers account makes every visit easier. Keep your wash receipts and vehicle details together, check your wash history and book your next visit without starting from scratch.\n\nPlanning a regular wash routine? Your account makes it easier to come back and keep your ride looking its best.\n\nAccess your car wash account here:\n" + appUrl + "\n\nBig Brothers Car Wash\nWash. Care. Go.";
@@ -106,6 +118,7 @@ export default function Home() {
 
   useEffect(() => {
     setOnline(navigator.onLine);
+    if ("storage" in navigator && navigator.storage?.persist) void navigator.storage.persist().catch(() => false);
     const onOnline = () => { setOnline(true); void syncOfflineRequests(); };
     const onOffline = () => { setOnline(false); setNotice({ kind: "pending", text: "Offline: requests can be saved on this device, but the team cannot see them until they sync." }); };
     const onResume = () => {
@@ -250,8 +263,9 @@ export default function Home() {
         if (!data.businessName) throw new Error("Enter the business or fleet name.");
       }
       if (!navigator.onLine || !hasFirebaseWebConfig) {
-        const saved = JSON.parse(localStorage.getItem(pendingKey) || "[]") as Array<unknown>;
-        const localId = crypto.randomUUID(); saved.push({ id: localId, collection: collectionName, data, ...(tab === "queue" ? { enteredBy } : {}) }); localStorage.setItem(pendingKey, JSON.stringify(saved)); formElement.reset();
+        const localId = crypto.randomUUID();
+        storeOfflineDraft({ id: localId, collection: collectionName, data, ...(tab === "queue" ? { enteredBy } : {}) });
+        formElement.reset();
         if (tab === "queue") { setQueueReference(localId); setQueueCustomerName(customerName); setQueueWhatsAppPhone(phone); setQueueEnteredBy(enteredBy); setQueueAppUrl(window.location.origin + "/account"); setQueueHandoff("offline"); }
         setNotice({ kind: "pending", text: "Saved on this device only. It is not visible to the team or a confirmed booking until it syncs." }); return;
       }
@@ -267,7 +281,7 @@ export default function Home() {
       if (tab === "queue") {
         const response = await fetch("/api/receipts/issue", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + await getIdToken(user) }, body: JSON.stringify({ queueEntryId: requestRef.id }) });
         const result = await response.json().catch(() => ({})) as { issued?: boolean; url?: string; error?: string };
-        if (response.ok && result.issued && result.url) issuedReceiptUrl = result.url;
+        if (response.ok && result.issued && result.url) { issuedReceiptUrl = result.url; setQueueReceiptError(""); }
         else setQueueReceiptError(result.error || "Your walk-in is saved, but the receipt could not be issued yet. Keep this reference and retry when connected.");
       }
       formElement.reset();
