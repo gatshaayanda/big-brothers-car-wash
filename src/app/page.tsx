@@ -236,6 +236,8 @@ export default function Home() {
     if (tab === "queue" && enteredBy === "staff" && serviceId === "customer-offer" && (agreedWashPrice === null || !Number.isFinite(agreedWashPrice) || agreedWashPrice <= 0 || agreedWashPrice > 1000000)) { setNotice({ kind: "error", text: "Enter the wash price agreed face-to-face with the customer." }); return; }
     setBusy(true); setNotice(null);
     let submissionStage: "authentication" | "customer profile" | "queue entry" | "booking request" | "fleet enquiry" = "authentication";
+    let pendingQueueId = "";
+    let pendingQueueData: Record<string, unknown> | null = null;
     try {
       const common: Record<string, unknown> = { customerName, phone, vehicleType: vehicleDescription || "Not described", vehicleRegistration: "", notes, createdAt: now, updatedAt: now };
       let collectionName: string; let data: Record<string, unknown>;
@@ -271,10 +273,11 @@ export default function Home() {
       }
       const user = await ensureUser();
       if (!user) throw new Error("Online service is not configured yet. Your request has not been sent.");
+      const requestRef = doc(collection(db, collectionName));
+      if (tab === "queue") { pendingQueueId = requestRef.id; pendingQueueData = data; }
       submissionStage = "customer profile";
       await saveCustomerRecord(user.uid, customerName, phone, String(form.get("email") || user.email || ""));
       submissionStage = tab === "queue" ? "queue entry" : tab === "book" ? "booking request" : "fleet enquiry";
-      const requestRef = doc(collection(db, collectionName));
       setNotice({ kind: "pending", text: "Sending securely to Big Brothers' system…" });
       await setDoc(requestRef, { ...data, customerId: user.uid });
       let issuedReceiptUrl = "";
@@ -288,8 +291,30 @@ export default function Home() {
       if (tab === "queue") { setQueueReference(requestRef.id); setQueueCustomerName(customerName); setQueueWhatsAppPhone(phone); setQueueEnteredBy(enteredBy); setQueueAppUrl(window.location.origin + "/account"); setQueueReceiptUrl(issuedReceiptUrl); setQueueHandoff("synced"); }
       setNotice({ kind: "success", text: tab === "queue" ? (issuedReceiptUrl ? "Your walk-in and branded receipt are saved." : "Your walk-in is saved in the shared queue. Your receipt is still being prepared; use Retry receipt below.") : "Your booking request reached Big Brothers. The team will check availability and confirm it with you." });
     } catch (error) {
+      const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code || "") : "";
+      const networkFailure = !navigator.onLine || ["unavailable", "network-request-failed", "deadline-exceeded"].includes(code);
+      if (tab === "queue" && pendingQueueId && pendingQueueData && networkFailure) {
+        try {
+          storeOfflineDraft({ id: pendingQueueId, collection: "queueEntries", data: pendingQueueData, enteredBy });
+          formElement.reset();
+          setQueueReference(pendingQueueId);
+          setQueueCustomerName(customerName);
+          setQueueWhatsAppPhone(phone);
+          setQueueEnteredBy(enteredBy);
+          setQueueAppUrl(window.location.origin + "/account");
+          setQueueReceiptUrl("");
+          setQueueReceiptError("Saved on this device. The secure receipt will be issued after the server confirms sync.");
+          setQueueHandoff("offline");
+          setNotice({ kind: "pending", text: "Connection interrupted. Your walk-in is saved on this device with a stable reference and will retry when connected." });
+          return;
+        } catch (storageError) {
+          const storageMessage = storageError instanceof Error ? storageError.message : "Device storage is unavailable.";
+          setNotice({ kind: "error", text: "The request could not reach the server and this device could not safely save an offline draft: " + storageMessage });
+          return;
+        }
+      }
       const detail = error instanceof Error ? error.message : "Unknown Firebase error.";
-      const permissionDenied = typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "permission-denied";
+      const permissionDenied = code === "permission-denied";
       const stageMessage = permissionDenied
         ? `Firebase denied the ${submissionStage} step. No queue entry was confirmed. Check that the published rules match the Big Brothers app and that this app is connected to the intended Vula Firebase project.`
         : `The ${submissionStage} step failed: ${detail}`;
