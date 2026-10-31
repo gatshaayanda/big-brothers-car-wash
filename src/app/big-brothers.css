@@ -127,7 +127,7 @@
 .bb-location-guide{padding-top:44px}
 .bb-location-videos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .bb-location-video{border:1px solid #e8e3e0;border-radius:3px;overflow:hidden;background:#fff}
-.bb-location-video video{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:#242424}
+.bb-location-video video{display:block;width:100%;height:clamp(190px,19vw,230px);min-height:190px;aspect-ratio:16/10;object-fit:cover;background:#242424}
 .bb-location-video>div{padding:16px 17px 18px}
 .bb-location-video h3{font-family:"Space Grotesk",Arial,sans-serif;font-size:18px;letter-spacing:-.035em;margin:0 0 6px}
 .bb-location-video p{font-size:12px;line-height:1.6;color:#6c6663;margin:0}
@@ -210,7 +210,7 @@
  .bb-weather-refresh{align-self:center}
  .bb-location-guide{padding-top:36px}
  .bb-location-videos{grid-template-columns:1fr;gap:11px}
- .bb-location-video video{aspect-ratio:16/9}
+ .bb-location-video video{height:205px;min-height:205px;aspect-ratio:16/9}
  .bb-location-video>div{padding:14px 15px}
  .bb-offline-media{align-items:stretch;flex-direction:column;padding:16px;gap:12px}
  .bb-offline-media .big-brothers-button{width:100%}
@@ -472,3 +472,40 @@
 .customer-rewards-balance strong{font:700 clamp(34px,7vw,48px)/1 "Space Grotesk",Arial,sans-serif;color:#b71920}
 .customer-rewards-balance span{font-size:.8rem;font-weight:800;color:#555}
 @media(max-width:680px){.customer-account-page>.customer-account-card{width:calc(100% - 28px);margin:12px auto}.customer-preference-list label{align-items:flex-start}}
+
+
+/* Big Brothers preferred-time picker — adapted from the JTS booking interaction. */
+.bb-time-choice{min-width:0;display:grid;gap:6px}
+.bb-time-choice-label{font-size:10px;font-weight:800;color:#5f5551}
+.bb-time-choice-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;padding:9px 11px;border:1px solid #e5d8d4;border-radius:8px;background:#fff}
+.bb-time-choice-summary>div{min-width:0}
+.bb-time-choice-summary strong,.bb-time-choice-summary small{display:block}
+.bb-time-choice-summary strong{font:700 17px "Space Grotesk",Arial,sans-serif;color:#211c1a}
+.bb-time-choice-summary small{margin-top:3px;color:#776d69;font-size:10px;line-height:1.35}
+.bb-time-choice-open{flex:0 0 auto;min-height:38px;padding:9px 12px;border:1px solid #d9c9c4;border-radius:6px;background:#fff7f5;color:#8f1017;font-size:11px;font-weight:800;cursor:pointer}
+.bb-time-choice-open:hover:not(:disabled){border-color:#a71922;background:#fff0ee}
+.bb-time-choice-open:disabled{opacity:.45;cursor:not-allowed}
+.bb-time-picker-backdrop{position:fixed;inset:0;z-index:120;background:rgba(18,15,14,.72);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px}
+.bb-time-picker-dialog{width:min(560px,100%);max-height:min(82vh,720px);overflow:auto;background:#fff;border:1px solid #e5d8d4;border-radius:16px;padding:22px;box-shadow:0 28px 90px rgba(0,0,0,.35);outline:none}
+.bb-time-picker-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:16px;border-bottom:1px solid #eee5e2}
+.bb-time-picker-heading .big-brothers-eyebrow{margin:0 0 8px}
+.bb-time-picker-heading h3{font:600 27px/1.05 "Space Grotesk",Arial,sans-serif;letter-spacing:-.05em;text-transform:none;margin:0 0 7px;color:#211c1a}
+.bb-time-picker-heading p{max-width:390px;color:#6e625e;font-size:12px;line-height:1.5;margin:0}
+.bb-time-picker-close{flex:0 0 36px;width:36px;height:36px;border:1px solid #e5d8d4;border-radius:50%;background:#fff;color:#4b403c;font-size:23px;line-height:1;cursor:pointer}
+.bb-time-slot-groups{display:grid;gap:13px;padding:16px 0}
+.bb-time-slot-group{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;align-items:start}
+.bb-time-slot-group h4{margin:8px 0 0;color:#a71922;font-size:11px;font-weight:850}
+.bb-time-slot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bb-time-slot{min-height:44px;border:1px solid #e7dedb;border-radius:7px;background:#faf8f7;color:#292321;font-size:12px;font-weight:700;cursor:pointer}
+.bb-time-slot:hover,.bb-time-slot.selected{border-color:#e51f2a;background:#fff0ef;box-shadow:inset 0 0 0 1px #e51f2a}
+.bb-time-slot.selected{color:#8f1017}
+.bb-time-picker-note{margin:12px 0 0;color:#746a66;font-size:10px;line-height:1.55}
+@media(max-width:650px){
+ .bb-selected-wash{grid-template-columns:1fr}
+ .bb-time-choice-summary{align-items:stretch;flex-direction:column}
+ .bb-time-choice-open{width:100%}
+ .bb-time-picker-backdrop{padding:8px;align-items:flex-end}
+ .bb-time-picker-dialog{max-height:88vh;border-radius:16px 16px 10px 10px;padding:18px 14px}
+ .bb-time-slot-group{grid-template-columns:46px minmax(0,1fr);gap:8px}
+ .bb-time-slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
