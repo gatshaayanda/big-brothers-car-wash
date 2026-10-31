@@ -113,6 +113,8 @@ export async function readReceiptByToken(token: string) {
 
 export type PublicReceipt = {
   receiptRef: string;
+  receiptKind: string;
+  priceNote: string;
   businessName: string;
   locationName: string;
   customerName: string;
@@ -135,6 +137,8 @@ export type PublicReceipt = {
 export function publicReceipt(receipt: Record<string, unknown>): PublicReceipt {
   return {
     receiptRef: String(receipt.receiptRef || ""),
+    receiptKind: String(receipt.receiptKind || "completed-receipt"),
+    priceNote: String(receipt.priceNote || ""),
     businessName: "Big Brothers Car Wash",
     locationName: "G-West, Botswana",
     customerName: String(receipt.customerName || ""),
@@ -163,9 +167,9 @@ export function createReceiptPdf(receipt: PublicReceipt) {
   const lines: Array<{ text: string; size: number; color: string }> = [
     { text: receipt.businessName.toUpperCase(), size: 20, color: "0.08 0.13 0.11" },
     { text: receipt.locationName, size: 10, color: "0.32 0.38 0.34" },
-    { text: "CAR WASH RECEIPT", size: 15, color: "0.08 0.13 0.11" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? "WALK-IN RECEIPT" : "CAR WASH RECEIPT", size: 15, color: "0.08 0.13 0.11" },
     { text: "Receipt reference: " + receipt.receiptRef, size: 10, color: "0.08 0.13 0.11" },
-    { text: "Completed: " + (receipt.completedAt ? new Date(receipt.completedAt).toLocaleString("en-BW", { timeZone: "Africa/Gaborone" }) : "Not recorded"), size: 10, color: "0.08 0.13 0.11" },
+    { text: (receipt.receiptKind === "walk-in-ticket" ? "Joined: " : "Completed: ") + (receipt.receiptKind === "walk-in-ticket" ? (receipt.joinedAt ? new Date(receipt.joinedAt).toLocaleString("en-BW", { timeZone: "Africa/Gaborone" }) : "Not recorded") : (receipt.completedAt ? new Date(receipt.completedAt).toLocaleString("en-BW", { timeZone: "Africa/Gaborone" }) : "Not recorded")), size: 10, color: "0.08 0.13 0.11" },
     { text: "", size: 8, color: "0 0 0" },
     { text: "CUSTOMER", size: 10, color: "0.25 0.32 0.27" },
     { text: "Name: " + receipt.customerName, size: 11, color: "0.08 0.13 0.11" },
@@ -174,15 +178,17 @@ export function createReceiptPdf(receipt: PublicReceipt) {
     { text: "Vehicle: " + receipt.vehicleType, size: 11, color: "0.08 0.13 0.11" },
     { text: "Service: " + receipt.serviceName, size: 11, color: "0.08 0.13 0.11" },
     { text: "", size: 8, color: "0 0 0" },
-    { text: "FINAL AGREED CHARGE", size: 10, color: "0.25 0.32 0.27" },
-    { text: "BWP " + receipt.amount.toFixed(2), size: 22, color: "0.08 0.13 0.11" },
-    { text: "Voluntary tip: BWP " + receipt.tipAmount.toFixed(2), size: 11, color: "0.08 0.13 0.11" },
-    { text: "Total recorded: BWP " + (receipt.amount + receipt.tipAmount).toFixed(2), size: 13, color: "0.08 0.13 0.11" },
-    { text: "Payment method: " + receipt.paymentMethod.toUpperCase().replaceAll("-", " "), size: 10, color: "0.08 0.13 0.11" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? "PRICE INFORMATION" : "FINAL AGREED CHARGE", size: 10, color: "0.25 0.32 0.27" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? receipt.priceNote : "BWP " + receipt.amount.toFixed(2), size: receipt.receiptKind === "walk-in-ticket" ? 12 : 22, color: "0.08 0.13 0.11" },
+    ...(receipt.receiptKind === "walk-in-ticket" ? [] : [
+      { text: "Voluntary tip: BWP " + receipt.tipAmount.toFixed(2), size: 11, color: "0.08 0.13 0.11" },
+      { text: "Total recorded: BWP " + (receipt.amount + receipt.tipAmount).toFixed(2), size: 13, color: "0.08 0.13 0.11" },
+      { text: "Payment method: " + receipt.paymentMethod.toUpperCase().replaceAll("-", " "), size: 10, color: "0.08 0.13 0.11" },
+    ]),
     { text: "Payment status: " + receipt.paymentStatus.toUpperCase(), size: 11, color: "0.08 0.13 0.11" },
     { text: "", size: 10, color: "0 0 0" },
-    { text: "This receipt records the details and payment status entered by staff.", size: 9, color: "0.32 0.38 0.34" },
-    { text: "It is not proof of payment unless the status above says PAID.", size: 9, color: "0.32 0.38 0.34" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? "This confirms your walk-in details were recorded. It is not a completed-wash or payment receipt." : "This receipt records the details and payment status entered by staff.", size: 9, color: "0.32 0.38 0.34" },
+    { text: receipt.receiptKind === "walk-in-ticket" ? "Any proposed price remains subject to agreement at the wash." : "It is not proof of payment unless the status above says PAID.", size: 9, color: "0.32 0.38 0.34" },
   ];
   let y = 780;
   const ops = ["q", "0.96 0.98 0.94 rg", "40 720 515 92 re f", "Q", "0.78 0.95 0.42 rg", "40 712 515 5 re f"];
