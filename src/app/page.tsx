@@ -136,7 +136,7 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => { const params = new URLSearchParams(window.location.search); if (params.get("journey") === "book") { setTab("book"); setBookingDate(params.get("preferredDate") || ""); setBookingTime(params.get("preferredTime") || ""); setMode(params.get("mode") === "mobile" ? "mobile" : "site"); } }, []);
+  useEffect(() => { const params = new URLSearchParams(window.location.search); if (params.get("journey") === "book") { setHomeDestination("queue"); setTab("book"); setBookingDate(params.get("preferredDate") || ""); setBookingTime(params.get("preferredTime") || ""); setMode(params.get("mode") === "mobile" ? "mobile" : "site"); window.setTimeout(() => document.getElementById("request")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); } }, []);
   useEffect(() => {
     if (tab !== "book" || !bookingDate) { setAvailableSlots([]); setAvailabilityConfigured(null); setAvailabilityMessage(""); return; }
     if (!online) { setAvailableSlots([]); setAvailabilityConfigured(null); setAvailabilityMessage("Offline: live availability cannot be checked. Any saved request remains unconfirmed until staff review."); return; }
