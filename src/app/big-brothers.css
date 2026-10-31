@@ -606,3 +606,66 @@
  .customer-account-loading-stage{min-height:clamp(300px,48vh,420px);border-radius:10px}
  .customer-account-loading-copy{padding:20px 16px}
 }
+
+/* Cinematic public welcome hub — Big Brothers supplied MP4 footage */
+.bb-cinematic-home{background:#101010;color:#f8f7f5;min-height:100vh}
+.bb-cinematic-home .cinematic-nav{position:absolute;z-index:10;top:0;left:0;right:0;max-width:none;height:86px;padding:0 clamp(20px,5vw,76px);background:linear-gradient(180deg,rgba(0,0,0,.72),transparent);border:0;color:#fff}
+.bb-cinematic-home .cinematic-nav .big-brothers-brand,.bb-cinematic-home .cinematic-nav nav a{color:#fff}
+.bb-cinematic-home .cinematic-staff-link{font-size:12px;opacity:.72}
+.bb-cinema-hero{position:relative;isolation:isolate;min-height:clamp(620px,92svh,900px);display:flex;align-items:center;overflow:hidden;background:#171312}
+.bb-cinema-video,.bb-cinema-shade{position:absolute;inset:0;z-index:-2}
+.bb-cinema-video video{width:100%;height:100%;object-fit:cover;object-position:center 52%;filter:saturate(.84) contrast(1.08)}
+.bb-cinema-video-fallback{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 70% 25%,#59312e,#151313 70%);color:white}
+.bb-cinema-video-fallback strong{font-size:clamp(28px,5vw,56px)}
+.bb-cinema-video-fallback small{color:#ddd}
+.bb-cinema-shade{z-index:-1;background:linear-gradient(90deg,rgba(8,8,8,.9),rgba(8,8,8,.65) 40%,rgba(8,8,8,.16)),linear-gradient(0deg,rgba(8,8,8,.64),transparent 38%)}
+.bb-cinema-copy{width:min(1240px,100%);margin:60px auto 0;padding:60px clamp(24px,7vw,100px)}
+.bb-cinema-copy .big-brothers-eyebrow{color:#ff777b;letter-spacing:.2em;font-size:11px;font-weight:800}
+.bb-cinema-kicker{margin:38px 0 8px;color:#fff;font-size:clamp(16px,2vw,22px);font-weight:650}
+.bb-cinema-copy h1{max-width:850px;margin:0;font:700 clamp(48px,8vw,108px)/.96 "Space Grotesk",Arial,sans-serif;letter-spacing:-.075em;color:#fff}
+.bb-cinema-copy h1 em,.bb-destination-heading h2 em,.bb-film-heading h2 em{font-style:normal;color:#ff4149}
+.bb-cinema-intro{max-width:510px;margin:25px 0 30px;color:#e7e3e1;font-size:clamp(15px,1.5vw,18px);line-height:1.75}
+.bb-cinema-live{display:flex;align-items:center;gap:10px;color:#eee;font-size:10px;font-weight:800;letter-spacing:.14em}
+.bb-cinema-live .status-dot{width:7px;height:7px;border-radius:50%;background:#ee343d}
+.bb-cinema-scroll-cue{position:absolute;right:clamp(24px,6vw,84px);bottom:34px;display:flex;align-items:center;gap:16px;color:#eee;font-size:9px;letter-spacing:.18em}
+.bb-cinema-scroll-cue span{font-size:20px;color:#ff454d}
+.bb-destination-section{padding:clamp(58px,8vw,100px) max(22px,calc((100vw - 1180px)/2));background:#f6f5f3;color:#171717}
+.bb-destination-heading{display:flex;justify-content:space-between;align-items:end;gap:25px;margin-bottom:30px}
+.bb-destination-heading .big-brothers-eyebrow,.bb-film-heading .big-brothers-eyebrow{color:#b51e27;letter-spacing:.16em;font-size:10px;font-weight:800}
+.bb-destination-heading h2,.bb-film-heading h2{margin:8px 0 0;font:700 clamp(30px,4.2vw,52px)/1.05 "Space Grotesk",Arial,sans-serif;letter-spacing:-.06em}
+.bb-destination-heading>p{max-width:250px;margin:0;color:#666;font-size:13px;line-height:1.6}
+.bb-destination-grid{display:grid;grid-template-columns:1.18fr 1fr 1fr;gap:14px}
+.bb-destination-card{position:relative;min-height:245px;display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:25px;text-align:left;text-decoration:none;color:#171717;background:#fff;border:1px solid #e4e1de;border-radius:5px;cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;font:inherit}
+.bb-destination-card:hover{transform:translateY(-4px);border-color:#d62b34;box-shadow:0 16px 35px rgba(24,15,12,.09)}
+.bb-destination-card.primary-destination{background:#a91d25;color:#fff;border-color:#a91d25}
+.bb-destination-index{font-size:9px;font-weight:800;letter-spacing:.16em;opacity:.72}
+.bb-destination-icon{position:absolute;right:24px;top:20px;font-size:27px;opacity:.72}
+.bb-destination-card strong{margin-top:auto;font:700 clamp(21px,2.2vw,28px)/1.08 "Space Grotesk",Arial,sans-serif;letter-spacing:-.045em}
+.bb-destination-card small{max-width:260px;color:inherit;opacity:.75;font-size:12px;line-height:1.55}
+.bb-destination-action{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:9px;font-weight:900;letter-spacing:.12em}
+.bb-destination-action b{font-size:18px}
+.bb-weather-dock{display:flex;justify-content:space-between;align-items:center;gap:22px;margin-top:24px;padding:20px 22px;background:#ebe9e6;border-radius:4px;color:#222}
+.bb-weather-dock>div:first-child{display:grid;gap:5px}
+.bb-weather-dock .big-brothers-eyebrow{font-size:9px;color:#a51c25;letter-spacing:.14em}
+.bb-weather-dock strong{font-size:13px}
+.bb-weather-dock>*:last-child{max-width:620px}
+.bb-film-strip{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:clamp(55px,7vw,88px) max(22px,calc((100vw - 1180px)/2));background:#151515;color:#fff}
+.bb-film-heading{grid-column:1/-1;display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:10px}
+.bb-film-heading h2{max-width:480px}
+.bb-film-heading>p:last-child{max-width:260px;margin:0;color:#aaa;font-size:12px;line-height:1.6}
+.bb-film-card{min-width:0;margin:0;background:#242424}
+.bb-film-card video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#292929}
+.bb-film-card>span{display:block;padding:12px 15px;color:#ddd;font-size:9px;font-weight:800;letter-spacing:.15em}
+.cinematic-destination-panel{max-width:1240px;margin:0 auto;padding:35px 24px 75px;color:#171717;background:#f6f5f3;scroll-margin-top:12px}
+.destination-panel-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 auto 22px;max-width:1120px}
+.destination-panel-top .big-brothers-eyebrow{color:#a91d25;font-size:10px;letter-spacing:.15em}
+.destination-close{padding:10px 13px;border:1px solid #d8d4d0;border-radius:3px;background:white;color:#222;font-size:12px;font-weight:700;cursor:pointer}
+.cinematic-destination-panel .section-title,.cinematic-destination-panel .request-panel{max-width:1120px;margin-left:auto;margin-right:auto}
+.cinematic-footer{background:#0b0b0b;color:#eee;border-top:1px solid #303030}
+.cinematic-footer .big-brothers-brand,.cinematic-footer>a:not(.big-brothers-brand){color:#fff}
+.bb-cinematic-home .bb-help-widget{z-index:40}
+.bb-cinematic-home .bb-help-launcher{box-shadow:0 8px 28px rgba(0,0,0,.3)}
+.bb-cinematic-home .bb-help-panel{background:#fff;color:#171717;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+.bb-cinematic-home .bb-help-panel button{width:100%;padding:13px 14px;text-align:left;border:1px solid #e7e3e1;background:#fff;color:#222;font:600 13px Arial,sans-serif;cursor:pointer}
+@media(max-width:760px){.bb-cinema-hero{min-height:690px;min-height:88svh}.bb-cinema-video video{object-position:58% center}.bb-cinema-shade{background:linear-gradient(90deg,rgba(8,8,8,.84),rgba(8,8,8,.36)),linear-gradient(0deg,rgba(8,8,8,.68),transparent 48%)}.bb-cinema-copy{margin:45px auto 0;padding:45px 25px}.bb-cinema-kicker{margin-top:28px}.bb-cinema-copy h1{font-size:clamp(47px,13vw,76px)}.bb-cinema-intro{max-width:360px}.bb-destination-heading,.bb-film-heading{display:block}.bb-destination-heading>p,.bb-film-heading>p:last-child{margin-top:14px}.bb-destination-grid{grid-template-columns:1fr;gap:10px}.bb-destination-card{min-height:190px;padding:21px}.bb-destination-card.primary-destination{min-height:205px}.bb-weather-dock{align-items:stretch;flex-direction:column}.bb-weather-dock>*:last-child{max-width:none}.bb-film-strip{grid-template-columns:1fr;gap:14px}.bb-film-heading{grid-column:auto}.cinematic-destination-panel{padding:26px 16px 55px}.destination-panel-top{align-items:flex-start}.cinematic-nav{height:72px!important;padding:0 18px!important}.bb-cinematic-home .cinematic-nav nav{gap:14px}}
+@media(prefers-reduced-motion:reduce){.bb-destination-card{transition:none}.bb-destination-card:hover{transform:none}}
