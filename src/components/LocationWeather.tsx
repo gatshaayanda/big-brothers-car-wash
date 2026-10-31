@@ -164,7 +164,7 @@ export default function LocationWeather({ showLocationGuide = true }: { showLoca
       </div>
       <div className="bb-location-videos">
         {videos.map(video => <article className="bb-location-video" key={video.src}>
-          <video controls preload="none" playsInline aria-label={video.title} src={video.src} />
+          <div className="bb-location-video-media"><video controls preload="none" playsInline aria-label={video.title} src={video.src} /></div>
           <div><h3>{video.title}</h3><p>{video.detail}</p></div>
         </article>)}
       </div>

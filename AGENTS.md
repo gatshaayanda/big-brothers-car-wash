@@ -255,3 +255,11 @@ These decisions supersede older conflicting queue/status and account notes above
 - Customer reviews and car-photo/video submissions require explicit consent and remain private/pending until staff moderation. Account receipt links should lead to the existing secure feedback/submission flow.
 - Loyalty points are staff-managed and read-only to customers. Do not invent earning/redemption rates or show an active referral reward/code until the referral rules and tracking are implemented and configured by the business.
 - The approved account loading transition may use the supplied wash footage, muted and motion-aware. Do not modify the protected PWA installation card, native prompt lifecycle, service worker, or installation cache behaviour during account work.
+
+
+## Customer account compact UX — owner-approved direction
+- Preserve the customer account's existing booking calendar and John The Stylist-inspired time picker exactly when making unrelated account UX changes. Do not modify their state, availability checks, selection behaviour or styles without explicit authorization.
+- Keep the customer account compact and mobile-first. Use short summaries, line clamping/truncation for previews, and accessible detail modals for longer profile, receipt, history and enquiry workflows. Do not remove working customer actions or their secure persistence.
+- Treat racing, wash rewards and occasional offers as one Regulars Club engagement category. Do not invent discount values, reward rules or automatic racing-on-behalf functionality; phrase participation as optional and offers as occasional/subject to availability.
+- Account loading should be a compact branded state, respect reduced-motion preferences, and not wait for secondary receipt/enquiry fetches before showing the account shell once the customer identity/profile is ready. Preserve the existing 15-second recovery path and Chrome handoff.
+- Location media cards must use a dedicated fixed-aspect-ratio media frame with the video absolutely fitted inside it; the card should size to its content without trailing whitespace. Keep native controls, `preload="none"`, no autoplay, and preserve the existing offline video cache behavior.
