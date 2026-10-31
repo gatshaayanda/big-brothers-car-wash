@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { signInAnonymously, signOut } from "firebase/auth";
+import { getIdToken, signInAnonymously, signOut } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, hasFirebaseWebConfig } from "@/lib/firebase/client";
 import { subscribeServices, subscribeSettings, type VulaService } from "@/lib/firebase/big-brothers-data";
@@ -40,6 +40,8 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [queueHandoff, setQueueHandoff] = useState<"synced" | "offline" | null>(null);
   const [queueReference, setQueueReference] = useState("");
+  const [queueReceiptUrl, setQueueReceiptUrl] = useState("");
+  const [queueReceiptError, setQueueReceiptError] = useState("");
   const [queueWhatsAppPhone, setQueueWhatsAppPhone] = useState("");
   const [queueCustomerName, setQueueCustomerName] = useState("");
   const [queueEnteredBy, setQueueEnteredBy] = useState<"customer" | "staff">("customer");
@@ -174,14 +176,25 @@ export default function Home() {
     try {
       const user = await ensureUser(); if (!user) return;
       const remaining: typeof drafts = [];
-      const queueDraft = drafts.find(draft => draft.collection === "queueEntries");
+      let syncedQueue: (typeof drafts)[number] | undefined;
+      let syncedReceiptUrl = "";
       for (const draft of drafts) {
-        try { const id = draft.id || crypto.randomUUID(); await saveCustomerRecord(user.uid, String(draft.data.customerName || draft.data.contactName || ""), String(draft.data.phone || ""), String(draft.data.email || user.email || "")); await setDoc(doc(db, draft.collection, id), { ...draft.data, customerId: user.uid, updatedAt: stamp() }); }
-        catch { remaining.push(draft); }
+        try {
+          const id = draft.id || crypto.randomUUID();
+          await saveCustomerRecord(user.uid, String(draft.data.customerName || draft.data.contactName || ""), String(draft.data.phone || ""), String(draft.data.email || user.email || ""));
+          await setDoc(doc(db, draft.collection, id), { ...draft.data, customerId: user.uid, updatedAt: stamp() });
+          if (draft.collection === "queueEntries") {
+            const response = await fetch("/api/receipts/issue", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + await getIdToken(user) }, body: JSON.stringify({ queueEntryId: id }) });
+            const result = await response.json().catch(() => ({})) as { issued?: boolean; url?: string; error?: string };
+            if (!response.ok || !result.issued || !result.url) throw new Error(result.error || "Walk-in saved, but its receipt is still waiting to sync.");
+            syncedQueue = draft;
+            syncedReceiptUrl = result.url;
+          }
+        } catch { remaining.push(draft); }
       }
       localStorage.setItem(pendingKey, JSON.stringify(remaining));
       setNotice(remaining.length ? { kind: "pending", text: remaining.length + " saved request(s) still have not synced." } : { kind: "success", text: "Saved requests have synced to Big Brothers' system. Bookings still need staff confirmation." });
-      if (queueDraft && !remaining.some(draft => draft.id === queueDraft.id)) { setQueueReference(queueDraft.id || ""); setQueueCustomerName(String(queueDraft.data.customerName || "")); setQueueWhatsAppPhone(String(queueDraft.data.phone || "")); setQueueEnteredBy(queueDraft.enteredBy === "staff" ? "staff" : "customer"); setQueueAppUrl(window.location.origin + "/account"); setQueueHandoff("synced"); }
+      if (syncedQueue) { setQueueReference(syncedQueue.id || ""); setQueueCustomerName(String(syncedQueue.data.customerName || "")); setQueueWhatsAppPhone(String(syncedQueue.data.phone || "")); setQueueEnteredBy(syncedQueue.enteredBy === "staff" ? "staff" : "customer"); setQueueAppUrl(window.location.origin + "/account"); setQueueReceiptUrl(syncedReceiptUrl); setQueueReceiptError(""); setQueueHandoff("synced"); }
     } catch { setNotice({ kind: "pending", text: "Sync is not complete. Your saved requests remain on this device." }); }
     finally { offlineSyncInProgress.current = false; }
   }
@@ -248,12 +261,18 @@ export default function Home() {
       await saveCustomerRecord(user.uid, customerName, phone, String(form.get("email") || user.email || ""));
       submissionStage = tab === "queue" ? "queue entry" : tab === "book" ? "booking request" : "fleet enquiry";
       const requestRef = doc(collection(db, collectionName));
-      const writePromise = setDoc(requestRef, { ...data, customerId: user.uid });
       setNotice({ kind: "pending", text: "Sending securely to Big Brothers' system…" });
-      await writePromise;
+      await setDoc(requestRef, { ...data, customerId: user.uid });
+      let issuedReceiptUrl = "";
+      if (tab === "queue") {
+        const response = await fetch("/api/receipts/issue", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + await getIdToken(user) }, body: JSON.stringify({ queueEntryId: requestRef.id }) });
+        const result = await response.json().catch(() => ({})) as { issued?: boolean; url?: string; error?: string };
+        if (response.ok && result.issued && result.url) issuedReceiptUrl = result.url;
+        else setQueueReceiptError(result.error || "Your walk-in is saved, but the receipt could not be issued yet. Keep this reference and retry when connected.");
+      }
       formElement.reset();
-      if (tab === "queue") { setQueueReference(requestRef.id); setQueueCustomerName(customerName); setQueueWhatsAppPhone(phone); setQueueEnteredBy(enteredBy); setQueueAppUrl(window.location.origin + "/account"); setQueueHandoff("synced"); }
-      setNotice({ kind: "success", text: tab === "queue" ? "You’re on the shared queue. Staff can send your secure receipt and account link to this WhatsApp number after the wash is completed." : "Your booking request reached Big Brothers. The team will check availability and confirm it with you." });
+      if (tab === "queue") { setQueueReference(requestRef.id); setQueueCustomerName(customerName); setQueueWhatsAppPhone(phone); setQueueEnteredBy(enteredBy); setQueueAppUrl(window.location.origin + "/account"); setQueueReceiptUrl(issuedReceiptUrl); setQueueHandoff("synced"); }
+      setNotice({ kind: "success", text: tab === "queue" ? (issuedReceiptUrl ? "Your walk-in and branded receipt are saved." : "Your walk-in is saved in the shared queue. Your receipt is still being prepared; use Retry receipt below.") : "Your booking request reached Big Brothers. The team will check availability and confirm it with you." });
     } catch (error) {
       const detail = error instanceof Error ? error.message : "Unknown Firebase error.";
       const permissionDenied = typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "permission-denied";
@@ -264,12 +283,31 @@ export default function Home() {
     } finally { setBusy(false); }
   }
 
+  async function retryQueueReceipt() {
+    const user = auth.currentUser;
+    if (!user || !navigator.onLine || !queueReference) {
+      setQueueReceiptError("Reconnect to the internet to prepare this receipt. Your saved walk-in reference is " + queueReference + ".");
+      return;
+    }
+    try {
+      const response = await fetch("/api/receipts/issue", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + await getIdToken(user) }, body: JSON.stringify({ queueEntryId: queueReference }) });
+      const result = await response.json().catch(() => ({})) as { issued?: boolean; url?: string; error?: string };
+      if (!response.ok || !result.issued || !result.url) throw new Error(result.error || "Receipt could not be issued.");
+      setQueueReceiptUrl(result.url);
+      setQueueReceiptError("");
+    } catch (error) {
+      setQueueReceiptError(error instanceof Error ? error.message : "Receipt could not be issued. Try again when connected.");
+    }
+  }
+
   async function finishQueueHandoff() {
     setHandoffError("");
     try {
       await signOut(auth);
       setQueueHandoff(null);
       setQueueReference("");
+      setQueueReceiptUrl("");
+      setQueueReceiptError("");
       setQueueCustomerName("");
       setQueueWhatsAppPhone("");
       setQueueEnteredBy("customer");
@@ -312,7 +350,7 @@ export default function Home() {
     return <main className="vula queue-handoff-page"><section className="queue-handoff-card" aria-labelledby="queue-handoff-title">
       <span className="big-brothers-eyebrow">BIG BROTHERS CAR WASH · WALK-IN</span>
       <h1 id="queue-handoff-title">{queueHandoff === "synced" ? "You're in the queue." : "Your request is saved here."}</h1>
-      {queueHandoff === "synced" ? <><div className="queue-customer-confirm"><span aria-hidden="true">✅</span><div><strong>{queueCustomerName || "Customer"}, your place is saved.</strong><p>Your details are now in the shared Big Brothers staff queue.</p></div></div><a className="big-brothers-button primary whatsapp-self-send queue-whatsapp-primary" href={buildWhatsAppSelfLink(queueWhatsAppPhone, queueAppUrl)} target="_blank" rel="noreferrer">📲 Send the Big Brothers link to {queueCustomerName || "your"}’s WhatsApp ↗</a><p className="field-hint queue-trust-copy">One quick step: tap the button to open WhatsApp, check that the number is yours, then press <strong>Send</strong>. Open the account link on your own phone to access your Big Brothers car wash account. Nothing is sent until you press Send.</p><p className="queue-reference">Official app address <strong>{queueAppUrl.replace("https://", "").replace("http://", "")}</strong> <span>· Opens Big Brothers Car Wash</span></p><p className="queue-reference">Sent by: <strong>{queueEnteredBy === "staff" ? "Big Brothers staff assisting" : "Customer"}</strong></p><button type="button" className="big-brothers-button secondary" onClick={() => void copyQueueAppLink()}>Copy app link</button>{handoffMessage && <p role="status" className="big-brothers-notice success">{handoffMessage}</p>}<p className="queue-reference">Queue reference <strong>{queueReference || "Recorded"}</strong></p><div className="bb-help-teaser queue-handoff-help" role="note"><button type="button" aria-label="Dismiss hand-back help" onClick={() => setHelpTeaserDismissed(true)}>×</button><strong>Need a hand?</strong><p>Check your own WhatsApp for the Big Brothers link. Once it is on your phone, please hand this phone back to the Brothers. If the link has not come through, let the team know so they can prepare it again when there is a connection.</p></div><Link className="big-brothers-button secondary" href="/#big-brothers-racing">Racing fans: play while you wait ↗</Link><button type="button" className="big-brothers-button secondary" onClick={() => void finishQueueHandoff()}>Finish &amp; hand back phone</button></> : <><p>This request is not yet in the shared queue. Keep this screen open until the phone reconnects and the server confirms the upload.</p><p className="queue-reference">Saved draft <strong>{queueReference || "On this device"}</strong></p><button type="button" className="big-brothers-button secondary" disabled={!online} onClick={() => void syncOfflineRequests()}>Retry sync</button><button type="button" className="big-brothers-button secondary" onClick={discardOfflineQueueDraft}>Discard saved request &amp; clear session</button></>}
+      {queueHandoff === "synced" ? <><div className="queue-customer-confirm"><span aria-hidden="true">✅</span><div><strong>{queueCustomerName || "Customer"}, your place is saved.</strong><p>Your details are now in the shared Big Brothers staff queue.</p></div></div><a className="big-brothers-button primary whatsapp-self-send queue-whatsapp-primary" href={buildWhatsAppSelfLink(queueWhatsAppPhone, queueAppUrl)} target="_blank" rel="noreferrer">📲 Send the Big Brothers link to {queueCustomerName || "your"}’s WhatsApp ↗</a><p className="field-hint queue-trust-copy">One quick step: tap the button to open WhatsApp, check that the number is yours, then press <strong>Send</strong>. Open the account link on your own phone to access your Big Brothers car wash account. Nothing is sent until you press Send.</p><p className="queue-reference">Official app address <strong>{queueAppUrl.replace("https://", "").replace("http://", "")}</strong> <span>· Opens Big Brothers Car Wash</span></p><p className="queue-reference">Sent by: <strong>{queueEnteredBy === "staff" ? "Big Brothers staff assisting" : "Customer"}</strong></p><button type="button" className="big-brothers-button secondary" onClick={() => void copyQueueAppLink()}>Copy app link</button>{handoffMessage && <p role="status" className="big-brothers-notice success">{handoffMessage}</p>}<p className="queue-reference">Queue reference <strong>{queueReference || "Recorded"}</strong></p>{queueReceiptUrl ? <a className="big-brothers-button primary" href={queueReceiptUrl} target="_blank" rel="noreferrer">Open branded walk-in receipt / PDF ↗</a> : <><p className="field-hint" role="status">{queueReceiptError || "Preparing your branded walk-in receipt…"}</p><button type="button" className="big-brothers-button secondary" disabled={!online} onClick={() => void retryQueueReceipt()}>Retry receipt</button></>}<div className="bb-help-teaser queue-handoff-help" role="note"><button type="button" aria-label="Dismiss hand-back help" onClick={() => setHelpTeaserDismissed(true)}>×</button><strong>Need a hand?</strong><p>Check your own WhatsApp for the Big Brothers link. Once it is on your phone, please hand this phone back to the Brothers. If the link has not come through, let the team know so they can prepare it again when there is a connection.</p></div><Link className="big-brothers-button secondary" href="/#big-brothers-racing">Racing fans: play while you wait ↗</Link><button type="button" className="big-brothers-button secondary" onClick={() => void finishQueueHandoff()}>Finish &amp; hand back phone</button></> : <><p>This request is not yet in the shared queue. Keep this screen open until the phone reconnects and the server confirms the upload.</p><p className="queue-reference">Saved draft <strong>{queueReference || "On this device"}</strong></p><button type="button" className="big-brothers-button secondary" disabled={!online} onClick={() => void syncOfflineRequests()}>Retry sync</button><button type="button" className="big-brothers-button secondary" onClick={discardOfflineQueueDraft}>Discard saved request &amp; clear session</button></>}
       {handoffError && <p role="alert" className="big-brothers-notice error">{handoffError}</p>}
     </section></main>;
   }
