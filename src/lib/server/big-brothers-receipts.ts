@@ -24,6 +24,67 @@ export async function requireBigBrothersStaff(request: Request) {
   return { app, uid: decoded.uid };
 }
 
+export async function createWalkInTicketReceipt(queueEntryId: string, job: Record<string, unknown>) {
+  const app = bigBrothersAdminApp();
+  const db = getFirestore(app);
+  const receiptRef = db.doc(`receipts/${queueEntryId}`);
+  const now = new Date();
+  const createdAt = now.toISOString();
+  const expiresAt = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString();
+
+  return db.runTransaction(async transaction => {
+    const existing = await transaction.get(receiptRef);
+    const current = existing.data() || {};
+    const currentToken = String(current.token || "");
+    const currentExpiry = Date.parse(String(current.expiresAt || ""));
+    if (existing.exists && current.revoked !== true
+      && /^[A-Za-z0-9_-]{40,80}$/.test(currentToken)
+      && current.tokenHash === receiptTokenHash(currentToken)
+      && Number.isFinite(currentExpiry) && currentExpiry > Date.now()) {
+      return { token: currentToken, receiptRef: String(current.receiptRef || ""), reused: true };
+    }
+
+    const token = createReceiptToken();
+    const tokenHash = receiptTokenHash(token);
+    const receiptNumber = "BB-" + createdAt.slice(0, 10).replaceAll("-", "") + "-" + token.slice(0, 6).toUpperCase();
+    const publishedPrice = typeof job.servicePrice === "number" && Number.isFinite(job.servicePrice) ? job.servicePrice : null;
+    const proposedPrice = typeof job.customerOfferAmount === "number" && Number.isFinite(job.customerOfferAmount) ? job.customerOfferAmount : null;
+    const agreedPrice = typeof job.agreedWashPrice === "number" && Number.isFinite(job.agreedWashPrice) ? job.agreedWashPrice : null;
+    const priceNote = agreedPrice !== null
+      ? "Face-to-face agreed wash price: BWP " + agreedPrice.toFixed(2)
+      : publishedPrice !== null
+        ? "Published service price: BWP " + publishedPrice.toFixed(2) + " (final charge may be confirmed at the wash)"
+        : proposedPrice !== null
+          ? "Customer-proposed amount: BWP " + proposedPrice.toFixed(2) + " (not yet accepted; final price to be agreed)"
+          : "Final wash price to be agreed with Big Brothers.";
+    const record = {
+      queueEntryId, token, tokenHash, receiptRef: receiptNumber,
+      receiptKind: "walk-in-ticket",
+      priceNote,
+      customerId: String(job.customerId || ""),
+      customerName: String(job.customerName || ""),
+      phone: String(job.phone || ""),
+      email: String(job.email || ""),
+      vehicleType: String(job.vehicleType || ""),
+      vehicleRegistration: String(job.vehicleRegistration || ""),
+      serviceName: String(job.serviceName || "Car wash service"),
+      amount: agreedPrice ?? publishedPrice ?? 0,
+      tipAmount: 0,
+      paymentStatus: "not-due",
+      paymentMethod: "not-recorded",
+      joinedAt: String(job.createdAt || createdAt),
+      completedAt: "",
+      createdAt,
+      expiresAt,
+      revoked: false,
+      ...(current.claimedBy ? { claimedBy: current.claimedBy, claimedAt: current.claimedAt } : {}),
+    };
+    transaction.set(receiptRef, record);
+    transaction.set(db.doc(`receiptTokens/${tokenHash}`), { queueEntryId, createdAt, expiresAt });
+    return { token, receiptRef: receiptNumber, reused: false };
+  });
+}
+
 export function receiptTokenHash(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
