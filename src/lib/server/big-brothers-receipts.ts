@@ -48,7 +48,6 @@ export async function createWalkInTicketReceipt(queueEntryId: string, job: Recor
     const tokenHash = receiptTokenHash(token);
     const receiptNumber = "BB-" + createdAt.slice(0, 10).replaceAll("-", "") + "-" + token.slice(0, 6).toUpperCase();
     const publishedPrice = typeof job.servicePrice === "number" && Number.isFinite(job.servicePrice) ? job.servicePrice : null;
-    const proposedPrice = typeof job.customerOfferAmount === "number" && Number.isFinite(job.customerOfferAmount) ? job.customerOfferAmount : null;
     const agreedPrice = typeof job.agreedWashPrice === "number" && Number.isFinite(job.agreedWashPrice) ? job.agreedWashPrice : null;
     const displayPrice = agreedPrice ?? publishedPrice;
     const priceNote = displayPrice !== null ? "BWP " + displayPrice.toFixed(2) : "";
