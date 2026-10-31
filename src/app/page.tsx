@@ -271,10 +271,10 @@ export default function Home() {
         if (tab === "queue") { setQueueReference(localId); setQueueCustomerName(customerName); setQueueWhatsAppPhone(phone); setQueueEnteredBy(enteredBy); setQueueAppUrl(window.location.origin + "/account"); setQueueHandoff("offline"); }
         setNotice({ kind: "pending", text: "Saved on this device only. It is not visible to the team or a confirmed booking until it syncs." }); return;
       }
-      const user = await ensureUser();
-      if (!user) throw new Error("Online service is not configured yet. Your request has not been sent.");
       const requestRef = doc(collection(db, collectionName));
       if (tab === "queue") { pendingQueueId = requestRef.id; pendingQueueData = data; }
+      const user = await ensureUser();
+      if (!user) throw new Error("Online service is not configured yet. Your request has not been sent.");
       submissionStage = "customer profile";
       await saveCustomerRecord(user.uid, customerName, phone, String(form.get("email") || user.email || ""));
       submissionStage = tab === "queue" ? "queue entry" : tab === "book" ? "booking request" : "fleet enquiry";
@@ -292,7 +292,7 @@ export default function Home() {
       setNotice({ kind: "success", text: tab === "queue" ? (issuedReceiptUrl ? "Your walk-in and branded receipt are saved." : "Your walk-in is saved in the shared queue. Your receipt is still being prepared; use Retry receipt below.") : "Your booking request reached Big Brothers. The team will check availability and confirm it with you." });
     } catch (error) {
       const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code || "") : "";
-      const networkFailure = !navigator.onLine || ["unavailable", "network-request-failed", "deadline-exceeded"].includes(code);
+      const networkFailure = !navigator.onLine || ["unavailable", "network-request-failed", "auth/network-request-failed", "auth/timeout", "deadline-exceeded"].includes(code);
       if (tab === "queue" && pendingQueueId && pendingQueueData && networkFailure) {
         try {
           storeOfflineDraft({ id: pendingQueueId, collection: "queueEntries", data: pendingQueueData, enteredBy });
