@@ -671,3 +671,17 @@
 @media(prefers-reduced-motion:reduce){.bb-destination-card{transition:none}.bb-destination-card:hover{transform:none}}
 
 .cinematic-destination-panel[hidden]{display:none!important}
+
+
+/* Final customer-first cinematic hero pass. */
+.bb-cinema-actions{display:grid;justify-items:start;gap:16px;margin-top:26px}
+.bb-cinema-primary-action{display:inline-flex;align-items:center;justify-content:center;gap:22px;min-height:58px;padding:0 24px;border:1px solid #ef424b;border-radius:3px;background:#b51e27;color:#fff;font:850 11px/1 Arial,sans-serif;letter-spacing:.13em;cursor:pointer;box-shadow:0 12px 35px #0005}
+.bb-cinema-primary-action:hover{background:#d12630;border-color:#ff777b}
+.bb-cinema-primary-action span{font-size:19px}
+.bb-cinema-shortcuts{display:flex;align-items:center;flex-wrap:wrap;gap:10px 22px}
+.bb-cinema-shortcuts a,.bb-cinema-shortcuts button{padding:5px 0;border:0;background:transparent;color:#fff;font:700 11px/1.4 Arial,sans-serif;text-decoration:none;letter-spacing:.04em;cursor:pointer}
+.bb-cinema-shortcuts a:hover,.bb-cinema-shortcuts button:hover{text-decoration:underline;text-underline-offset:4px}
+.bb-cinema-live .status-dot{background:#e8e0dc}
+.bb-film-card video{background:linear-gradient(135deg,#382321,#171515 62%,#090909)}
+@media(max-width:760px){.bb-cinema-actions{gap:13px;margin-top:22px}.bb-cinema-primary-action{width:100%;min-height:56px;padding:0 17px;justify-content:space-between}.bb-cinema-shortcuts{gap:8px 18px}.bb-cinema-shortcuts a,.bb-cinema-shortcuts button{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.bb-cinema-primary-action{transition:none}}
