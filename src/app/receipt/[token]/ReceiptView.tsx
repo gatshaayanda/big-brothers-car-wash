@@ -10,6 +10,8 @@ import { enableVulaPushNotifications } from "@/lib/firebase/big-brothers-notific
 
 type Receipt = {
   receiptRef: string;
+  receiptKind: string;
+  priceNote: string;
   businessName: string;
   locationName: string;
   customerName: string;
@@ -216,8 +218,8 @@ export default function ReceiptView({ token }: { token: string }) {
 
   return <main className="receipt-page"><section className="receipt-card">
     <header className="receipt-brand"><span className="receipt-mark">BB</span><span><strong>BIG BROTHERS CAR WASH</strong><small>{receipt.locationName}</small></span></header>
-    <p className="big-brothers-eyebrow">COMPLETED WASH · SECURE RECEIPT</p>
-    <h1>Your wash receipt.</h1>
+    <p className="big-brothers-eyebrow">{receipt.receiptKind === "walk-in-ticket" ? "WALK-IN RECORDED · SECURE RECEIPT" : "COMPLETED WASH · SECURE RECEIPT"}</p>
+    <h1>{receipt.receiptKind === "walk-in-ticket" ? "Your walk-in receipt." : "Your wash receipt."}</h1>
     <p className="receipt-reference">Reference <strong>{receipt.receiptRef}</strong></p>
     <section className="receipt-next-booking receipt-account-claim"><h2>Make this wash yours</h2><p>Secure your Big Brothers account to keep this receipt with your wash history, manage future bookings and receive updates you choose.</p><button className="big-brothers-button primary" type="button" onClick={() => void claimJob()} disabled={claiming}>{claiming ? "Securing your account…" : receipt.claimed ? "Confirm / open my account ↗" : "Secure my account & save this wash ↗"}</button>{claimMessage && <p className="big-brothers-notice pending" role="status">{claimMessage}</p>}<Link className="receipt-next-step" href="/account">My Big Brothers Car Wash Account ↗</Link></section>
     <div className="receipt-details">
@@ -225,10 +227,10 @@ export default function ReceiptView({ token }: { token: string }) {
       <div><span>Phone</span><strong>{receipt.phone}</strong></div>
       <div><span>Vehicle</span><strong>{receipt.vehicleType}</strong></div>
       <div><span>Service</span><strong>{receipt.serviceName}</strong></div>
-      <div><span>Completed</span><strong>{receipt.completedAt ? new Date(receipt.completedAt).toLocaleString("en-BW") : "Not recorded"}</strong></div>
+      <div><span>{receipt.receiptKind === "walk-in-ticket" ? "Walk-in received" : "Completed"}</span><strong>{(receipt.receiptKind === "walk-in-ticket" ? receipt.joinedAt : receipt.completedAt) ? new Date(receipt.receiptKind === "walk-in-ticket" ? receipt.joinedAt : receipt.completedAt).toLocaleString("en-BW") : "Not recorded"}</strong></div>
     </div>
-    <div className="receipt-total"><span>Final agreed wash charge</span><strong>BWP {receipt.amount.toFixed(2)}</strong><small>Voluntary tip: BWP {receipt.tipAmount.toFixed(2)}</small><small>Total recorded: BWP {(receipt.amount+receipt.tipAmount).toFixed(2)}</small><small>Payment method: {receipt.paymentMethod.replaceAll("-", " ")}</small><small>Payment status: {receipt.paymentStatus}</small></div>
-    <p className="receipt-disclaimer">This receipt reflects the final charge and payment status recorded by staff. It is proof of payment only when the status says “paid”. This secure link expires {new Date(receipt.expiresAt).toLocaleDateString("en-BW")}.</p>
+    <div className="receipt-total">{receipt.receiptKind === "walk-in-ticket" ? <><span>Price information</span><strong>{receipt.priceNote}</strong><small>Payment is not due on this walk-in ticket. This is not proof of payment.</small></> : <><span>Final agreed wash charge</span><strong>BWP {receipt.amount.toFixed(2)}</strong><small>Voluntary tip: BWP {receipt.tipAmount.toFixed(2)}</small><small>Total recorded: BWP {(receipt.amount+receipt.tipAmount).toFixed(2)}</small><small>Payment method: {receipt.paymentMethod.replaceAll("-", " ")}</small><small>Payment status: {receipt.paymentStatus}</small></>}</div>
+    <p className="receipt-disclaimer">{receipt.receiptKind === "walk-in-ticket" ? "This confirms your walk-in details were recorded in the Big Brothers queue. Any proposed price remains subject to agreement; no payment is recorded." : "This receipt reflects the final charge and payment status recorded by staff. It is proof of payment only when the status says “paid”."} This secure link expires {new Date(receipt.expiresAt).toLocaleDateString("en-BW")}.</p>
     <a className="big-brothers-button primary" href={"/api/receipts/" + encodeURIComponent(token) + "/pdf"}>Download PDF receipt ↗</a>
     {receipt.claimed && <p className="receipt-claim-note">This receipt is linked to a customer account. Sign in to that account to view your complete wash history.</p>}
     <section className="receipt-next-booking receipt-notification-choices"><h2>Choose the updates you want</h2><p>Optional: get booking reminders or hear about admin-published special offers. Your choice can be changed later in My Account.</p><div className="receipt-next-booking-options"><button className="big-brothers-button secondary" type="button" disabled={notificationBusy} onClick={() => void enableCustomerNotifications("reminders")}>Enable booking reminders</button><button className="big-brothers-button secondary" type="button" disabled={notificationBusy} onClick={() => void enableCustomerNotifications("offers")}>Hear about special offers</button></div>{notificationMessage && <p className="big-brothers-notice pending" role="status">{notificationMessage}</p>}</section>
