@@ -4,6 +4,51 @@ import { createReceiptToken, receiptTokenHash, requireBigBrothersStaff } from "@
 
 export const runtime = "nodejs";
 
+
+export async function GET(request: Request) {
+  try {
+    const { app } = await requireBigBrothersStaff(request);
+    const queueEntryId = new URL(request.url).searchParams.get("queueEntryId")?.trim() || "";
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(queueEntryId)) {
+      return NextResponse.json({ error: "Choose a valid saved walk-in." }, { status: 400 });
+    }
+
+    const db = getFirestore(app);
+    const queueSnap = await db.doc(`queueEntries/${queueEntryId}`).get();
+    if (!queueSnap.exists) return NextResponse.json({ error: "That saved walk-in could not be found." }, { status: 404 });
+
+    const receiptSnap = await db.doc(`receipts/${queueEntryId}`).get();
+    if (!receiptSnap.exists) return NextResponse.json({ exists: false }, { headers: { "Cache-Control": "no-store" } });
+
+    const receipt = receiptSnap.data() || {};
+    const token = String(receipt.token || "");
+    const expiresAt = String(receipt.expiresAt || "");
+    const expiry = Date.parse(expiresAt);
+    const available = receipt.revoked !== true
+      && /^[A-Za-z0-9_-]{40,80}$/.test(token)
+      && receipt.tokenHash === receiptTokenHash(token)
+      && Number.isFinite(expiry)
+      && expiry > Date.now();
+
+    return NextResponse.json({
+      exists: true,
+      available,
+      url: available ? new URL("/receipt/" + token, request.url).toString() : null,
+      receiptRef: String(receipt.receiptRef || ""),
+      amount: typeof receipt.amount === "number" && Number.isFinite(receipt.amount) ? receipt.amount : null,
+      tipAmount: typeof receipt.tipAmount === "number" && Number.isFinite(receipt.tipAmount) ? receipt.tipAmount : 0,
+      paymentStatus: String(receipt.paymentStatus || "unpaid"),
+      paymentMethod: String(receipt.paymentMethod || "not-recorded"),
+      expiresAt,
+    }, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Saved receipt could not be loaded.";
+    const status = /staff sign-in/i.test(message) ? 401 : /staff access/i.test(message) ? 403 : /FIREBASE_ADMIN_KEY|credentials|service-account/i.test(message) ? 503 : 400;
+    console.error("Big Brothers saved receipt lookup failed:", message);
+    return NextResponse.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { app, uid } = await requireBigBrothersStaff(request);
