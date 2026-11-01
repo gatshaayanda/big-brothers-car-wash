@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const { app } = await requireBigBrothersStaff(request);
     const db = getFirestore(app);
@@ -68,8 +68,10 @@ export async function GET(request: Request) {
     for (const doc of bookings.docs) { const d = doc.data(); const uid = String(d.customerId || ""); if (uid && !bookingByUid.has(uid)) bookingByUid.set(uid, String(d.createdAt || "")); }
     const queueByUid = new Map<string, string>();
     for (const doc of queue.docs) { const d = doc.data(); const uid = String(d.customerId || ""); if (uid && !queueByUid.has(uid)) queueByUid.set(uid, String(d.createdAt || "")); }
-    const preferenceByUid = new Map(prefs.docs.map(doc => [doc.id, doc.data()]));
-    const profileByUid = new Map(customers.docs.map(doc => [doc.id, doc.data()]));
+    const preferenceByUid = new Map<string, Record<string, unknown>>();
+    for (const item of prefs.docs) preferenceByUid.set(item.id, item.data());
+    const profileByUid = new Map<string, Record<string, unknown>>();
+    for (const item of customers.docs) profileByUid.set(item.id, item.data());
     const leads = engagements.docs.map(doc => {
       const d = doc.data(); const uid = doc.id;
       const lastBookingAt = bookingByUid.get(uid) || "";
