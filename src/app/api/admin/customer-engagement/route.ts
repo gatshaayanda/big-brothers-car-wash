@@ -122,10 +122,12 @@ export async function PATCH(request: Request) {
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(customerId) || !["contacted", "declined"].includes(action)) return NextResponse.json({ error: "Choose a valid customer action." }, { status: 400 });
     const db = getFirestore(app);
     const ref = db.doc("customerEngagement/" + customerId);
+    const preferenceRef = db.doc("reminderPreferences/" + customerId);
     const at = new Date().toISOString();
     await db.runTransaction(async tx => {
-      const snap = await tx.get(ref);
+      const [snap, preferenceSnap] = await Promise.all([tx.get(ref), tx.get(preferenceRef)]);
       if (!snap.exists) throw new Error("CUSTOMER_ACTIVITY_NOT_FOUND");
+      if (action === "contacted" && preferenceSnap.data()?.whatsappFollowUpEnabled !== true) throw new Error("WHATSAPP_CONSENT_REQUIRED");
       const data = snap.data() || {};
       const step = Math.min(2, Number(data.followUpStep || 0) + 1);
       tx.set(ref, action === "declined"
@@ -135,7 +137,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ updated: true, action }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Customer follow-up could not be saved.";
-    const status = /staff sign-in/i.test(message) ? 401 : /staff access/i.test(message) ? 403 : message === "CUSTOMER_ACTIVITY_NOT_FOUND" ? 404 : 503;
-    return NextResponse.json({ error: status === 503 ? "Customer follow-up could not be saved." : message }, { status, headers: { "Cache-Control": "no-store" } });
+    const status = /staff sign-in/i.test(message) ? 401 : /staff access/i.test(message) ? 403 : message === "CUSTOMER_ACTIVITY_NOT_FOUND" ? 404 : message === "WHATSAPP_CONSENT_REQUIRED" ? 409 : 503;
+    return NextResponse.json({ error: status === 503 ? "Customer follow-up could not be saved." : message === "WHATSAPP_CONSENT_REQUIRED" ? "The customer has not enabled WhatsApp follow-ups, or has switched consent off." : message }, { status, headers: { "Cache-Control": "no-store" } });
   }
 }
