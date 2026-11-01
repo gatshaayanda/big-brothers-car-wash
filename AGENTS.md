@@ -283,3 +283,9 @@ These decisions supersede older conflicting queue/status and account notes above
 - On receipt retrieval, backfill a secure walk-in ticket for each existing queueEntries record owned by that UID when no receipt record exists. Do not create receipts for booking requests merely because they exist; bookings are requests, not proof of a wash or payment.
 - Display walk-in tickets distinctly from completed transaction receipts. Never show a zero-valued walk-in ticket as a paid/final receipt. Preserve published/proposed price wording and actual transaction/payment facts.
 - Keep all receipt lookups server-side, scoped to the verified Firebase token UID, and return only secure unexpired receipt links. Never expose another customer's queue or receipt records.
+
+
+## Botswana customer contact numbers
+- Every Big Brothers customer-facing or staff-assisted input that collects a Botswana phone/WhatsApp number must visibly include the +267 country prefix and guide the person to enter all 8 local digits.
+- Accept local 8-digit entry and normalize it to +267 for storage/WhatsApp handoff. Validate exactly 8 Botswana local digits before submitting; show a clear inline/toast-style message when incomplete. Never silently truncate an invalid number or accept a different country code as a Botswana number.
+- Keep phone handling consistent across booking, walk-in queue and customer profile forms. Preserve existing customer records and prefill them safely.
