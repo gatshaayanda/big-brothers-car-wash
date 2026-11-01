@@ -56,12 +56,13 @@ export async function GET(request: Request) {
     const { app } = await requireBigBrothersStaff(request);
     const db = getFirestore(app);
     const now = Date.now();
-    const [engagements, bookings, queue, prefs, customers] = await Promise.all([
+    const [engagements, bookings, queue, prefs, customers, publicViews] = await Promise.all([
       db.collection("customerEngagement").orderBy("lastAccountOpenedAt", "desc").limit(250).get(),
       db.collection("bookings").orderBy("createdAt", "desc").limit(500).get(),
       db.collection("queueEntries").orderBy("createdAt", "desc").limit(500).get(),
       db.collection("reminderPreferences").get(),
       db.collection("customers").limit(500).get(),
+      db.collection("publicSiteEvents").where("createdAt", ">=", new Date(now - 7 * DAY).toISOString()).get(),
     ]);
     const bookingByUid = new Map<string, string>();
     for (const doc of bookings.docs) { const d = doc.data(); const uid = String(d.customerId || ""); if (uid && !bookingByUid.has(uid)) bookingByUid.set(uid, String(d.createdAt || "")); }
@@ -73,7 +74,8 @@ export async function GET(request: Request) {
       const d = doc.data(); const uid = doc.id;
       const lastBookingAt = bookingByUid.get(uid) || "";
       const lastWalkInAt = queueByUid.get(uid) || "";
-      const lastActionAt = [lastBookingAt, lastWalkInAt].filter(Boolean).sort().at(-1) || "";
+      const actionTimes = [lastBookingAt, lastWalkInAt].filter(Boolean).sort();
+      const lastActionAt = actionTimes.length ? actionTimes[actionTimes.length - 1] : "";
       const openedAt = String(d.lastAccountOpenedAt || "");
       const actedAfterOpen = Boolean(lastActionAt && lastActionAt >= openedAt);
       const pref = preferenceByUid.get(uid) || {};
@@ -101,7 +103,7 @@ export async function GET(request: Request) {
     const accountOpens7d = engagements.docs.filter(doc => String(doc.data().lastAccountOpenedAt || "") >= sevenDaysAgo).length;
     const due = leads.filter(item => item.due).sort((a,b) => a.openedAt.localeCompare(b.openedAt));
     return NextResponse.json({
-      metrics: { trackedAccounts: engagements.size, accountOpens7d, bookingRequests: bookings.size, walkInEntries: queue.size, followUpDue: due.length },
+      metrics: { publicViews7d: publicViews.size, trackedAccounts: engagements.size, accountOpens7d, bookingRequests: bookings.size, walkInEntries: queue.size, followUpDue: due.length },
       leads: leads.sort((a,b) => b.openedAt.localeCompare(a.openedAt)),
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
