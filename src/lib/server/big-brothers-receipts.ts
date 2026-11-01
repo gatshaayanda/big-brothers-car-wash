@@ -20,7 +20,7 @@ export async function requireBigBrothersStaff(request: Request) {
   const app = bigBrothersAdminApp();
   const decoded = await getAuth(app).verifyIdToken(token, true);
   const sessionExpiry = Number(decoded.bbStaffSessionExpiresAt);
-  if (!Number.isFinite(sessionExpiry) || sessionExpiry <= Date.now()) throw new Error("Staff session expired. Sign in again.");
+  if (!Number.isFinite(sessionExpiry) || sessionExpiry <= Date.now()) throw new Error("Staff sign-in is required because the staff session expired. Sign in again.");
   const admin = await getFirestore(app).doc(`admins/${decoded.uid}`).get();
   if (!admin.exists || !["owner", "staff"].includes(String(admin.data()?.role))) throw new Error("Staff access is required.");
   return { app, uid: decoded.uid };
