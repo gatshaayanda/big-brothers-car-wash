@@ -57,12 +57,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const { app, uid } = await requireBigBrothersStaff(request);
-    const body = await request.json().catch(() => null) as { queueEntryId?: unknown; amount?: unknown; tipAmount?: unknown; paymentStatus?: unknown; paymentMethod?: unknown } | null;
+    const body = await request.json().catch(() => null) as { queueEntryId?: unknown; amount?: unknown; tipAmount?: unknown; paymentStatus?: unknown; paymentMethod?: unknown; serviceDelivered?: unknown } | null;
     const queueEntryId = typeof body?.queueEntryId === "string" ? body.queueEntryId.trim() : "";
     const amount = body?.amount;
     const tipAmount = body?.tipAmount === undefined ? 0 : body.tipAmount;
     const paymentStatus = body?.paymentStatus;
     const paymentMethod = body?.paymentMethod === undefined ? "not-recorded" : body.paymentMethod;
+    if (body?.serviceDelivered !== true) return NextResponse.json({ error: "Confirm that the wash has been delivered before recording its final transaction." }, { status: 400 });
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(queueEntryId)) return NextResponse.json({ error: "Choose a valid queue entry." }, { status: 400 });
     if (typeof amount !== "number" || !Number.isFinite(amount) || amount < 0 || amount > 1000000) return NextResponse.json({ error: "Enter a valid final agreed charge in BWP." }, { status: 400 });
     if (typeof tipAmount !== "number" || !Number.isFinite(tipAmount) || tipAmount < 0 || tipAmount > 1000000) return NextResponse.json({ error: "Enter a valid optional tip amount in BWP." }, { status: 400 });
@@ -74,14 +75,15 @@ export async function POST(request: Request) {
     const queueSnap = await queueRef.get();
     if (!queueSnap.exists) return NextResponse.json({ error: "That queue entry could not be found." }, { status: 404 });
     const job = queueSnap.data() || {};
-    if (job.status !== "completed") return NextResponse.json({ error: "Mark the wash completed before creating its receipt." }, { status: 409 });
+    // Final transaction recording is an explicit staff attestation after service delivery; it does not mutate or depend on queue status.
 
     const receiptRef = db.doc(`receipts/${queueEntryId}`);
     const existing = await receiptRef.get();
     const existingData = existing.data() || {};
     const expiry = Date.parse(String(existingData.expiresAt || ""));
     if (existing.exists && existingData.revoked !== true && existingData.token && Number.isFinite(expiry) && expiry > Date.now()) {
-      await receiptRef.set({ amount, tipAmount, paymentStatus: String(paymentStatus), paymentMethod: String(paymentMethod), updatedAt: new Date().toISOString() }, { merge: true });
+      const transactionAt = new Date().toISOString();
+      await receiptRef.set({ receiptKind: "completed-receipt", priceNote: "", serviceDelivered: true, transactionRecordedAt: transactionAt, transactionRecordedBy: uid, completedAt: transactionAt, amount, tipAmount, paymentStatus: String(paymentStatus), paymentMethod: String(paymentMethod), updatedAt: transactionAt }, { merge: true });
       const url = new URL("/receipt/" + String(existingData.token), request.url).toString();
       return NextResponse.json({ url, receiptRef: String(existingData.receiptRef || ""), reused: true }, { headers: { "Cache-Control": "no-store" } });
     }
@@ -96,6 +98,10 @@ export async function POST(request: Request) {
       queueEntryId,
       token,
       tokenHash,
+      receiptKind: "completed-receipt",
+      serviceDelivered: true,
+      transactionRecordedAt: createdAt,
+      transactionRecordedBy: uid,
       receiptRef: receiptNumber,
       customerId: String(job.customerId || ""),
       customerName: String(job.customerName || ""),
@@ -109,7 +115,7 @@ export async function POST(request: Request) {
       paymentStatus: String(paymentStatus),
       paymentMethod: String(paymentMethod),
       joinedAt: String(job.createdAt || ""),
-      completedAt: String(job.updatedAt || createdAt),
+      completedAt: createdAt,
       createdAt,
       expiresAt,
       createdBy: uid,
