@@ -81,7 +81,7 @@ export async function GET(request: Request) {
       const phone = String(profile.phone || d.phone || "");
       const status = actedAfterOpen ? "customer" : String(d.followUpStatus || "waiting");
       const dueAt = Date.parse(String(d.nextFollowUpAt || ""));
-      const optedIn = pref.announcementsEnabled === true;
+      const optedIn = pref.whatsappFollowUpEnabled === true;
       return {
         id: uid,
         name: String(profile.name || d.customerName || "Customer"),
