@@ -994,3 +994,12 @@
 .admin-retention-stop:disabled{opacity:.5;cursor:not-allowed}
 .admin-retention-note{font-size:10px;line-height:1.5;color:#777;margin:0}
 @media(max-width:760px){.admin-retention .admin-inbox-heading{align-items:flex-start;flex-direction:column}.admin-retention .admin-inbox-heading>.big-brothers-button{width:100%}.admin-retention-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-retention-card{align-items:stretch;flex-direction:column;gap:10px}.admin-retention-actions{justify-content:flex-start}.admin-retention-actions .big-brothers-button{flex:1 1 120px}}
+
+
+.customer-whatsapp-followup-consent{width:min(1120px,calc(100% - 28px));margin:10px auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.customer-whatsapp-followup-consent>div{min-width:0}
+.customer-whatsapp-followup-consent .big-brothers-eyebrow{margin:0 0 4px}
+.customer-whatsapp-followup-consent h2{font-size:15px;letter-spacing:-.03em;margin:0 0 4px}
+.customer-whatsapp-followup-consent p:not(.big-brothers-eyebrow){font-size:11px;line-height:1.5;color:#666;margin:0;max-width:700px}
+.customer-whatsapp-followup-consent .customer-toggle{flex:0 0 auto}
+@media(max-width:680px){.customer-whatsapp-followup-consent{align-items:flex-start;flex-direction:column;gap:10px}.customer-whatsapp-followup-consent .customer-toggle{align-self:flex-end}}
