@@ -859,3 +859,74 @@
  .bb-service-picker-summary,.bb-booking-time-summary{align-items:flex-start;flex-direction:column}
  .bb-service-picker-summary>button,.bb-booking-time-summary>button{width:100%}
 }
+/* Customer account: compact, task-first return experience. */
+.customer-account-page.customer-account-compact{padding-bottom:28px}
+.customer-account-compact .customer-account-cinematic-intro{min-height:clamp(210px,25vw,285px);margin:14px auto 12px;padding:clamp(20px,3.5vw,34px);border-radius:11px}
+.customer-account-compact .customer-account-cinematic-intro .customer-account-greeting{margin-bottom:10px}
+.customer-account-compact .customer-account-kicker{font-size:14px;margin-bottom:5px}
+.customer-account-compact .customer-account-cinematic-intro h1{font-size:clamp(36px,5.4vw,62px)}
+.customer-account-compact .customer-account-hero-description{max-width:440px;font-size:12px;line-height:1.5;margin:10px 0 13px}
+.customer-account-compact .customer-account-primary-action{min-height:42px;padding:10px 15px;font-size:10px}
+.customer-account-compact .customer-account-secondary-action{font-size:10px}
+.customer-account-compact .customer-account-hero-meta{gap:6px}
+.customer-account-compact .customer-account-summary-compact{margin-bottom:10px}
+.customer-account-tools{margin:10px auto 14px;gap:8px}
+.customer-account-tools-heading{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 2px 2px}
+.customer-account-tools-heading .big-brothers-eyebrow{margin:0;font-size:9px}
+.customer-account-tools-heading>span{font-size:10px;color:#77716e}
+.customer-account-tools>button{gap:9px;padding:10px 11px;border-radius:8px}
+.customer-account-tools>button .customer-tool-icon{width:30px;height:30px;flex-basis:30px;font-size:14px}
+.customer-account-tools>button strong{font-size:11px}
+.customer-account-tools>button small{font-size:9px}
+.customer-account-tools>button b{font-size:9px}
+.bb-next-wash{margin:12px auto 16px;padding:17px;border-radius:10px;box-shadow:none}
+.bb-next-wash-heading h2{font-size:clamp(23px,3vw,30px)}
+.bb-next-wash-heading>p:last-child{font-size:11px;max-width:65ch}
+.bb-wash-suggestions{margin-top:13px;padding:12px}
+.bb-wash-suggestions-title strong{font-size:13px}
+.bb-wash-suggestions-title small{font-size:10px}
+.bb-wash-suggestion-grid{gap:8px;margin-top:10px}
+.bb-wash-suggestion{gap:5px;padding:11px;border-radius:8px}
+.bb-wash-suggestion>strong{font-size:13px}
+.bb-wash-suggestion>b{font-size:11px}
+.bb-wash-suggestion>small{font-size:9px}
+.bb-calendar-disclosure{margin-top:10px;border:1px solid #ece5e2;border-radius:9px;background:#fff}
+.bb-calendar-disclosure>summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;cursor:pointer;list-style:none}
+.bb-calendar-disclosure>summary::-webkit-details-marker{display:none}
+.bb-calendar-disclosure>summary>span{display:grid;gap:2px}
+.bb-calendar-disclosure>summary strong{font-size:11px;color:#302725}
+.bb-calendar-disclosure>summary small{font-size:9px;color:#766b67}
+.bb-calendar-disclosure>summary>b{font-size:10px;color:#a71922;white-space:nowrap}
+.bb-calendar-disclosure[open]>summary{border-bottom:1px solid #ece5e2;background:#fffafa}
+.bb-calendar-disclosure .bb-calendar-panel{margin:0;border:0;padding:12px}
+.customer-regulars-club{padding:16px;margin-top:12px}
+.customer-regulars-heading h2{font-size:clamp(22px,3vw,29px)}
+.customer-regulars-racing-disclosure{margin-top:12px;border:1px solid #ffffff24;border-radius:9px;background:#ffffff08}
+.customer-regulars-racing-disclosure>summary{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 13px;cursor:pointer;list-style:none}
+.customer-regulars-racing-disclosure>summary::-webkit-details-marker{display:none}
+.customer-regulars-racing-disclosure>summary>span{display:grid;gap:3px}
+.customer-regulars-racing-disclosure>summary strong{font-size:11px;color:#fff}
+.customer-regulars-racing-disclosure>summary small{font-size:9px;color:#d4ceca}
+.customer-regulars-racing-disclosure>summary>b{font-size:10px;color:#ff777b;white-space:nowrap}
+.customer-regulars-racing-disclosure[open]>summary{border-bottom:1px solid #ffffff24}
+.customer-regulars-racing-disclosure .customer-regulars-racing{margin:0;padding:8px 12px 12px}
+@media(max-width:680px){
+ .customer-account-compact .customer-account-cinematic-intro{min-height:0;display:block;padding:21px 18px;margin:10px auto 10px}
+ .customer-account-compact .customer-account-hero-meta{margin-top:14px;align-items:flex-start}
+ .customer-account-tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .customer-account-tools>button{padding:10px 9px;gap:7px}
+ .customer-account-tools>button small{white-space:normal;line-height:1.3}
+ .customer-account-tools>button b{display:none}
+ .customer-account-tools-heading{align-items:flex-start;flex-direction:column;gap:3px}
+ .bb-next-wash{margin:10px 14px 14px;padding:13px}
+ .bb-wash-suggestion-grid{grid-template-columns:1fr 1fr}
+ .bb-wash-suggestion{padding:9px}
+ .bb-wash-suggestion>strong{font-size:12px}
+ .bb-calendar-disclosure>summary{align-items:flex-start}
+ .customer-regulars-club{padding:13px;margin:10px 14px}
+}
+@media(max-width:380px){
+ .customer-account-tools>button{align-items:flex-start}
+ .customer-account-tools>button .customer-tool-icon{width:26px;height:26px;flex-basis:26px}
+ .bb-wash-suggestion-grid{grid-template-columns:1fr}
+}
