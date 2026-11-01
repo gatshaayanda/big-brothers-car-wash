@@ -967,3 +967,30 @@
 .customer-account-secondary-disclosure>summary b{flex:0 0 auto;color:#a71922;font-size:10px}
 .customer-account-secondary-disclosure>.customer-account-card{border:0;border-top:1px solid #eee;border-radius:0;box-shadow:none}
 @media(max-width:680px){.customer-account-receipts-preview{margin-bottom:10px}.customer-account-receipt-row{gap:8px}.customer-account-receipt-row a{font-size:10px}}
+
+
+/* Compact customer-retention workspace */
+.admin-retention{display:grid;gap:14px;max-width:1120px}
+.admin-retention .admin-inbox-heading{margin:0;align-items:center}
+.admin-retention .admin-inbox-heading h2{font-size:clamp(20px,3vw,27px);margin:2px 0 4px;letter-spacing:-.04em}
+.admin-retention .admin-inbox-heading p:not(.big-brothers-eyebrow){font-size:12px;line-height:1.5;color:#777;margin:0;max-width:620px}
+.admin-retention-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+.admin-retention-metrics>div{padding:12px 14px;border:1px solid #eee;border-radius:10px;background:#fff;min-width:0}
+.admin-retention-metrics strong{font-size:clamp(20px,3vw,27px)}
+.admin-retention-metrics span{font-size:10px}
+.admin-retention-list{display:grid;gap:8px}
+.admin-retention-card{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 14px;border:1px solid #eaeaea;border-radius:11px;background:#fff}
+.admin-retention-main{min-width:0;display:grid;gap:5px}
+.admin-retention-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.admin-retention-title>strong{font-size:14px}
+.admin-retention-title>span{font-size:9px;font-weight:800;letter-spacing:.06em}
+.admin-retention-due{color:#a71922}
+.admin-retention-wait{color:#777}
+.admin-retention-main p{margin:0;color:#555;font-size:11px;overflow-wrap:anywhere}
+.admin-retention-main small{color:#888;font-size:10px;line-height:1.45}
+.admin-retention-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;flex:0 0 auto}
+.admin-retention-actions .big-brothers-button{min-height:34px;padding:8px 10px;font-size:10px}
+.admin-retention-stop{border:0;background:transparent;color:#777;font-size:10px;font-weight:700;padding:8px;cursor:pointer}
+.admin-retention-stop:disabled{opacity:.5;cursor:not-allowed}
+.admin-retention-note{font-size:10px;line-height:1.5;color:#777;margin:0}
+@media(max-width:760px){.admin-retention .admin-inbox-heading{align-items:flex-start;flex-direction:column}.admin-retention .admin-inbox-heading>.big-brothers-button{width:100%}.admin-retention-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-retention-card{align-items:stretch;flex-direction:column;gap:10px}.admin-retention-actions{justify-content:flex-start}.admin-retention-actions .big-brothers-button{flex:1 1 120px}}
