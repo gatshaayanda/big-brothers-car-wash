@@ -11,7 +11,8 @@
 
 ## Business identity and customer-first priorities
 - Product: Big Brothers Car Wash, G-West, Botswana. Use the owner's confirmed brand assets and real supplied photos/videos. Do not invent hours, prices, location details, services, capacity, available slots or contact details; make these editable admin settings or clearly marked configuration until confirmed.
-- Primary action on the customer-facing home page: **Join the walk-in queue**. This is the main intake journey and must be immediately obvious on a phone.
+- Primary public customer action on the shared home page: **Book a Wash**. Keep the cinematic Bays.mp4 hero and make booking the dominant, immediately obvious customer action.
+- Walk-in queue access is a subdued **ON-SITE TEAM → Open walk-in queue** utility on the shared home page, not a public customer call-to-action and not an item hidden inside Staff/admin access. No staff authentication is required to open walk-in intake. When staff opens it, default the entry mode to staff-assisted; staff can enter the customer's details or hand the device over and switch to customer entry. Keep this control visually secondary to booking.
 - Keep the interface mobile-first, accessible, legible and quick to use on the staff member's smartphone handed to a walk-in customer. Use concise copy, appropriate touch targets, keyboard/accessibility support, validation and clear loading, empty, error, offline, success and pending states.
 - Staff operations are secondary to the customer journey and must be behind real authorization. Do not add unnecessary forced sign-in before a walk-in can submit their details.
 
@@ -83,7 +84,7 @@ Before declaring ready for owner QA, verify:
 Keep this document aligned with verified architecture. Update README and related docs when the repository has been corrected to the intended Vula application; do not document imagined paths or claim the workflow is already implemented.
 
 ## Customer experience improvements — location, weather and waiting
-- Keep **Join the walk-in queue** as the primary home-page action. Weather, location media, loyalty and account links are supporting information; none should compete with the queue action or introduce a forced account step.
+- Keep **Book a Wash** as the primary public home-page action. Keep the cinematic Bays.mp4 hero. Weather, location media, loyalty and account links are supporting information; none should compete with booking or introduce a forced account step. Keep the walk-in queue as a subdued on-site-team utility, available directly from the shared home page without staff authentication; do not present it as a customer-facing CTA.
 - The optional Gaborone weather card uses Open-Meteo current conditions at the business-area coordinates supplied by the owner. Display the data timestamp and Open-Meteo attribution. Weather is contextual, not operational truth: do not infer whether the wash is open, promise a wash outcome, or block a booking based on weather. No browser geolocation or silent location tracking.
 - The “Find us & enter” guide uses the owner-supplied `/videos/Left.mp4`, `/videos/Right.mp4`, and `/videos/Bays.mp4`. Videos must have native controls, descriptive labels, and `preload="none"`; never autoplay. The text should still explain what each clip shows.
 - Offline video storage is opt-in because the three videos total about 104 MB. Explain the approximate download size before saving, show byte-level download progress, check available browser storage where supported, verify each completed cache entry, retain already-saved clips after a partial failure, and never make video download a prerequisite for joining the queue.

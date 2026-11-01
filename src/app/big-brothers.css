@@ -727,3 +727,14 @@
  .customer-account-hero-meta{justify-items:start;gap:8px}
 }
 @media(prefers-reduced-motion:reduce){.customer-account-tools>button{transition:none}.customer-account-tools>button:hover{transform:none}}
+
+
+/* Discreet staff-context utility: available on the shared homepage without competing with customer booking. */
+.bb-onsite-team{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:7px 12px;max-width:1180px;margin:13px auto 0;padding:0 2px;color:#777}
+.bb-onsite-team-label{font-size:8px;font-weight:900;letter-spacing:.17em;color:#8b817c}
+.bb-onsite-team button{padding:4px 0;border:0;background:transparent;color:#766b66;font:700 10px/1.4 Arial,sans-serif;text-decoration:underline;text-decoration-color:#c9c0bb;text-underline-offset:3px;cursor:pointer}
+.bb-onsite-team button:hover{color:#a91d25;text-decoration-color:#a91d25}
+.bb-onsite-team button:focus-visible{outline:2px solid #a91d25;outline-offset:4px;border-radius:2px}
+.bb-onsite-team button span{font-size:12px}
+.bb-onsite-team-hint{font-size:9px;color:#958b86}
+@media(max-width:760px){.bb-onsite-team{justify-content:flex-start;padding:0 4px;gap:5px 9px}.bb-onsite-team-hint{flex-basis:100%;padding-left:0}}
