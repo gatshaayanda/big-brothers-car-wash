@@ -685,3 +685,45 @@
 .bb-film-card video{background:linear-gradient(135deg,#382321,#171515 62%,#090909)}
 @media(max-width:760px){.bb-cinema-actions{gap:13px;margin-top:22px}.bb-cinema-primary-action{width:100%;min-height:56px;padding:0 17px;justify-content:space-between}.bb-cinema-shortcuts{gap:8px 18px}.bb-cinema-shortcuts a,.bb-cinema-shortcuts button{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.bb-cinema-primary-action{transition:none}}
+
+
+/* Customer account welcome — same Big Brothers art direction, without touching account workflows. */
+.customer-account-header{border-bottom-color:#e7dfdc}
+.customer-account-home-link{color:#8f171e;font-size:11px;font-weight:800;text-decoration:none}
+.customer-account-home-link:hover{text-decoration:underline;text-underline-offset:4px}
+.customer-account-cinematic-intro{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;min-height:clamp(280px,35vw,390px);margin:22px auto 18px;padding:clamp(24px,5vw,54px);border:0;border-radius:14px;background:radial-gradient(ellipse at 88% 12%,#a91d254d,transparent 42%),linear-gradient(115deg,#171312 0%,#211a19 58%,#321b1c 100%);color:#fff;box-shadow:0 18px 50px #24171418}
+.customer-account-cinematic-intro:after{content:"BB";position:absolute;z-index:-1;right:clamp(10px,5vw,60px);top:50%;transform:translateY(-50%);font:900 clamp(150px,26vw,330px)/.8 "Space Grotesk",Arial,sans-serif;letter-spacing:-.13em;color:#ffffff08;pointer-events:none}
+.customer-account-hero-copy{max-width:700px}
+.customer-account-cinematic-intro .big-brothers-eyebrow{color:#ff777b;font-size:10px;letter-spacing:.18em;font-weight:850;margin:0 0 12px}
+.customer-account-cinematic-intro .customer-account-greeting{color:#fff;font-size:13px;font-weight:650;margin:0 0 22px}
+.customer-account-kicker{color:#f1d9d8;font-size:clamp(15px,2vw,19px);font-weight:650;margin:0 0 7px}
+.customer-account-cinematic-intro h1{font:750 clamp(43px,7vw,78px)/.94 "Space Grotesk",Arial,sans-serif;letter-spacing:-.075em;color:#fff;margin:0}
+.customer-account-cinematic-intro h1 span{color:#ff555d}
+.customer-account-hero-description{max-width:490px;color:#e5dcda;font-size:13px;line-height:1.65;margin:17px 0 20px}
+.customer-account-hero-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px}
+.customer-account-primary-action{min-height:50px;display:inline-flex;align-items:center;justify-content:space-between;gap:22px;padding:0 19px;border:1px solid #f14a52;border-radius:3px;background:#b51e27;color:#fff;font-size:10px;font-weight:900;letter-spacing:.12em;cursor:pointer;box-shadow:0 10px 28px #0003}
+.customer-account-primary-action:hover{background:#d12630}
+.customer-account-primary-action span{font-size:18px}
+.customer-account-secondary-action{min-height:44px;padding:8px 0;border:0;background:transparent;color:#fff;font-size:10px;font-weight:850;letter-spacing:.1em;cursor:pointer}
+.customer-account-secondary-action:hover{text-decoration:underline;text-underline-offset:4px}
+.customer-account-hero-meta{display:grid;justify-items:end;gap:10px;flex:0 0 auto}
+.customer-account-cinematic-intro .customer-account-status{margin:0;border-color:#ffffff38;background:#ffffff12;color:#fff}
+.customer-account-hero-meta>small{color:#d6c7c4;font-size:8px;font-weight:800;letter-spacing:.15em}
+.customer-account-summary-compact article{border-color:#e8dfdc;background:linear-gradient(145deg,#fff,#fcfaf9)}
+.customer-account-tools>button{min-height:68px;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+.customer-account-tools>button:hover{transform:translateY(-2px);box-shadow:0 10px 25px #2113110d}
+.customer-account-modal{box-shadow:0 28px 90px #0006}
+@media(max-width:680px){
+ .customer-account-header{min-height:68px}
+ .customer-account-home-link{font-size:10px}
+ .customer-account-cinematic-intro{align-items:flex-start;flex-direction:column;gap:20px;min-height:0;margin:12px auto 14px;padding:25px 21px;border-radius:11px}
+ .customer-account-cinematic-intro:after{right:8px;top:20px;transform:none;font-size:150px}
+ .customer-account-cinematic-intro .customer-account-greeting{margin-bottom:18px}
+ .customer-account-cinematic-intro h1{font-size:clamp(43px,12vw,62px)}
+ .customer-account-hero-description{font-size:12px;margin:14px 0 17px}
+ .customer-account-hero-actions{width:100%;align-items:stretch;flex-direction:column;gap:5px}
+ .customer-account-primary-action{width:100%;min-height:52px}
+ .customer-account-secondary-action{align-self:flex-start;min-height:40px}
+ .customer-account-hero-meta{justify-items:start;gap:8px}
+}
+@media(prefers-reduced-motion:reduce){.customer-account-tools>button{transition:none}.customer-account-tools>button:hover{transform:none}}
