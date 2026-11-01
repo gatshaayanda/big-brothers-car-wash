@@ -43,6 +43,24 @@ export async function createWalkInTicketReceipt(queueEntryId: string, job: Recor
       && /^[A-Za-z0-9_-]{40,80}$/.test(currentToken)
       && current.tokenHash === receiptTokenHash(currentToken)
       && Number.isFinite(currentExpiry) && currentExpiry > Date.now()) {
+      // Backfill customer metadata on older walk-in receipts so the signed-in
+      // customer can retrieve them. Never replace existing final transaction facts.
+      const customerMetadata = {
+        customerId: String(current.customerId || job.customerId || ""),
+        customerName: String(current.customerName || job.customerName || ""),
+        phone: String(current.phone || job.phone || ""),
+        email: String(current.email || job.email || ""),
+        vehicleType: String(current.vehicleType || job.vehicleType || ""),
+        vehicleRegistration: String(current.vehicleRegistration || job.vehicleRegistration || ""),
+        serviceName: String(current.serviceName || job.serviceName || "Car wash service"),
+        joinedAt: String(current.joinedAt || job.createdAt || createdAt),
+      };
+      const backfill = Object.fromEntries(
+        Object.entries(customerMetadata).filter(([key, value]) => !current[key] && Boolean(value)),
+      );
+      if (Object.keys(backfill).length) {
+        transaction.set(receiptRef, { ...backfill, updatedAt: createdAt }, { merge: true });
+      }
       return { token: currentToken, receiptRef: String(current.receiptRef || ""), reused: true };
     }
 
