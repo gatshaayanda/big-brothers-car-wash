@@ -27,8 +27,11 @@ export async function POST(request: Request) {
     const word = typeof body?.word === "string" ? body.word : "";
     if (!matchesWord(word, expected)) return NextResponse.json({ error: "Access denied. Check the staff access word and try again." }, { status: 401 });
     const app = getAdminApp(), uid = "big-brothers-operations-owner";
+    const adminAuth = getAuth(app);
     await getFirestore(app).collection("admins").doc(uid).set({ role: "owner", updatedAt: new Date().toISOString() }, { merge: true });
-    const token = await getAuth(app).createCustomToken(uid);
+    const bbStaffSessionExpiresAt = Date.now() + 24 * 60 * 60 * 1000;
+    await adminAuth.setCustomUserClaims(uid, { bbStaffSessionExpiresAt });
+    const token = await adminAuth.createCustomToken(uid, { bbStaffSessionExpiresAt });
     return NextResponse.json({ token }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Vula staff login failed:", error instanceof Error ? error.message : "unknown error");

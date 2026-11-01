@@ -12,6 +12,8 @@ service cloud.firestore {
 
     function isAdmin() {
       return signedIn()
+        && request.auth.token.bbStaffSessionExpiresAt is int
+        && request.auth.token.bbStaffSessionExpiresAt > request.time.toMillis()
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
         && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['owner', 'staff'];
     }

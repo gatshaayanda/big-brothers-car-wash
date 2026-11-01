@@ -24,8 +24,8 @@ async function identity(request: Request) {
   const token = request.headers.get("authorization")?.match(/^Bearer (.+)$/i)?.[1];
   if (!token) throw new Error("Sign in to synchronize your racing career.");
   const app = adminApp();
-  const decoded = await getAuth(app).verifyIdToken(token);
-  return { app, uid: decoded.uid };
+  const decoded = await getAuth(app).verifyIdToken(token, true);
+  return { app, uid: decoded.uid, claims: decoded };
 }
 function cleanAlias(value: unknown) {
   return typeof value === "string" ? value.trim().replace(/[^\p{L}\p{N} _-]/gu, "").slice(0, 18) : "";
@@ -37,10 +37,14 @@ function jsonError(error: unknown) {
 }
 export async function GET(request: Request) {
   try {
-    const { app, uid } = await identity(request);
+    const { app, uid, claims } = await identity(request);
     const store = getFirestore(app);
     const url = new URL(request.url);
     if (url.searchParams.get("admin") === "1") {
+      const sessionExpiry = Number(claims.bbStaffSessionExpiresAt);
+      if (!Number.isFinite(sessionExpiry) || sessionExpiry <= Date.now()) {
+        return NextResponse.json({ error: "Staff session expired. Sign in again." }, { status: 401, headers: { "Cache-Control": "no-store" } });
+      }
       const staff = await store.doc(`admins/${uid}`).get();
       if (!staff.exists || !["owner", "staff"].includes(String(staff.data()?.role))) {
         return NextResponse.json({ error: "Staff access required." }, { status: 403, headers: { "Cache-Control": "no-store" } });
