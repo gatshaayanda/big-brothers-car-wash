@@ -75,3 +75,7 @@ export async function updateOperationalRecord(path: "bookings" | "queueEntries" 
 export async function setBookingStatus(id: string, status: string) {
   await updateOperationalRecord("bookings", id, { status });
 }
+
+export async function saveWhatsAppFollowUpPreference(uid: string, enabled: boolean) {
+  await setDoc(doc(db, "reminderPreferences", uid), { whatsappFollowUpEnabled: enabled, whatsappFollowUpConsentAt: enabled ? new Date().toISOString() : "", updatedAt: new Date().toISOString() }, { merge: true });
+}
