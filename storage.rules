@@ -4,6 +4,8 @@ service firebase.storage {
     function signedIn() { return request.auth != null; }
     function isAdmin() {
       return signedIn()
+        && request.auth.token.bbStaffSessionExpiresAt is int
+        && request.auth.token.bbStaffSessionExpiresAt > request.time.toMillis()
         && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
         && firestore.get(/databases/(default)/documents/admins/$(request.auth.uid)).data.role in ['owner', 'staff'];
     }
