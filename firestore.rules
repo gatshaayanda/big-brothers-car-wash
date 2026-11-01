@@ -40,7 +40,7 @@ service cloud.firestore {
           'customerId', 'customerName', 'phone', 'vehicleType',
           'vehicleRegistration', 'serviceId', 'serviceName',
           'serviceMode', 'locationId', 'address', 'scheduledFor',
-          'notes', 'priceQuote', 'paymentMethod', 'paymentStatus',
+          'notes', 'priceQuote', 'paymentMethod', 'paymentStatus', 'tipAmount',
           'status', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.keys().hasAll([
@@ -75,6 +75,12 @@ service cloud.firestore {
         && (
           !request.resource.data.keys().hasAny(['paymentStatus'])
           || request.resource.data.paymentStatus == 'unpaid'
+        )
+        && (
+          !request.resource.data.keys().hasAny(['tipAmount'])
+          || (request.resource.data.tipAmount is number
+              && request.resource.data.tipAmount >= 0
+              && request.resource.data.tipAmount <= 1000000)
         );
     }
 
