@@ -104,6 +104,7 @@ export default function Home() {
   const [bookingTime, setBookingTime] = useState("");
   const bookingTimeRef = useRef(bookingTime);
   useEffect(() => { bookingTimeRef.current = bookingTime; }, [bookingTime]);
+  useEffect(() => { void fetch("/api/analytics/public", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "home_view" }), keepalive: true }).catch(() => {}); }, []);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [availabilityConfigured, setAvailabilityConfigured] = useState<boolean | null>(null);
   const [availabilityMessage, setAvailabilityMessage] = useState("");
