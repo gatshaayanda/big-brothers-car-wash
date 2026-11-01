@@ -974,7 +974,7 @@
 .admin-retention .admin-inbox-heading{margin:0;align-items:center}
 .admin-retention .admin-inbox-heading h2{font-size:clamp(20px,3vw,27px);margin:2px 0 4px;letter-spacing:-.04em}
 .admin-retention .admin-inbox-heading p:not(.big-brothers-eyebrow){font-size:12px;line-height:1.5;color:#777;margin:0;max-width:620px}
-.admin-retention-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+.admin-retention-metrics{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0}
 .admin-retention-metrics>div{padding:12px 14px;border:1px solid #eee;border-radius:10px;background:#fff;min-width:0}
 .admin-retention-metrics strong{font-size:clamp(20px,3vw,27px)}
 .admin-retention-metrics span{font-size:10px}
