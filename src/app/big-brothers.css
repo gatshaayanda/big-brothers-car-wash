@@ -786,3 +786,76 @@
  .bb-cinematic-home .bb-cinema-intro{margin:12px 0 15px}
  .bb-cinematic-home .bb-cinema-actions{margin-top:14px}
 }
+
+/* JTS-inspired future wash booking controls, adapted to Big Brothers red/white identity. */
+.bb-booking-step{display:flex;align-items:flex-start;gap:12px;margin:24px 0 12px}
+.bb-booking-step>span{flex:0 0 30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#8f1017;color:#fff;font-size:11px;font-weight:900}
+.bb-booking-step>div{display:grid;gap:4px;min-width:0}
+.bb-booking-step strong{font-size:14px;color:#211c1b}.bb-booking-step small{font-size:11px;line-height:1.45;color:#6b625f}
+.bb-service-picker-summary,.bb-booking-time-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px;border:1px solid #eadcda;border-radius:9px;background:linear-gradient(120deg,#fff9f8,#fff);min-width:0}
+.bb-service-picker-summary>div,.bb-booking-time-summary>div{display:grid;gap:5px;min-width:0}
+.bb-service-picker-summary>div>span{font-size:9px;font-weight:900;letter-spacing:.14em;color:#a71922}
+.bb-service-picker-summary>div>strong,.bb-booking-time-summary>div>strong{font-size:14px;color:#211c1b;overflow-wrap:anywhere}
+.bb-service-picker-summary>div>small,.bb-booking-time-summary>div>small{font-size:11px;color:#716663;line-height:1.45}
+.bb-service-picker-summary>button,.bb-booking-time-summary>button{flex:0 0 auto;min-height:42px;padding:9px 13px;border:1px solid #a71922;border-radius:6px;background:#8f1017;color:#fff;font-size:11px;font-weight:850}
+.bb-booking-calendar{padding:14px;border:1px solid #e6dedb;border-radius:9px;background:#fff}
+.bb-booking-calendar-header{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;gap:8px;margin-bottom:12px}
+.bb-booking-calendar-header strong{text-align:center;font:600 16px Georgia,serif;color:#292321}
+.bb-booking-calendar-header button{height:38px;border:1px solid #e2d7d3;border-radius:6px;background:#fff7f6;color:#8f1017;font-size:23px}
+.bb-booking-calendar-header button:disabled{opacity:.3}
+.bb-booking-weekdays,.bb-booking-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.bb-booking-weekdays{margin-bottom:6px}.bb-booking-weekdays span{text-align:center;padding:5px 0;color:#81736f;font-size:9px;font-weight:850}
+.bb-booking-days>span{min-height:42px}
+.bb-booking-days>button{position:relative;min-width:0;min-height:42px;border:1px solid #e7dfdc;border-radius:6px;background:#fff;color:#302725;font-size:12px;font-weight:800}
+.bb-booking-days>button:hover:not(:disabled){border-color:#a71922;background:#fff1ef}
+.bb-booking-days>button.selected{border-color:#8f1017;background:#8f1017;color:#fff;box-shadow:inset 0 0 0 1px #8f1017}
+.bb-booking-days>button:disabled{opacity:.35;background:#f0eeed;color:#807875}
+.bb-booking-days>button.closed{background:#f8e9e7;color:#9a625d;text-decoration:line-through}
+.bb-booking-days>button i{position:absolute;right:3px;top:0;font-size:9px;font-style:normal}
+.bb-booking-calendar-legend{display:flex;flex-wrap:wrap;gap:13px;margin-top:11px;color:#6d625e;font-size:9px}
+.bb-booking-calendar-legend span{display:flex;align-items:center;gap:6px}
+.bb-booking-calendar-legend i{width:8px;height:8px;border-radius:50%;background:#8f1017}
+.bb-booking-calendar-legend i.closed{background:#b8786c}
+.bb-booking-selected-date{display:grid;gap:5px;margin-top:13px;padding:12px;border-left:3px solid #a71922;background:#fff4f2}
+.bb-booking-selected-date span{font-size:9px;font-weight:900;letter-spacing:.13em;color:#8f1017}
+.bb-booking-selected-date strong{font-size:13px;color:#28211f}
+.bb-booking-selected-date button{justify-self:start;padding:0;border:0;background:none;color:#8f1017;font-size:10px;font-weight:850;text-decoration:underline}
+.bb-booking-modal-backdrop{position:fixed;z-index:150;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;background:#000b;backdrop-filter:blur(6px)}
+.bb-booking-modal,.bb-booking-time-modal{width:min(580px,100%);max-height:min(84dvh,760px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #c9aaa6;border-radius:12px;background:#fff;color:#211c1b;box-shadow:0 24px 80px #0008}
+.bb-booking-modal>header,.bb-booking-time-modal>header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px;border-bottom:1px solid #eee2df}
+.bb-booking-modal>header span,.bb-booking-time-modal>header span{font-size:9px;font-weight:900;letter-spacing:.15em;color:#a71922}
+.bb-booking-modal>header h3,.bb-booking-time-modal>header h3{margin:7px 0 4px;color:#241e1c;font:600 23px Georgia,serif}
+.bb-booking-modal>header p,.bb-booking-time-modal>header p{margin:0;color:#6c615d;font-size:11px;line-height:1.5}
+.bb-booking-modal>header>button,.bb-booking-time-modal>header>button{flex:0 0 36px;width:36px;height:36px;border:1px solid #e1d5d2;border-radius:50%;background:#fff;color:#8f1017;font-size:22px}
+.bb-booking-modal-list{overflow-y:auto;padding:8px 18px 14px}
+.bb-booking-modal-list>button{width:100%;min-height:52px;display:grid;grid-template-columns:minmax(0,1fr) auto 18px;align-items:center;gap:10px;padding:10px;border:0;border-bottom:1px solid #eee7e4;background:#fff;color:#28211f;text-align:left}
+.bb-booking-modal-list>button>span{font-size:12px;font-weight:700;line-height:1.35}
+.bb-booking-modal-list>button>b{font-size:11px;white-space:nowrap;color:#514744}
+.bb-booking-modal-list>button>i{font-size:12px;color:#a71922;font-style:normal}
+.bb-booking-modal-list>button.selected{background:#fff3f1}
+.bb-booking-modal>footer,.bb-booking-time-modal>footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;border-top:1px solid #eee2df;background:#fff9f8}
+.bb-booking-modal>footer span,.bb-booking-time-modal>footer span{color:#6b615e;font-size:10px;line-height:1.4}
+.bb-booking-modal>footer button,.bb-booking-time-modal>footer button{min-height:38px;padding:8px 16px;border:1px solid #8f1017;border-radius:5px;background:#8f1017;color:#fff;font-size:11px;font-weight:850}
+.bb-booking-time-modal{padding-bottom:4px}
+.bb-booking-time-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow-y:auto;padding:16px}
+.bb-booking-time-slots button{min-height:44px;border:1px solid #e4d9d6;border-radius:7px;background:#fff;color:#302725;font-size:12px;font-weight:750}
+.bb-booking-time-slots button.selected,.bb-booking-time-slots button:hover{border-color:#8f1017;background:#fff1ef;color:#8f1017}
+.bb-booking-time-manual{display:grid;gap:10px;padding:18px}
+.bb-booking-time-manual label{display:grid;gap:7px;color:#443a37;font-size:11px;font-weight:800}
+.bb-booking-time-manual small{font-size:10px;line-height:1.5;color:#6b615e}
+.bb-booking-time-manual>button{min-height:42px;border:1px solid #8f1017;border-radius:5px;background:#8f1017;color:#fff;font-size:11px;font-weight:850}
+.bb-booking-zaka{margin-top:16px}.bb-booking-zaka .field-hint{color:#6b625f}
+.bb-booking-modal button:focus-visible,.bb-booking-time-modal button:focus-visible,.bb-booking-calendar button:focus-visible{outline:3px solid #8f1017;outline-offset:2px}
+@media(max-width:560px){
+ .bb-booking-modal-backdrop{align-items:flex-end;padding:0}
+ .bb-booking-modal,.bb-booking-time-modal{width:100%;max-height:88dvh;border-radius:13px 13px 0 0;border-bottom:0}
+ .bb-booking-modal>header,.bb-booking-time-modal>header{padding:16px}
+ .bb-booking-modal-list{padding:6px 14px 12px}
+ .bb-booking-modal>footer,.bb-booking-time-modal>footer{padding:11px 14px}
+ .bb-booking-calendar{padding:10px}
+ .bb-booking-weekdays,.bb-booking-days{gap:3px}
+ .bb-booking-days>button,.bb-booking-days>span{min-height:39px}
+ .bb-booking-time-slots{grid-template-columns:repeat(2,minmax(0,1fr));padding:13px}
+ .bb-service-picker-summary,.bb-booking-time-summary{align-items:flex-start;flex-direction:column}
+ .bb-service-picker-summary>button,.bb-booking-time-summary>button{width:100%}
+}
