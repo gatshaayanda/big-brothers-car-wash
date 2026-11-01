@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     for (const queueDoc of queueSnapshot.docs) {
       const queueEntry = queueDoc.data();
       const existing = await db.doc("receipts/" + queueDoc.id).get();
-      if (!existing.exists) await createWalkInTicketReceipt(queueDoc.id, queueEntry);
+      await createWalkInTicketReceipt(queueDoc.id, queueEntry);
     }
 
     const snapshot = await db.collection("receipts").where("customerId", "==", decoded.uid).get();

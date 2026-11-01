@@ -313,3 +313,12 @@ These decisions supersede older conflicting queue/status and account notes above
 ## Admin customer inbox
 - Customer enquiries and staff replies are private and accessible only through authenticated server routes. Replies appear in the customer's account; never claim that saving a reply sends a push or WhatsApp message.
 - Preserve the existing staff session enforcement, customer ownership rules, booking/capacity configuration, queue controls, racing game and protected PWA installation.
+
+
+## Customer account follow-up — 2026-11-01
+- Keep the Regulars Club voice recognisably Gaborone/G-West: relaxed local car-wash energy, friends and family, clean rides and friendly track competition. Use local language naturally (for example, “laaities”) without forced slang or stereotypes. Do not promise points, discounts or prizes unless a specific staff-published offer/challenge is active and its rules are configured.
+- Customer account primary action opens the existing wash planner. Preserve its calendar, time picker, availability and booking semantics.
+- Customer My Ride submissions reuse the existing secure receipt-linked photo/video moderation workflow. Media is not public until staff approves it; require consent and enforce the existing file type/size limits.
+- Community sharing links to the public Big Brothers wash experience and must not imply referral credits or rewards that are not configured.
+- Receipt retrieval backfills missing customer metadata on existing walk-in receipt records without replacing verified final transaction fields. Preserve UID scoping and secure receipt token expiry.
+- Racing account UX may remove instructional copy only; never alter keyboard handlers, touch controls, physics, scoring, assets or game state.
