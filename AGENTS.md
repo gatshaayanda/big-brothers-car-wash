@@ -308,3 +308,8 @@ These decisions supersede older conflicting queue/status and account notes above
 - Queue position and wait estimate are operational values entered by staff, not generated promises. Sort the live queue by configured position (unpositioned entries fall back to arrival order); save reordering through a server-side Firestore transaction that re-numbers all active queue positions consistently. Clearly label wait estimates as staff-entered and allow them to be unset. Never invent a wait time or claim the customer has been notified.
 - Preserve booking capacity checks, receipt issuance and retrieval, customer WhatsApp handoff preparation, fleet status updates, service publishing, business hours/capacity settings, opt-in announcements, gallery moderation, consent-aware review moderation, loyalty balance controls and server-validated racing activity. All actions must continue to report real persistence/errors.
 - QA the admin on mobile and desktop: valid session restoration, expiry/sign-out at 24 hours, expired-claim rejection by API and Firestore rules, live queue ordering and wait-estimate edits, booking capacity conflict, receipt create/retrieve/share, service/settings persistence, gallery/review moderation and racing records. Do not touch protected install or racing-game implementation while doing staff-workspace work.
+
+
+## Admin customer inbox
+- Customer enquiries and staff replies are private and accessible only through authenticated server routes. Replies appear in the customer's account; never claim that saving a reply sends a push or WhatsApp message.
+- Preserve the existing staff session enforcement, customer ownership rules, booking/capacity configuration, queue controls, racing game and protected PWA installation.

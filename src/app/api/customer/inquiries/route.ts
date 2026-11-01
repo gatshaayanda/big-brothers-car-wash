@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       .where("customerId", "==", uid).limit(30).get();
     const inquiries = snapshot.docs.map(item => {
       const value = item.data();
-      return { id: item.id, subject: String(value.subject || "Customer enquiry"), message: String(value.message || ""), status: String(value.status || "open"), createdAt: String(value.createdAt || "") };
+      return { id: item.id, subject: String(value.subject || "Customer enquiry"), message: String(value.message || ""), status: String(value.status || "open"), createdAt: String(value.createdAt || ""), reply: typeof value.reply === "string" ? value.reply : "", repliedAt: String(value.repliedAt || "") };
     }).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return NextResponse.json({ inquiries }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
