@@ -754,12 +754,12 @@
 .bb-home-weather>summary:after{content:"＋";margin-left:9px;color:#ff777b}
 .bb-home-weather[open]>summary:after{content:"−"}
 .bb-home-weather>summary span{color:#c7bbb7;font-weight:500}
-.bb-home-weather[open]>.location-weather-section{position:absolute;z-index:20;left:0;top:calc(100% + 10px);width:min( min(88vw, 440px), 440px);max-height:60svh;overflow:auto;margin:0;padding:0;background:#171312;border:1px solid #ffffff30;border-radius:8px;box-shadow:0 18px 50px #0009}
+.bb-home-weather[open]>.location-weather-section{position:absolute;z-index:20;left:0;top:calc(100% + 10px);width:min(88vw, 440px);max-height:60svh;overflow:auto;margin:0;padding:0;background:#171312;border:1px solid #ffffff30;border-radius:8px;box-shadow:0 18px 50px #0009}
 .bb-home-weather .bb-weather-card{margin:0;padding:15px;background:#fff;color:#171717}
 .bb-home-weather .bb-weather-main{gap:7px}
 .bb-home-weather .bb-daily-message{font-size:11px;line-height:1.4}
 .bb-home-weather .bb-weather-metrics{gap:12px}
-.bb-home-weather .bb-weather-actions a{font-size:10px}
+.bb-home-weather .bb-weather-actions a{display:none}
 .bb-cinematic-home .bb-onsite-team{justify-content:flex-start;margin:0;padding:0;color:#ddd}
 .bb-cinematic-home .bb-onsite-team-label{color:#d0aaa7;font-size:8px}
 .bb-cinematic-home .bb-onsite-team button{color:#e7d9d7;font-size:10px}
