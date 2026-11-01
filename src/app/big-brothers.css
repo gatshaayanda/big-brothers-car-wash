@@ -738,3 +738,51 @@
 .bb-onsite-team button span{font-size:12px}
 .bb-onsite-team-hint{font-size:9px;color:#958b86}
 @media(max-width:760px){.bb-onsite-team{justify-content:flex-start;padding:0 4px;gap:5px 9px}.bb-onsite-team-hint{flex-basis:100%;padding-left:0}}
+
+
+/* Compact cinematic homepage: one-screen navigation, optional details on demand. */
+.bb-cinematic-home .bb-cinema-hero{min-height:100svh;min-height:100dvh;align-items:center}
+.bb-cinematic-home .bb-cinema-copy{margin:54px auto 0;padding-top:34px;padding-bottom:30px}
+.bb-cinematic-home .bb-cinema-intro{margin:18px 0 22px;line-height:1.55}
+.bb-cinematic-home .bb-cinema-kicker{margin-top:22px}
+.bb-cinematic-home .bb-cinema-actions{gap:12px;margin-top:20px}
+.bb-cinematic-home .bb-cinema-primary-action{min-height:54px}
+.bb-home-utilities{display:flex;align-items:center;flex-wrap:wrap;gap:12px 22px;margin-top:18px}
+.bb-home-weather{position:relative;max-width:min(100%,520px)}
+.bb-home-weather>summary{color:#f2e9e7;font-size:10px;font-weight:750;letter-spacing:.04em;cursor:pointer;list-style:none}
+.bb-home-weather>summary::-webkit-details-marker{display:none}
+.bb-home-weather>summary:after{content:"＋";margin-left:9px;color:#ff777b}
+.bb-home-weather[open]>summary:after{content:"−"}
+.bb-home-weather>summary span{color:#c7bbb7;font-weight:500}
+.bb-home-weather[open]>.location-weather-section{position:absolute;z-index:20;left:0;top:calc(100% + 10px);width:min( min(88vw, 440px), 440px);max-height:60svh;overflow:auto;margin:0;padding:0;background:#171312;border:1px solid #ffffff30;border-radius:8px;box-shadow:0 18px 50px #0009}
+.bb-home-weather .bb-weather-card{margin:0;padding:15px;background:#fff;color:#171717}
+.bb-home-weather .bb-weather-main{gap:7px}
+.bb-home-weather .bb-daily-message{font-size:11px;line-height:1.4}
+.bb-home-weather .bb-weather-metrics{gap:12px}
+.bb-home-weather .bb-weather-actions a{font-size:10px}
+.bb-cinematic-home .bb-onsite-team{justify-content:flex-start;margin:0;padding:0;color:#ddd}
+.bb-cinematic-home .bb-onsite-team-label{color:#d0aaa7;font-size:8px}
+.bb-cinematic-home .bb-onsite-team button{color:#e7d9d7;font-size:10px}
+.bb-cinematic-home .bb-onsite-team button:hover{color:#fff}
+.bb-cinematic-home .bb-onsite-team-hint{display:none}
+.bb-cinematic-home .bb-cinema-scroll-cue{display:none}
+@media(max-width:760px){
+ .bb-cinematic-home .bb-cinema-hero{min-height:100svh;min-height:100dvh;align-items:center}
+ .bb-cinematic-home .bb-cinema-copy{margin:42px auto 0;padding:30px 22px 24px}
+ .bb-cinematic-home .bb-cinema-kicker{margin-top:19px}
+ .bb-cinematic-home .bb-cinema-copy h1{font-size:clamp(43px,11.8vw,65px)}
+ .bb-cinematic-home .bb-cinema-intro{max-width:330px;margin:14px 0 17px;font-size:13px;line-height:1.5}
+ .bb-cinematic-home .bb-cinema-live{font-size:9px}
+ .bb-cinematic-home .bb-cinema-actions{gap:11px;margin-top:17px}
+ .bb-cinematic-home .bb-cinema-primary-action{min-height:52px}
+ .bb-home-utilities{gap:10px 17px;margin-top:15px}
+ .bb-home-weather[open]>.location-weather-section{position:fixed;left:6vw;right:6vw;top:18vh;width:auto;max-height:64svh}
+ .bb-cinematic-home .bb-onsite-team{gap:6px 9px}
+}
+@media(max-height:740px) and (min-width:761px){
+ .bb-cinematic-home .bb-cinema-copy{margin-top:34px;padding-top:24px;padding-bottom:18px}
+ .bb-cinematic-home .bb-cinema-kicker{margin-top:14px}
+ .bb-cinematic-home .bb-cinema-copy h1{font-size:clamp(46px,6vw,76px)}
+ .bb-cinematic-home .bb-cinema-intro{margin:12px 0 15px}
+ .bb-cinematic-home .bb-cinema-actions{margin-top:14px}
+}
