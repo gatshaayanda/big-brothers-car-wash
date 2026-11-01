@@ -54,7 +54,7 @@ export async function createWalkInTicketReceipt(queueEntryId: string, job: Recor
     const displayPrice = agreedPrice ?? publishedPrice;
     const priceNote = displayPrice !== null ? "BWP " + displayPrice.toFixed(2) : "";
     const record = existing.exists
-      ? { ...current, queueEntryId, token, tokenHash, expiresAt, updatedAt: createdAt, revoked: false }
+      ? { ...current, queueEntryId, token, tokenHash, expiresAt, updatedAt: createdAt, revoked: false, customerId: String(current.customerId || job.customerId || ""), customerName: String(current.customerName || job.customerName || ""), phone: String(current.phone || job.phone || ""), email: String(current.email || job.email || ""), vehicleType: String(current.vehicleType || job.vehicleType || ""), vehicleRegistration: String(current.vehicleRegistration || job.vehicleRegistration || ""), serviceName: String(current.serviceName || job.serviceName || "Car wash service"), joinedAt: String(current.joinedAt || job.createdAt || createdAt) }
       : {
           queueEntryId, token, tokenHash, receiptRef: receiptNumber,
           receiptKind: "walk-in-ticket",
