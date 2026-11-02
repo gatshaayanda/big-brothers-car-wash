@@ -30,6 +30,8 @@ export async function POST(request: Request) {
       const current = engagementSnap.data() || {};
       const count = Number(current.accountOpenCount || 0);
       const hasExistingAction = Boolean(current.lastBookingAt || current.lastWalkInAt);
+      const followUpComplete = current.followUpStatus === "complete" || Number(current.followUpStep || 0) >= 2;
+      const stopped = current.followUpStatus === "do-not-contact" || current.followUpStatus === "declined";
       const next = {
         customerId: uid,
         customerName: String(profile.name || "").slice(0, 120),
@@ -37,8 +39,8 @@ export async function POST(request: Request) {
         firstAccountOpenedAt: String(current.firstAccountOpenedAt || at),
         lastAccountOpenedAt: at,
         accountOpenCount: Math.min(1000000, count + 1),
-        followUpStatus: current.followUpStatus === "do-not-contact" || current.followUpStatus === "declined" ? current.followUpStatus : (hasExistingAction ? "customer" : (current.followUpStatus || "waiting")),
-        nextFollowUpAt: current.nextFollowUpAt || (hasExistingAction ? "" : new Date(now.getTime() + DAY).toISOString()),
+        followUpStatus: stopped ? current.followUpStatus : (hasExistingAction ? "customer" : (current.followUpStatus || "waiting")),
+        nextFollowUpAt: stopped || followUpComplete || hasExistingAction ? "" : (current.nextFollowUpAt || new Date(now.getTime() + DAY).toISOString()),
         updatedAt: at,
       };
       tx.set(engagementRef, next, { merge: true });
@@ -100,7 +102,7 @@ export async function GET(request: Request) {
         optedIn,
         due: !actedAfterOpen && optedIn && status !== "do-not-contact" && status !== "declined" && Number.isFinite(dueAt) && dueAt <= now && /^\+?[0-9 ()-]{8,20}$/.test(phone),
       };
-    }).filter(item => item.status !== "customer" && item.status !== "do-not-contact" && item.status !== "declined");
+    }).filter(item => !["customer", "do-not-contact", "declined", "complete"].includes(item.status));
     const sevenDaysAgo = new Date(now - 7 * DAY).toISOString();
     const accountOpens7d = engagements.docs.filter(doc => String(doc.data().lastAccountOpenedAt || "") >= sevenDaysAgo).length;
     const due = leads.filter(item => item.due).sort((a,b) => a.openedAt.localeCompare(b.openedAt));
