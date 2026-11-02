@@ -1003,3 +1003,15 @@
 .customer-whatsapp-followup-consent p:not(.big-brothers-eyebrow){font-size:11px;line-height:1.5;color:#666;margin:0;max-width:700px}
 .customer-whatsapp-followup-consent .customer-toggle{flex:0 0 auto}
 @media(max-width:680px){.customer-whatsapp-followup-consent{align-items:flex-start;flex-direction:column;gap:10px}.customer-whatsapp-followup-consent .customer-toggle{align-self:flex-end}}
+
+
+/* The account hero owns the single primary planner action. Keep the disclosure
+   available to assistive technology without showing a second competing CTA. */
+.customer-account-planner-disclosure>summary.customer-account-planner-summary{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.customer-account-planner-disclosure>summary.customer-account-planner-summary:focus-visible{position:static;width:auto;height:auto;margin:0;padding:8px 12px;clip:auto;overflow:visible;white-space:normal;outline:2px solid #a71922;outline-offset:2px}
+.customer-account-planner-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid #eee8e5;background:#fffafa}
+.customer-account-planner-heading .big-brothers-eyebrow{margin:0 0 3px;font-size:9px;letter-spacing:.12em}
+.customer-account-planner-heading h2{margin:0;font-size:17px;letter-spacing:-.04em;color:#302725}
+.customer-account-planner-heading p:not(.big-brothers-eyebrow){margin:3px 0 0;font-size:11px;line-height:1.45;color:#766b67}
+.customer-account-planner-heading>button{flex:0 0 auto;border:1px solid #e5d8d5;border-radius:7px;padding:7px 10px;background:#fff;color:#6f2527;font-size:10px;font-weight:800;cursor:pointer}
+@media(max-width:680px){.customer-account-planner-heading{padding:12px;align-items:flex-start}.customer-account-planner-heading h2{font-size:15px}.customer-account-planner-heading>button{padding:7px 9px}}
