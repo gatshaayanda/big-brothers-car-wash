@@ -334,3 +334,11 @@ These decisions supersede older conflicting queue/status and account notes above
 - Do not infer bookings from page views or account opens. Existing booking and walk-in records are authoritative for activity. Do not match customers by phone number alone.
 - Discounts must never be promised by a WhatsApp draft or treated as issued merely because staff mention one. A customer-specific offer requires a server-created record, clear value/eligibility/expiry, authenticated customer visibility and atomic server-side validation/redemption against the actual booking or final receipt. Until that end-to-end workflow is implemented and verified, do not issue or claim account-attached discounts from this tab.
 - Analytics counts are directional operational signals. Do not expose customer names, phone numbers, account IDs or individual engagement records publicly. Preserve Firestore least-privilege rules and the protected PWA installation and racing baselines.
+
+
+## Customer receipt and account journey — 2026-11-02
+- A walk-in service receipt is a concise record of the order received. It must not become a second customer dashboard. Show receipt identity/reference, customer/service/vehicle/date, published service price when available, secure expiry, PDF action and one account-save action. Keep notification opt-ins and next-wash planning in My Account, not on the receipt.
+- Do not request a review or fresh-wash media submission from a walk-in ticket. Completed-wash feedback/media remain available only for completed-wash receipts and behind one optional disclosure.
+- In My Account, render the existing weather-informed two-date suggestions visibly; the planner's existing full calendar disclosure remains the only calendar expansion. The hero CTA is OPEN WASH PLANNER and scrolls to those suggestions.
+- Present four immediate account shortcuts including receipts. Add persistent mobile Home / Book / Visits / More navigation using existing routes, planner and authenticated panels. Reserve bottom safe-area space so it never covers content.
+- Preserve customer UID ownership, anonymous guest continuity, secure receipt token handling, verified Google linking, review/photo consent and moderation, planner availability/time-picker behaviour, booking semantics, PWA installation, offline behaviour and racing mechanics.
