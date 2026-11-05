@@ -23,12 +23,12 @@ export default function OfflinePage() {
         </article>
         <article>
           <span className="location-number">03</span>
-          <h3>Play your saved wash clips</h3>
-          <p>The wash-bay and location videos can play offline after you save all three clips in Big Brothers Racing while connected. The download is about 104 MB; clips already saved on this device stay available without data.</p>
-          <Link className="text-link" href="/games">Open Big Brothers Racing ↗</Link>
+          <h3>Reconnect to finish syncing</h3>
+          <p>Walk-in, booking and fleet requests saved while offline stay on this device until a connection returns. Big Brothers only receives them after the shared system confirms the save.</p>
+          <Link className="text-link" href="/">Return to the wash bay ↗</Link>
         </article>
       </div>
-      <p className="big-brothers-notice pending">Offline: saved videos and the racing practice game can work on this device. Live prices, shared queue updates, account sync, current weather and booking availability need a connection. A saved wash request is not visible to staff until it syncs and the server confirms it; a booking request is never confirmed just because it was saved here.</p>
+      <p className="big-brothers-notice pending">Offline: the cached homepage and racing practice game can work on this device. Walk-in, booking and fleet drafts saved here can sync after reconnection. Live prices, shared queue updates, account data, current weather and booking availability need a connection. A saved request is not visible to staff until the server confirms it; a booking remains pending until the team confirms it.</p>
       <p className="big-brothers-actions">
         <Link className="big-brothers-button primary" href="/">Return to Big Brothers Car Wash ↗</Link>
       </p>

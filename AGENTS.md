@@ -342,3 +342,41 @@ These decisions supersede older conflicting queue/status and account notes above
 - In My Account, render the existing weather-informed two-date suggestions visibly; the planner's existing full calendar disclosure remains the only calendar expansion. The hero CTA is OPEN WASH PLANNER and scrolls to those suggestions.
 - Present four immediate account shortcuts including receipts. Add persistent mobile Home / Book / Visits / More navigation using existing routes, planner and authenticated panels. Reserve bottom safe-area space so it never covers content.
 - Preserve customer UID ownership, anonymous guest continuity, secure receipt token handling, verified Google linking, review/photo consent and moderation, planner availability/time-picker behaviour, booking semantics, PWA installation, offline behaviour and racing mechanics.
+
+
+## Visible Work, Loading & Operational Transparency — 2026-11-03
+Make the app explain what it is doing, what has actually completed, and what still needs attention. A spinner alone is not a status system.
+
+### Customer and booking workflows
+- Show a clear loading/skeleton state when a page or important data region is genuinely waiting. Avoid blank screens and avoid delaying the usable page shell for secondary requests.
+- Every submit action has an independent busy state, prevents duplicate submission, disables only the relevant action and gives a concise stage/status message. Restore the action after failure so the customer can retry.
+- Distinguish local draft saved, request sent to Firebase/server, server acknowledgement received, booking requested, and booking confirmed. Only the server acknowledgement means the request reached shared records. A booking remains requested/pending until staff confirms it.
+- When offline, clearly state which actions can be saved locally, which require a connection, and that local drafts are not visible to staff until successful sync. Keep stable request IDs and idempotent retry behaviour; never clear a draft before the shared write is acknowledged.
+- On reconnect, show sync progress/result and remaining pending count. Do not announce successful sync from the browser's online event alone; confirm the Firestore/API write. Keep a failed receipt issuance distinct from a successfully saved queue entry.
+- Live availability, weather, prices, service settings and shared queue state must show loading, unavailable, stale or error states as appropriate. Do not turn missing data into fabricated slots, prices, wait times or success.
+
+### Customer accounts, receipts and private messaging
+- Render the account shell as soon as the authenticated/guest identity is ready. Load secondary receipts, inquiries, reminders and rewards independently; show per-section loading, empty, refresh and error/retry feedback.
+- Never show cached private account, receipt or message content as though it were the current authenticated response. Offline access to private data must fail closed to the offline guidance page.
+- Message submission must distinguish sending, server-saved, failed/retry and delivered/read only where the underlying system supplies those states. Unread counts and replies must come from persisted records, not optimistic assumptions.
+- Uploads show file validation, progress where the upload API exposes it, completion only after storage and metadata persistence succeed, and a recoverable error. A selected file or completed storage upload alone is not a submitted/moderated public post.
+- Review and public media submission remain optional, consent-gated and pending moderation until staff approves. Do not imply public publication from a successful private submission.
+
+### Staff and admin operations
+- Give each independent admin action its own busy state and clear success/error result. Confirm destructive or consequential actions and prevent duplicate clicks while a write is in progress.
+- CRUD feedback follows the real persistence lifecycle: saving, saved, failed, and retry. Keep forms populated after failure where safe. Do not close a form or remove a record optimistically before the server confirms the change.
+- Queue, bookings, customer messages, uploads, financial records and analytics each need meaningful loading, empty, error and refresh states. Do not use sample/demo values as live operations.
+- Analytics must be privacy-conscious and based on actual events/records. Do not expose customer contact details or private messages in public/business analytics.
+
+### PWA, offline and release transparency
+- Preserve the approved Africhiko installation card, native `beforeinstallprompt` lifecycle, dismiss/reopen behaviour, iOS guidance, embedded-browser handling and update prompt. Ordinary workflow changes must not edit the install component or installation UX.
+- Keep the Big Brothers service worker cache namespace isolated. Precache the public app shell and explicit offline fallback; cache public static assets and racing practice assets only. Never cache authenticated account/admin/receipt responses or API data as public content.
+- Offline walk-in, booking and fleet requests may be saved as device-local drafts with stable IDs. On reconnect, retry and verify the actual Firebase write before removing a draft. A booking synced to Firebase is still only requested until staff confirmation. Never offer WhatsApp success handoff for an un-synced draft.
+- Public homepage and the previously cached racing practice experience should remain usable offline after a successful online visit/install. Live weather, availability, shared queue state, account data, private messages, receipt claim/PDF, uploads, push registration and admin operations require connectivity.
+- Offline fallback copy must describe the actual offline capabilities. Do not suggest downloading wash/location videos; that opt-in media cache is not part of the approved experience.
+- Verify first install and service-worker update from a clean browser profile, then separately verify a returning installed app. Test offline after the homepage has been cached, reconnect/sync with a real test draft, and confirm the server-side record before reporting success.
+- Report lint, tests, build, GitHub push, deployment readiness and real device/offline QA separately. A successful build or push is not proof of offline operation or production deployment.
+
+### Implementation and QA guard
+- Inspect the relevant component, API, Firebase write and rules before changing feedback or loading behaviour. Reuse existing data contracts; do not add a second queue, messaging or sync system.
+- Keep installation infrastructure, racing mechanics, Firebase ownership/rules, UploadThing, receipts and booking availability protected. Any change to installation UX requires separate explicit approval.

@@ -48,7 +48,7 @@ self.addEventListener("notificationclick", (event) => {
   }));
 });
 
-const CACHE_VERSION = "big-brothers-shell-v2";
+const CACHE_VERSION = "big-brothers-shell-v3";
 const GAME_CACHE = "big-brothers-game-v2";
 const MEDIA_CACHE = "big-brothers-media-v2";
 const SHELL_CACHE = CACHE_VERSION;
@@ -85,7 +85,7 @@ async function fetchAndCache(path, cacheName, { required = false } = {}) {
 async function precacheShell() {
   const discovered = new Set();
   for (const path of APP_SHELL) {
-    const critical = path === "/" || path === "/games";
+    const critical = path === "/" || path === "/games" || path === "/offline";
     try {
       const response = await fetchAndCache(path, SHELL_CACHE, { required: critical });
       if (!response || !(response.headers.get("content-type") || "").includes("text/html")) continue;
@@ -159,7 +159,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     const obsolete = new Set([
-      "big-brothers-shell-v1", "big-brothers-shell-v3", "big-brothers-shell-v4",
+      "big-brothers-shell-v1", "big-brothers-shell-v2", "big-brothers-shell-v4",
       "big-brothers-game-v1", "big-brothers-game-v3", "big-brothers-game-v4",
       "big-brothers-media-v0", "big-brothers-media-v1"
     ]);
